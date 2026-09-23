@@ -23,18 +23,19 @@ public sealed class ValidationBehavior<TMessage, TResponse>(IEnumerable<IValidat
     {
         ArgumentNullException.ThrowIfNull(next);
 
-        // Fast path: most queries have no validator, so skip allocating a context.
+        // Fast path: most queries have no validator, so skip all validation work.
         if (_validators.Length == 0)
         {
             return await next(message, cancellationToken);
         }
 
-        var context = new ValidationContext<TMessage>(message);
         List<ValidationFailure>? failures = null;
 
         foreach (var validator in _validators)
         {
-            var result = await validator.ValidateAsync(context, cancellationToken);
+            // Each validator gets its own context: a shared context accumulates failures across
+            // validators, which would report earlier failures more than once.
+            var result = await validator.ValidateAsync(message, cancellationToken);
             if (!result.IsValid)
             {
                 (failures ??= []).AddRange(result.Errors);
