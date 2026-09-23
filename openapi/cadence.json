@@ -1,0 +1,65 @@
+{
+  "openapi": "3.1.1",
+  "info": {
+    "title": "Cadence API",
+    "description": "Project and work management for teams.",
+    "version": "1"
+  },
+  "paths": {
+    "/api/v1/system/info": {
+      "get": {
+        "tags": [
+          "System"
+        ],
+        "summary": "Get information about the running application",
+        "description": "Returns the product name, version, hosting environment and current server time.",
+        "operationId": "GetSystemInfo",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SystemInfoResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "SystemInfoResponse": {
+        "required": [
+          "name",
+          "version",
+          "environment",
+          "serverTime"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          },
+          "environment": {
+            "type": "string"
+          },
+          "serverTime": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "System"
+    }
+  ]
+}

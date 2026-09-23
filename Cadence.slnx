@@ -1,0 +1,18 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Cadence.Api/Cadence.Api.csproj" />
+    <Project Path="src/Cadence.AppHost/Cadence.AppHost.csproj" />
+    <Project Path="src/Cadence.Application/Cadence.Application.csproj" />
+    <Project Path="src/Cadence.Domain/Cadence.Domain.csproj" />
+    <Project Path="src/Cadence.Infrastructure/Cadence.Infrastructure.csproj" />
+    <Project Path="src/Cadence.Migrator/Cadence.Migrator.csproj" />
+    <Project Path="src/Cadence.ServiceDefaults/Cadence.ServiceDefaults.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Cadence.Api.IntegrationTests/Cadence.Api.IntegrationTests.csproj" />
+    <Project Path="tests/Cadence.Application.UnitTests/Cadence.Application.UnitTests.csproj" />
+    <Project Path="tests/Cadence.ArchitectureTests/Cadence.ArchitectureTests.csproj" />
+    <Project Path="tests/Cadence.Benchmarks/Cadence.Benchmarks.csproj" />
+    <Project Path="tests/Cadence.Domain.UnitTests/Cadence.Domain.UnitTests.csproj" />
+  </Folder>
+</Solution>

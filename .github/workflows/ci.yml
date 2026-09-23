@@ -1,0 +1,57 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [develop, staging, main]
+  push:
+    branches: [develop, staging, main]
+  workflow_dispatch:
+
+# Superseded runs for the same PR or branch are cancelled.
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+
+jobs:
+  backend:
+    name: Backend
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0 # MinVer derives the version from git tags.
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: global.json
+
+      - name: Restore
+        run: dotnet restore Cadence.slnx
+
+      - name: Check formatting
+        run: dotnet format Cadence.slnx --verify-no-changes --no-restore
+
+      - name: Build
+        run: dotnet build Cadence.slnx --configuration Release --no-restore
+
+      - name: Check the OpenAPI document is up to date
+        run: |
+          if ! git diff --exit-code -- openapi/; then
+            echo "::error::openapi/ is out of date. Build the solution locally and commit the regenerated document."
+            exit 1
+          fi
+
+      # Integration tests start PostgreSQL with Testcontainers; the runner provides Docker.
+      - name: Test
+        run: dotnet test --solution Cadence.slnx --configuration Release --no-build
