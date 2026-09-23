@@ -33,6 +33,23 @@ dotnet_style_qualification_for_event = false:warning
 dotnet_style_readonly_field = true:warning
 
 # --- Naming ------------------------------------------------------------
+# Rules are matched in order: constants, then static fields, then instance fields.
+dotnet_naming_rule.constants_pascal.symbols = constant_fields
+dotnet_naming_rule.constants_pascal.style = pascal
+dotnet_naming_rule.constants_pascal.severity = warning
+dotnet_naming_symbols.constant_fields.applicable_kinds = field
+dotnet_naming_symbols.constant_fields.required_modifiers = const
+dotnet_naming_style.pascal.capitalization = pascal_case
+
+dotnet_naming_rule.private_static_fields_s_prefix.symbols = private_static_fields
+dotnet_naming_rule.private_static_fields_s_prefix.style = s_camel
+dotnet_naming_rule.private_static_fields_s_prefix.severity = warning
+dotnet_naming_symbols.private_static_fields.applicable_kinds = field
+dotnet_naming_symbols.private_static_fields.applicable_accessibilities = private
+dotnet_naming_symbols.private_static_fields.required_modifiers = static
+dotnet_naming_style.s_camel.capitalization = camel_case
+dotnet_naming_style.s_camel.required_prefix = s_
+
 dotnet_naming_rule.private_fields_camel_underscore.symbols = private_fields
 dotnet_naming_rule.private_fields_camel_underscore.style = camel_underscore
 dotnet_naming_rule.private_fields_camel_underscore.severity = warning
@@ -63,6 +80,12 @@ dotnet_analyzer_diagnostic.severity = none
 # Tests: descriptive underscore names are idiomatic, and xUnit fixtures are instantiated by the framework.
 [tests/**.cs]
 dotnet_diagnostic.CA1707.severity = none
+dotnet_diagnostic.CA1711.severity = none   # xUnit collection definitions are conventionally named "*Collection"
 dotnet_diagnostic.CA1515.severity = none
 dotnet_diagnostic.CA1812.severity = none
 dotnet_diagnostic.CA2234.severity = none
+
+# Benchmarks: BenchmarkDotNet requires instance methods on public, non-sealed classes.
+[tests/Cadence.Benchmarks/**.cs]
+dotnet_diagnostic.CA1822.severity = none
+dotnet_diagnostic.CA1852.severity = none
