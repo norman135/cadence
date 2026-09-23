@@ -1,0 +1,15 @@
+{
+	# The admin API is not needed for a static configuration; turning it off closes a port
+	# and saves memory.
+	admin off
+}
+
+{$CADENCE_DOMAIN} {
+	# Compress dynamic responses. Static assets arrive pre-compressed (Brotli/gzip) from the app,
+	# and Caddy leaves already-encoded responses untouched.
+	encode zstd gzip
+
+	reverse_proxy app:8080
+
+	header -Server
+}

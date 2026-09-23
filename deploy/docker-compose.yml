@@ -1,0 +1,96 @@
+# Cadence production stack for a single small server (1–2 GB RAM, amd64 or arm64).
+#
+#   cp .env.example .env    # then edit it
+#   docker compose up -d
+#
+# Upgrades: set CADENCE_VERSION in .env, then `docker compose pull && docker compose up -d`.
+# Every service has a memory limit, so a regression fails loudly instead of starving the host.
+
+name: cadence
+
+x-app-image: &app-image ${CADENCE_IMAGE:-ghcr.io/norman135/cadence}:${CADENCE_VERSION:-latest}
+x-connection-string: &connection-string "Host=postgres;Database=cadence;Username=cadence;Password=${POSTGRES_PASSWORD}"
+
+services:
+  postgres:
+    image: postgres:18-alpine
+    restart: unless-stopped
+    command: ["postgres", "-c", "config_file=/etc/postgresql/postgresql.conf"]
+    environment:
+      POSTGRES_DB: cadence
+      POSTGRES_USER: cadence
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+    volumes:
+      # PostgreSQL 18 images keep data in a versioned subdirectory of /var/lib/postgresql.
+      - pg-data:/var/lib/postgresql
+      - ./postgresql.conf:/etc/postgresql/postgresql.conf:ro
+      - ./postgres/initdb:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cadence -d cadence"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+    mem_limit: 384m
+    networks: [backend]
+
+  # Applies database migrations, then exits. The app starts only if this succeeds.
+  migrate:
+    image: *app-image
+    entrypoint: ["dotnet", "/app/migrator/Cadence.Migrator.dll"]
+    environment:
+      ConnectionStrings__cadence: *connection-string
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+    healthcheck:
+      disable: true
+    mem_limit: 128m
+    networks: [backend]
+
+  app:
+    image: *app-image
+    restart: unless-stopped
+    environment:
+      ConnectionStrings__cadence: *connection-string
+      # Trust X-Forwarded-For/-Proto from Caddy, so client IPs and HTTPS are detected correctly.
+      ASPNETCORE_FORWARDEDHEADERS_ENABLED: "true"
+    volumes:
+      - dp-keys:/app/data/keys
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    mem_limit: 320m
+    networks: [backend, edge]
+
+  # Reverse proxy: automatic HTTPS (Let's Encrypt), HTTP/2 and HTTP/3, response compression.
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      CADENCE_DOMAIN: ${CADENCE_DOMAIN:-localhost}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      app:
+        condition: service_healthy
+    mem_limit: 64m
+    networks: [edge]
+
+networks:
+  # PostgreSQL is reachable only by the app and the migrator, and has no internet access.
+  backend:
+    internal: true
+  edge: {}
+
+volumes:
+  pg-data:
+  dp-keys:
+  caddy-data:
+  caddy-config:
