@@ -1,0 +1,36 @@
+# Enforces the promotion path of the branching model (see CONTRIBUTING.md):
+#   feature/* ─▶ develop ─▶ staging ─▶ main
+# Only develop (or a hotfix) may be promoted to staging, and only staging
+# (or a hotfix) may be promoted to main. This job is a required status check
+# on the staging and main rulesets.
+name: Branch policy
+
+on:
+  pull_request:
+    branches: [main, staging]
+
+permissions: {}
+
+jobs:
+  source-branch:
+    name: Allowed source branch
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check pull request source branch
+        env:
+          BASE_REF: ${{ github.base_ref }}
+          HEAD_REF: ${{ github.head_ref }}
+        run: |
+          case "$BASE_REF:$HEAD_REF" in
+            staging:develop | staging:hotfix/* | main:staging | main:hotfix/*)
+              echo "Allowed: $HEAD_REF -> $BASE_REF"
+              ;;
+            staging:*)
+              echo "::error::Pull requests into 'staging' must come from 'develop' or 'hotfix/*', not '$HEAD_REF'."
+              exit 1
+              ;;
+            *)
+              echo "::error::Pull requests into 'main' must come from 'staging' or 'hotfix/*', not '$HEAD_REF'."
+              exit 1
+              ;;
+          esac
