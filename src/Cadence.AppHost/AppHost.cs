@@ -1,7 +1,8 @@
 // Local development environment: `dotnet run --project src/Cadence.AppHost`
 //
-// Starts PostgreSQL and Mailpit in containers, runs the migrator, then starts the API once the
-// schema is up to date. The Aspire dashboard shows logs, traces and metrics for everything.
+// Starts PostgreSQL and Mailpit in containers, runs the migrator, starts the API once the
+// schema is up to date, then the Vite dev server. The Aspire dashboard shows logs, traces and
+// metrics for everything.
 
 var builder = DistributedApplication.CreateBuilder(args);
 
@@ -21,10 +22,16 @@ var migrator = builder.AddProject<Projects.Cadence_Migrator>("migrator")
     .WithReference(database)
     .WaitFor(database);
 
-builder.AddProject<Projects.Cadence_Api>("api")
+var api = builder.AddProject<Projects.Cadence_Api>("api")
     .WithReference(database)
     .WithReference(mailpit)
     .WaitForCompletion(migrator)
     .WithHttpHealthCheck("/health/ready");
+
+// Vite dev server with hot reload. It proxies /api to the API through service discovery,
+// so the browser sees a single origin, as it does in production.
+builder.AddViteApp("web", "../../web")
+    .WithReference(api)
+    .WaitFor(api);
 
 await builder.Build().RunAsync();
