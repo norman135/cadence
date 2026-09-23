@@ -52,6 +52,8 @@ dotnet_diagnostic.IDE0044.severity = warning   # readonly fields
 dotnet_diagnostic.CA2007.severity = none
 # Public API types in an application (not a library) don't need to be sealed or internal by default.
 dotnet_diagnostic.CA1515.severity = none
+# Keyword clashes only matter for Visual Basic consumers; this is a C#-only application.
+dotnet_diagnostic.CA1716.severity = none
 
 # Generated code (EF Core migrations) is excluded from style and analyzer rules.
 [**/Migrations/*.cs]
