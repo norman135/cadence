@@ -1,9 +1,11 @@
 <Solution>
   <Folder Name="/src/">
     <Project Path="src/Cadence.Api/Cadence.Api.csproj" />
+    <Project Path="src/Cadence.AppHost/Cadence.AppHost.csproj" />
     <Project Path="src/Cadence.Application/Cadence.Application.csproj" />
     <Project Path="src/Cadence.Domain/Cadence.Domain.csproj" />
     <Project Path="src/Cadence.Infrastructure/Cadence.Infrastructure.csproj" />
+    <Project Path="src/Cadence.Migrator/Cadence.Migrator.csproj" />
     <Project Path="src/Cadence.ServiceDefaults/Cadence.ServiceDefaults.csproj" />
   </Folder>
 </Solution>
