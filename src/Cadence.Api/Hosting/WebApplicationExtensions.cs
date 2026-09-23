@@ -39,7 +39,27 @@ internal static class WebApplicationExtensions
             return app;
         }
 
-        // Fingerprinted, pre-compressed (Brotli/gzip) assets with immutable caching and ETags.
+        // Vite names every file under /assets after a hash of its content, so a given URL never
+        // changes and can be cached for a year. MapStaticAssets doesn't recognize Vite's hashes,
+        // so the header is set here, just before the response starts.
+        app.UseWhen(
+            context => context.Request.Path.StartsWithSegments("/assets"),
+            branch => branch.Use((context, next) =>
+            {
+                context.Response.OnStarting(() =>
+                {
+                    if (context.Response.StatusCode == StatusCodes.Status200OK)
+                    {
+                        context.Response.Headers[HeaderNames.CacheControl] = "public, max-age=31536000, immutable";
+                    }
+
+                    return Task.CompletedTask;
+                });
+
+                return next(context);
+            }));
+
+        // Pre-compressed (Brotli/gzip at publish time) assets with ETags.
         app.MapStaticAssets();
 
         // Client-side routes resolve to index.html, which must always be revalidated so users
