@@ -1,5 +1,6 @@
 <Solution>
   <Folder Name="/src/">
+    <Project Path="src/Cadence.Application/Cadence.Application.csproj" />
     <Project Path="src/Cadence.Domain/Cadence.Domain.csproj" />
   </Folder>
 </Solution>
