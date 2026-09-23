@@ -1,0 +1,89 @@
+# Performance
+
+Cadence targets a **1–2 GB RAM server with about 10 concurrent users**, and must keep working at 5× that load. This page records how performance is measured and the results for each release. The targets themselves are defined in [ROADMAP §3](ROADMAP.md#3-performance-targets).
+
+## Results
+
+### v0.1.0 (M0: Foundation)
+
+> M0 has no features yet, so these numbers are a **baseline for the platform itself**: the proxy, runtime, pipeline, database connectivity and SPA hosting. Later milestones add real workloads, and the numbers will be re-measured against the same targets.
+
+**Environment:** Docker Desktop on Windows 11 (x86-64, 8 vCPU, 7.6 GB assigned to Docker), production Compose stack built from source, requests through Caddy with TLS. CI repeats the idle memory check and the 10-user load test on GitHub's amd64 and arm64 runners for every pull request.
+
+| Metric | Target | Measured | |
+|---|---|---|---|
+| Whole stack at idle | ≤ 450 MB (M0 gate: ≤ 350 MB) | **103 MiB** (app 45, PostgreSQL 45, Caddy 12) | ✅ |
+| App container memory under 10-user load | ≤ 200 MB | **61 MiB** | ✅ |
+| App container memory under 50-user load | — | **62 MiB** | ✅ |
+| API p95, 10 users | ≤ 100 ms | **3.1 ms** | ✅ |
+| Page (index.html) p95, 10 users | ≤ 100 ms | **4.3 ms** | ✅ |
+| API p95, 50 users | ≤ 300 ms | **5.6 ms** | ✅ |
+| Error rate, 10 and 50 users | 0% | **0%** (1,200 and 6,000 requests) | ✅ |
+| Cold start to ready | ≤ 5 s | **1.1 s** (three runs, including container start) | ✅ |
+| Initial JavaScript (gzip) | ≤ 180 KB | **113.4 KB** | ✅ |
+| Initial CSS (gzip) | — (budget 30 KB) | **3.9 KB** | ✅ |
+| Largest lazy route chunk (gzip) | ≤ 80 KB | **4.6 KB** (home) | ✅ |
+| DB queries for `GET /api/v1/system/info` | ≤ 3 | **0** (asserted by an integration test) | ✅ |
+| Container image size | — | 255 MB (uncompressed, includes ReadyToRun code) | ℹ️ |
+
+The initial JavaScript is dominated by React, React DOM, React Router and TanStack Query. It sets the floor that every later feature builds on, and is why feature pages are lazy-loaded.
+
+#### Micro-benchmark: JSON serialization
+
+`JsonSerializationBenchmarks` serializes `SystemInfoResponse` with reflection-based options and with the source-generated context (BenchmarkDotNet, ShortRun job):
+
+| Method | Mean | Allocated |
+|---|---|---|
+| Reflection | 529 ns | 232 B |
+| Source-generated | 494 ns | 232 B |
+
+The steady-state difference for a small DTO is within noise. The source-generated context's benefit is avoiding reflection warm-up at startup and being trimming/AOT-ready ([ADR-0005](adr/0005-no-reflection-on-hot-paths.md)), not faster per-call serialization.
+
+## How to measure
+
+### Load test and memory
+
+```bash
+# 1. Start the production stack from source
+cd deploy
+POSTGRES_PASSWORD=local-test docker compose -f docker-compose.yml -f docker-compose.build.yml up -d --build
+
+# 2. Smoke test and idle memory
+../perf/smoke-test.sh https://localhost
+../perf/measure-memory.sh 350
+
+# 3. Load: 10 users (design load), then 50 users (headroom)
+docker run --rm --network host -v "$PWD/../perf/k6:/scripts:ro" grafana/k6 run -e VUS=10 /scripts/baseline.js
+docker run --rm --network host -v "$PWD/../perf/k6:/scripts:ro" grafana/k6 run -e VUS=50 /scripts/baseline.js
+../perf/measure-memory.sh 450
+```
+
+### Bundle budgets
+
+```bash
+cd web
+npm run build && npm run budget
+```
+
+### Micro-benchmarks
+
+```bash
+dotnet run -c Release --project tests/Cadence.Benchmarks -- --filter "*"
+```
+
+### Query budgets
+
+Integration tests wrap requests in `QueryCounter.AssertAtMostAsync(n, ...)`, which fails when an endpoint executes more database commands than its budget. This turns N+1 regressions into test failures.
+
+## Tools
+
+| Tool | Used for |
+|---|---|
+| k6 (`perf/k6`) | HTTP load with latency and error thresholds |
+| `perf/measure-memory.sh` | Per-container and total memory against a budget |
+| `perf/smoke-test.sh` | End-to-end checks of a running deployment |
+| `web/scripts/check-bundle-budget.mjs` | Gzip size of initial and lazy chunks |
+| BenchmarkDotNet (`tests/Cadence.Benchmarks`) | Micro-benchmarks of hot paths |
+| `SlowQueryInterceptor` | Logs database commands slower than 50 ms |
+| `pg_stat_statements` | Top queries by total time in production |
+| `dotnet-counters`, `dotnet-gcdump` | Runtime and GC profiling (M9 deep dive) |

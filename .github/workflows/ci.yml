@@ -166,6 +166,18 @@ jobs:
           sleep 20 # let startup allocations settle
           ../perf/measure-memory.sh 350
 
+      # 10 concurrent users for one minute; k6 fails the step if a latency or error threshold
+      # from ROADMAP §3 is missed.
+      - name: Load test (10 users)
+        run: >
+          docker run --rm --network host -v "$PWD/../perf/k6:/scripts:ro"
+          grafana/k6:latest run --quiet -e VUS=10 -e DURATION=1m /scripts/baseline.js
+
+      - name: Check memory budget after load
+        env:
+          MEMORY_LABEL: after 10-user load, ${{ matrix.arch }}
+        run: ../perf/measure-memory.sh 450
+
       - name: Show container logs
         if: failure()
         run: docker compose logs --no-color
