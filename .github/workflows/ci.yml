@@ -102,3 +102,74 @@ jobs:
 
       - name: Check bundle budgets
         run: npm run budget
+
+  # Builds the production image natively on each architecture Cadence supports, starts the
+  # production Compose stack, and checks it end to end, including the idle memory budget.
+  container:
+    name: Container (${{ matrix.arch }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: amd64
+            runner: ubuntu-24.04
+          - arch: arm64
+            runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 30
+    env:
+      COMPOSE_FILE: docker-compose.yml:docker-compose.build.yml
+      CADENCE_DOMAIN: localhost
+      POSTGRES_PASSWORD: ci-only-not-a-secret
+    defaults:
+      run:
+        working-directory: deploy
+    steps:
+      - name: Check out
+        uses: actions/checkout@v5
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          load: true
+          tags: cadence:local
+          build-args: VERSION=0.0.0-ci.${{ github.run_number }}
+          cache-from: type=gha,scope=image-${{ matrix.arch }}
+          cache-to: type=gha,mode=max,scope=image-${{ matrix.arch }}
+
+      - name: Start the production stack
+        run: docker compose up -d --no-build
+
+      - name: Wait for the app to be ready
+        run: |
+          for attempt in $(seq 1 60); do
+            if curl -skf https://localhost/health/ready > /dev/null; then
+              echo "Ready after about $((attempt * 2)) seconds."
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "::error::The stack did not become ready within 120 seconds."
+          exit 1
+
+      - name: Smoke test
+        run: ../perf/smoke-test.sh https://localhost
+
+      - name: Check idle memory budget
+        env:
+          MEMORY_LABEL: idle, ${{ matrix.arch }}
+        run: |
+          sleep 20 # let startup allocations settle
+          ../perf/measure-memory.sh 350
+
+      - name: Show container logs
+        if: failure()
+        run: docker compose logs --no-color
+
+      - name: Stop the stack
+        if: always()
+        run: docker compose down --volumes
