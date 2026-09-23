@@ -218,6 +218,7 @@ Each milestone's detailed scope and completion criteria are in [docs/ROADMAP.md]
 |---|---|
 | [Roadmap](docs/ROADMAP.md) | Constraints, architecture, technology choices, performance playbook, milestones |
 | [Contributing guide](CONTRIBUTING.md) | Branching model, pull request workflow, commit conventions |
+| [Agent guide](AGENTS.md) | Commands, conventions and constraints for AI coding agents |
 | [Architecture overview](docs/architecture.md) | Layers, request flow, frontend structure, build and delivery |
 | [Architecture decision records](docs/adr/README.md) | The reasoning behind each significant decision |
 | [Performance report](docs/performance.md) | Measured results for each release, and how to reproduce them |
