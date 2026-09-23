@@ -55,3 +55,50 @@ jobs:
       # Integration tests start PostgreSQL with Testcontainers; the runner provides Docker.
       - name: Test
         run: dotnet test --solution Cadence.slnx --configuration Release --no-build
+
+  frontend:
+    name: Frontend
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - name: Check out
+        uses: actions/checkout@v5
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version-file: web/.nvmrc
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check the generated API client is up to date
+        run: |
+          npm run api:generate
+          if ! git diff --exit-code -- src/shared/api/generated; then
+            echo "::error::The generated API client is out of date. Run 'npm run api:generate' in web/ and commit the result."
+            exit 1
+          fi
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Check formatting
+        run: npm run format:check
+
+      - name: Type-check
+        run: npm run typecheck
+
+      - name: Test
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+      - name: Check bundle budgets
+        run: npm run budget
