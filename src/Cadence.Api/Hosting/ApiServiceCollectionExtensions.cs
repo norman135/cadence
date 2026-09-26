@@ -13,6 +13,11 @@ internal static class ApiServiceCollectionExtensions
     public static IServiceCollection AddApi(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddSingleton<IApplicationInfo, ApplicationInfo>();
+        services.AddHttpContextAccessor();
+        services.AddScoped<ICurrentUser, HttpCurrentUser>();
+
+        services.AddAuthorization();
+        services.AddCadenceRateLimiting();
 
         // Source-generated serialization for API contracts; the reflection resolver remains as a fallback
         // for framework types such as ProblemDetails.
@@ -37,12 +42,14 @@ internal static class ApiServiceCollectionExtensions
                 options.GroupNameFormat = "'v'V";
                 options.SubstituteApiVersionInUrl = true;
             })
-            .AddOpenApi(options => options.Document.AddDocumentTransformer((document, _, _) =>
-            {
-                document.Info.Title = "Cadence API";
-                document.Info.Description = "Project and work management for teams.";
-                return Task.CompletedTask;
-            }));
+            .AddOpenApi(options => options.Document
+                .AddBearerSecurity()
+                .AddDocumentTransformer((document, _, _) =>
+                {
+                    document.Info.Title = "Cadence API";
+                    document.Info.Description = "Project and work management for teams.";
+                    return Task.CompletedTask;
+                }));
 
         // Keys protect auth cookies and tokens. In containers they must live on a volume,
         // otherwise every restart would sign all users out.

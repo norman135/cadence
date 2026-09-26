@@ -1,5 +1,8 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Cadence.Api.Endpoints;
+using Cadence.Application.Features.Auth;
+using Cadence.Application.Features.Me;
 using Cadence.Application.Features.System;
 
 namespace Cadence.Api.Serialization;
@@ -11,4 +14,15 @@ namespace Cadence.Api.Serialization;
 /// </summary>
 [JsonSourceGenerationOptions(JsonSerializerDefaults.Web)]
 [JsonSerializable(typeof(SystemInfoResponse))]
+[JsonSerializable(typeof(RegisterCommand))]
+[JsonSerializable(typeof(RegisterResponse))]
+[JsonSerializable(typeof(ConfirmEmailCommand))]
+[JsonSerializable(typeof(ResendConfirmationCommand))]
+[JsonSerializable(typeof(LoginCommand))]
+[JsonSerializable(typeof(AccessTokenResponse))]
+[JsonSerializable(typeof(ForgotPasswordCommand))]
+[JsonSerializable(typeof(ResetPasswordCommand))]
+[JsonSerializable(typeof(CurrentUserResponse))]
+[JsonSerializable(typeof(UpdateProfileCommand))]
+[JsonSerializable(typeof(ChangePasswordCommand))]
 internal sealed partial class ApiJsonSerializerContext : JsonSerializerContext;

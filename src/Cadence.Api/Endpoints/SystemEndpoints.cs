@@ -8,7 +8,7 @@ internal static class SystemEndpoints
 {
     public static RouteGroupBuilder MapSystemEndpoints(this RouteGroupBuilder api)
     {
-        var group = api.MapGroup("/system").WithTags("System");
+        var group = api.MapGroup("/system").WithTags("System").AllowAnonymous();
 
         group.MapGet("/info", GetSystemInfo)
             .WithName(nameof(GetSystemInfo))
