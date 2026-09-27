@@ -309,10 +309,422 @@
           }
         ]
       }
+    },
+    "/api/v1/organizations": {
+      "post": {
+        "tags": [
+          "Organizations"
+        ],
+        "summary": "Create an organization with you as its owner",
+        "operationId": "CreateOrganization",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateOrganizationCommand"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrganizationResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/v1/organizations/{organizationId}": {
+      "get": {
+        "tags": [
+          "Organizations"
+        ],
+        "summary": "Get an organization",
+        "operationId": "GetOrganization",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrganizationResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      },
+      "patch": {
+        "tags": [
+          "Organizations"
+        ],
+        "summary": "Rename an organization",
+        "operationId": "RenameOrganization",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RenameOrganizationCommand"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "Organizations"
+        ],
+        "summary": "Delete an organization and everything in it",
+        "operationId": "DeleteOrganization",
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/v1/organizations/{organizationId}/members": {
+      "get": {
+        "tags": [
+          "Members"
+        ],
+        "summary": "List members, one page at a time",
+        "operationId": "ListMembers",
+        "parameters": [
+          {
+            "name": "after",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KeysetPageOfMemberResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/v1/organizations/{organizationId}/members/{userId}": {
+      "patch": {
+        "tags": [
+          "Members"
+        ],
+        "summary": "Change a member's role",
+        "operationId": "ChangeMemberRole",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangeMemberRoleRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "Members"
+        ],
+        "summary": "Remove a member, or leave the organization",
+        "operationId": "RemoveMember",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/v1/organizations/{organizationId}/invitations": {
+      "get": {
+        "tags": [
+          "Invitations"
+        ],
+        "summary": "List pending invitations",
+        "operationId": "ListInvitations",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/InvitationResponse"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "Invitations"
+        ],
+        "summary": "Invite someone by email",
+        "operationId": "CreateInvitation",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateInvitationCommand"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvitationResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/v1/organizations/{organizationId}/invitations/{invitationId}": {
+      "delete": {
+        "tags": [
+          "Invitations"
+        ],
+        "summary": "Revoke a pending invitation",
+        "operationId": "RevokeInvitation",
+        "parameters": [
+          {
+            "name": "invitationId",
+            "in": "path",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/v1/invitations/{token}": {
+      "get": {
+        "tags": [
+          "Invitations"
+        ],
+        "summary": "Preview an invitation",
+        "operationId": "GetInvitation",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "path",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvitationPreviewResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/invitations/{token}/accept": {
+      "post": {
+        "tags": [
+          "Invitations"
+        ],
+        "summary": "Accept an invitation and join the organization",
+        "operationId": "AcceptInvitation",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "path",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AcceptInvitationResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
     }
   },
   "components": {
     "schemas": {
+      "AcceptInvitationResponse": {
+        "required": [
+          "organizationId",
+          "name",
+          "slug",
+          "role"
+        ],
+        "type": "object",
+        "properties": {
+          "organizationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "role": {
+            "$ref": "#/components/schemas/OrganizationRole"
+          }
+        }
+      },
       "AccessTokenResponse": {
         "required": [
           "accessToken",
@@ -331,6 +743,18 @@
           }
         },
         "description": "A new access token. The refresh token is set as an httpOnly cookie alongside it."
+      },
+      "ChangeMemberRoleRequest": {
+        "required": [
+          "role"
+        ],
+        "type": "object",
+        "properties": {
+          "role": {
+            "$ref": "#/components/schemas/OrganizationRole"
+          }
+        },
+        "description": "Body of the change-role request."
       },
       "ChangePasswordCommand": {
         "required": [
@@ -363,11 +787,38 @@
           }
         }
       },
+      "CreateInvitationCommand": {
+        "required": [
+          "email",
+          "role"
+        ],
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "role": {
+            "$ref": "#/components/schemas/OrganizationRole"
+          }
+        }
+      },
+      "CreateOrganizationCommand": {
+        "required": [
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        }
+      },
       "CurrentUserResponse": {
         "required": [
           "id",
           "email",
-          "displayName"
+          "displayName",
+          "organizations"
         ],
         "type": "object",
         "properties": {
@@ -380,6 +831,12 @@
           },
           "displayName": {
             "type": "string"
+          },
+          "organizations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MyOrganizationResponse"
+            }
           }
         }
       },
@@ -391,6 +848,101 @@
         "properties": {
           "email": {
             "type": "string"
+          }
+        }
+      },
+      "InvitationPreviewResponse": {
+        "required": [
+          "organizationName",
+          "invitedByName",
+          "email",
+          "role",
+          "status",
+          "expiresAt"
+        ],
+        "type": "object",
+        "properties": {
+          "organizationName": {
+            "type": "string"
+          },
+          "invitedByName": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "role": {
+            "$ref": "#/components/schemas/OrganizationRole"
+          },
+          "status": {
+            "$ref": "#/components/schemas/InvitationStatus"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "InvitationResponse": {
+        "required": [
+          "id",
+          "email",
+          "role",
+          "invitedByName",
+          "createdAt",
+          "expiresAt"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "email": {
+            "type": "string"
+          },
+          "role": {
+            "$ref": "#/components/schemas/OrganizationRole"
+          },
+          "invitedByName": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "InvitationStatus": {
+        "enum": [
+          "Pending",
+          "Accepted",
+          "Revoked",
+          "Expired"
+        ]
+      },
+      "KeysetPageOfMemberResponse": {
+        "required": [
+          "items",
+          "nextCursor"
+        ],
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MemberResponse"
+            }
+          },
+          "nextCursor": {
+            "type": [
+              "null",
+              "string"
+            ]
           }
         }
       },
@@ -408,6 +960,91 @@
             "type": "string"
           }
         }
+      },
+      "MemberResponse": {
+        "required": [
+          "userId",
+          "displayName",
+          "email",
+          "role",
+          "joinedAt"
+        ],
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "role": {
+            "$ref": "#/components/schemas/OrganizationRole"
+          },
+          "joinedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "MyOrganizationResponse": {
+        "required": [
+          "id",
+          "name",
+          "slug",
+          "role"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "role": {
+            "$ref": "#/components/schemas/OrganizationRole"
+          }
+        }
+      },
+      "OrganizationResponse": {
+        "required": [
+          "id",
+          "name",
+          "slug",
+          "role"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "role": {
+            "$ref": "#/components/schemas/OrganizationRole"
+          }
+        }
+      },
+      "OrganizationRole": {
+        "enum": [
+          "Guest",
+          "Member",
+          "Admin",
+          "Owner"
+        ]
       },
       "RegisterCommand": {
         "required": [
@@ -436,6 +1073,17 @@
         "properties": {
           "emailConfirmationRequired": {
             "type": "boolean"
+          }
+        }
+      },
+      "RenameOrganizationCommand": {
+        "required": [
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
           }
         }
       },
@@ -523,6 +1171,15 @@
     },
     {
       "name": "Me"
+    },
+    {
+      "name": "Organizations"
+    },
+    {
+      "name": "Members"
+    },
+    {
+      "name": "Invitations"
     }
   ]
 }
