@@ -1,5 +1,6 @@
 using Cadence.Application.Common.Abstractions;
 using Cadence.Application.Features.Auth;
+using Cadence.Infrastructure.Caching;
 using Cadence.Infrastructure.Email;
 using Cadence.Infrastructure.Identity;
 using Cadence.Infrastructure.Persistence;
@@ -7,7 +8,9 @@ using Cadence.Infrastructure.Persistence.Interceptors;
 using MailKit.Security;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -41,6 +44,18 @@ public static class DependencyInjection
         services.AddCadenceIdentity();
         services.AddEmail();
 
+        // In-process only (ADR-0008): L1 memory cache with stampede protection and tag invalidation.
+        services.AddHybridCache(options =>
+        {
+            options.MaximumPayloadBytes = 1024 * 1024;
+            options.DefaultEntryOptions = new HybridCacheEntryOptions
+            {
+                Expiration = TimeSpan.FromMinutes(10),
+                LocalCacheExpiration = TimeSpan.FromMinutes(10),
+            };
+        });
+        services.AddSingleton<IMembershipCache, MembershipCache>();
+
         return services;
     }
 
@@ -69,12 +84,22 @@ public static class DependencyInjection
 
         services.TryAddEnumerable(ServiceDescriptor.Singleton<IInterceptor, SlowQueryInterceptor>());
 
-        services.AddDbContextPool<CadenceDbContext>(
+        services.AddPooledDbContextFactory<CadenceDbContext>(
             static (serviceProvider, options) => DatabaseConfiguration.Configure(
                 options,
                 serviceProvider.GetRequiredService<NpgsqlDataSource>(),
                 serviceProvider.GetServices<IInterceptor>()),
             DbContextPoolSize);
+
+        // The request-scoped context comes from the pool and is bound to the request's tenant
+        // (hosts without tenants, such as the migrator, get an unbound context).
+        services.AddScoped(static serviceProvider =>
+        {
+            var db = serviceProvider.GetRequiredService<IDbContextFactory<CadenceDbContext>>().CreateDbContext();
+            db.UseTenant(serviceProvider.GetService<ITenantContext>());
+            return db;
+        });
+        services.AddScoped<ICadenceDbContext>(static serviceProvider => serviceProvider.GetRequiredService<CadenceDbContext>());
 
         return services;
     }
@@ -147,6 +172,7 @@ public static class DependencyInjection
 
         services.AddSingleton<EmailQueue>();
         services.AddScoped<IAccountEmails, AccountEmails>();
+        services.AddScoped<IOrganizationEmails, OrganizationEmails>();
         services.AddHostedService<EmailDispatcher>();
 
         services.TryAddSingleton<IEmailTransport>(static serviceProvider =>
