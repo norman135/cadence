@@ -34,7 +34,13 @@ const restrictImports = (...patterns) => ({
 });
 
 export default defineConfig([
-  globalIgnores(['dist', 'coverage', 'src/shared/api/generated']),
+  globalIgnores([
+    'dist',
+    'coverage',
+    'test-results',
+    'playwright-report',
+    'src/shared/api/generated',
+  ]),
 
   {
     files: ['**/*.{ts,tsx}'],
