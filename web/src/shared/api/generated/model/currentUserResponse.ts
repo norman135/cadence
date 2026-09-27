@@ -5,9 +5,11 @@
  * Project and work management for teams.
  * OpenAPI spec version: 1
  */
+import type { MyOrganizationResponse } from './myOrganizationResponse';
 
 export interface CurrentUserResponse {
   id: string;
   email: string;
   displayName: string;
+  organizations: MyOrganizationResponse[];
 }
