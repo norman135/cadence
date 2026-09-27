@@ -2,7 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router';
-import { z } from 'zod';
+import { z } from 'zod/mini';
 import { getGetCurrentUserQueryKey, useCreateOrganization } from '@/shared/api/generated/endpoints';
 import { applyServerErrors } from '@/shared/forms/server-errors';
 import { Alert } from '@/shared/ui/alert';

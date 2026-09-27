@@ -23,7 +23,7 @@ Organize work into projects, move issues through custom workflows, plan sprints,
 ---
 
 > [!NOTE]
-> **Cadence is under active development.** It is built milestone by milestone, in the open, and each milestone ships as a tagged release. **M0 (Foundation) is complete**: the architecture, CI/CD, container deployment and performance harness are in place, and product features start with M1. The [roadmap](docs/ROADMAP.md) has the full plan and current progress.
+> **Cadence is under active development.** It is built milestone by milestone, in the open, and each milestone ships as a tagged release. **M1 (Identity & tenancy) is complete**: people can sign up, create organizations, invite their team and manage roles, on top of the M0 foundation (architecture, CI/CD, container deployment and performance harness). Projects and issues arrive in M2. The [roadmap](docs/ROADMAP.md) has the full plan and current progress.
 
 ## Why Cadence?
 
@@ -171,7 +171,7 @@ The first run installs the frontend's npm packages and pulls the container image
 
 ```bash
 cd deploy
-cp .env.example .env    # set your domain, database password and SMTP settings
+cp .env.example .env    # set your domain, database password, JWT signing key and SMTP settings
 docker compose up -d
 ```
 
@@ -181,16 +181,18 @@ To try the production stack on your own machine, built from source instead of pu
 
 ```bash
 cd deploy
-POSTGRES_PASSWORD=local-test docker compose -f docker-compose.yml -f docker-compose.build.yml up -d --build
+export POSTGRES_PASSWORD=local-test JWT_SIGNING_KEY=local-test-signing-key-at-least-32-characters
+docker compose -f docker-compose.yml -f docker-compose.build.yml -f docker-compose.e2e.yml up -d --build
 ```
 
-Then open https://localhost (Caddy uses a self-signed certificate for `localhost`).
+Then open https://localhost (Caddy uses a self-signed certificate for `localhost`). The `docker-compose.e2e.yml` override adds [Mailpit](https://mailpit.axllent.org/), so confirmation and invitation emails appear at http://localhost:8025 instead of needing a real mail server.
 
 ### Run the tests
 
 ```bash
 dotnet test                       # unit, integration and architecture tests (needs Docker)
 cd web && npm test                # frontend unit and component tests
+cd web && npm run e2e             # Playwright end-to-end tests (needs the stack above running)
 ```
 
 Load tests, memory checks and benchmarks are described in [docs/performance.md](docs/performance.md).
@@ -200,7 +202,7 @@ Load tests, memory checks and benchmarks are described in [docs/performance.md](
 | Milestone | Release | Status |
 |---|---|---|
 | M0: Foundation | `v0.1.0` | ✅ Done |
-| M1: Identity & tenancy | `v0.2.0` | 🚧 In progress |
+| M1: Identity & tenancy | `v0.2.0` | ✅ Done |
 | M2: Projects & issues | `v0.3.0` | Planned |
 | M3: Workflows & Kanban board | `v0.4.0` | Planned |
 | M4: Real-time collaboration | `v0.5.0` | Planned |

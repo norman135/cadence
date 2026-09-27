@@ -5,9 +5,9 @@
 
 | | |
 |---|---|
-| **Status** | In development: M0 complete |
-| **Last updated** | 2026-09-26 |
-| **Current milestone** | M1: Identity & tenancy (in progress) |
+| **Status** | In development: M1 complete |
+| **Last updated** | 2026-09-27 |
+| **Current milestone** | M2: Projects & issues (next) |
 
 ---
 
@@ -476,11 +476,9 @@ The abstractions are already in place, so this is a configuration change rather 
 
 ---
 
-### M1 — Identity & tenancy · `v0.2.0` 🚧
+### M1 — Identity & tenancy · `v0.2.0` ✅
 
 **Goal:** users can sign up, belong to organizations, and are only allowed to do what they are permitted to do.
-
-**Progress:** the account backend is done: auth and profile endpoints, 77 passing tests, ADR-0006. Organizations and tenancy are in progress: the domain model is written, the application use cases are being finished, and the infrastructure, endpoints and tests are next. The frontend has not started.
 
 **Accounts**
 - [x] Registration, email confirmation, login, logout, password reset. Email goes through an in-process queue for now; M7 makes it durable.
@@ -491,23 +489,24 @@ The abstractions are already in place, so this is a configuration change rather 
 - [x] Bearer authentication described in the OpenAPI document
 
 **Organizations and permissions**
-- [ ] Organizations: create, switch, settings *(domain model written)*
-- [ ] Invitations with expiring tokens; member management *(domain model written)*
+- [x] Organizations: create, switch, settings (rename, delete)
+- [x] Invitations with expiring tokens (7 days, revocable); member management with ownership rules
 - [x] Roles: Owner / Admin / Member / Guest, with a single role → permission matrix in the domain
-- [ ] Permission-based authorization: a custom policy provider, with permission sets cached in HybridCache
-- [ ] Tenant resolution middleware and EF global query filters
+- [x] Permission-based authorization: a custom policy provider (`.RequirePermission(...)`), with memberships cached in HybridCache
+- [x] Tenant resolution middleware and EF named query filters, plus a `SaveChanges` guard against cross-tenant writes
 
 **Frontend**
-- [ ] Auth pages
-- [ ] Protected routes
-- [ ] Silent token refresh with deduplication of parallel refreshes
-- [ ] Organization switcher
-- [ ] App shell: sidebar, top bar, command palette skeleton
-- [ ] Settings pages
+- [x] Auth pages: sign in, register, email confirmation, forgot and reset password, invitation
+- [x] Protected routes, with a `returnTo` after sign-in
+- [x] Silent token refresh with deduplication of parallel refreshes, across tabs too (Web Locks)
+- [x] Organization switcher
+- [x] App shell: sidebar, top bar, account menu, command palette skeleton (`Ctrl K`, loaded on first use)
+- [x] Settings pages: organization, members and invitations, profile and password
 
 **Also**
 - [x] ADR-0006 (tokens)
-- [ ] ADR-0007 (tenant isolation)
+- [x] ADR-0007 (tenant isolation)
+- [x] Playwright end-to-end tests against the production stack in CI, with Mailpit for email
 
 **Performance focus:**
 - The permission check on the hot path makes **0 database queries** (served from cache).
@@ -518,6 +517,13 @@ The abstractions are already in place, so this is a configuration change rather 
 - Integration tests prove that two organizations are completely isolated.
 - Refresh-token rotation and reuse detection are tested.
 - The Playwright login and organization-switch flow passes.
+
+**Result:** all three criteria are met in CI. The tests:
+- 116 backend tests, including two-organization isolation, token rotation and reuse detection, and query budgets on every endpoint
+- 23 frontend tests
+- 2 Playwright journeys against the production stack
+
+A permission check costs **0 queries** with a warm cache. The idle stack uses **117 MiB** (+14 MiB over M0). p95 is **4.1 ms at 10 users** and **4.7 ms at 50**, with 0 errors. Initial JS is **124.2 KB**, and the heaviest page downloads 62.9 KB. Full details are in [performance.md](performance.md#v020-m1-identity--tenancy).
 
 ---
 
@@ -888,3 +894,4 @@ Three long-lived branches, all protected by GitHub rulesets. **No direct commits
 | 2026-09-23 | Initial plan. Project Management platform chosen and named **Cadence**. Database switched from SQL Server to **PostgreSQL 18** for ARM64 support. Deployment is **self-hosted Docker Compose** (Azure dropped). Added **low-RAM performance requirements** (1–2 GB host, 10 concurrent users): Redis and Hangfire removed in favour of in-process caching and a PostgreSQL job queue; MediatR and AutoMapper replaced by source-generated alternatives. |
 | 2026-09-23 | Repository is a **monorepo** at `norman135/cadence` under the **MIT license**. Adopted a three-branch, pull-request-only workflow (`develop` → `staging` → `main`), with beta tags on `staging`, release tags on `main`, and a CI check enforcing the promotion path. |
 | 2026-09-23 | **M0 complete.** Changes from the original plan, each made for a concrete reason: <br>• The EF migration bundle became a one-shot **migrator console app** in the app image, because bundles are per-runtime and complicate cross-compiled multi-arch builds (ADR-0015). <br>• `size-limit` became a **manifest-based bundle budget script** that separates initial from lazy chunks. <br>• Feature boundaries use generated **`no-restricted-imports`** rules instead of eslint-plugin-boundaries, whose v7 API changed. <br>• **TypeScript 6.0** instead of 7, until typescript-eslint supports 7. <br>• The **compiled EF model moved to M2**, since the model is empty until then. <br>• Added **ADR-0014** (committed OpenAPI contract and client) and **ADR-0015** (migrator). <br>• The uploads volume will be added in M6, when attachments need it. |
+| 2026-09-27 | **M1 complete.** Changes from the plan, each made for a concrete reason: <br>• The app shell may import a feature's **route pages directly** (`@/features/x/routes/page`), not only its index, so every page becomes its own lazy chunk. The ESLint boundary rule allows exactly that. <br>• The **bundle budget counts every chunk a route downloads**, including chunks shared with other routes. Counting only a route's own chunk hid most of the cost: the members page is 4.4 KB alone, but 62.9 KB with everything it downloads. <br>• **Sign-out lives in `shared/auth`**, and the **organization switcher in `app/`**. Importing them from a feature index pulled whole features into the initial bundle. <br>• An **OpenAPI transformer declares route parameters** that middleware consumes (`{organizationId}`), because endpoints that never bind them produced a document Orval rejected. <br>• Forms use **`zod/mini`** instead of the classic API, which saved about 16 KB per form page. <br>• Npgsql **GSS encryption is disabled** by default: probing for Kerberos failed on every new connection in the chiseled image. <br>• The **test stack lifts per-IP rate limits**, because every browser and k6 user shares one IP there. <br>• End-to-end tests run **on amd64 only**, because they test behaviour, not the platform. |
