@@ -55,6 +55,16 @@ services:
       ConnectionStrings__cadence: *connection-string
       # Trust X-Forwarded-For/-Proto from Caddy, so client IPs and HTTPS are detected correctly.
       ASPNETCORE_FORWARDEDHEADERS_ENABLED: "true"
+      # Links in emails point here.
+      Cadence__PublicUrl: https://${CADENCE_DOMAIN:-localhost}
+      Cadence__Auth__SigningKey: ${JWT_SIGNING_KEY:?Set JWT_SIGNING_KEY in .env}
+      Cadence__Auth__RequireConfirmedEmail: ${REQUIRE_CONFIRMED_EMAIL:-true}
+      Cadence__Auth__AllowRegistration: ${ALLOW_REGISTRATION:-true}
+      Cadence__Email__FromAddress: ${EMAIL_FROM_ADDRESS:-cadence@localhost}
+      Cadence__Email__Smtp__Host: ${SMTP_HOST:-}
+      Cadence__Email__Smtp__Port: ${SMTP_PORT:-587}
+      Cadence__Email__Smtp__Username: ${SMTP_USERNAME:-}
+      Cadence__Email__Smtp__Password: ${SMTP_PASSWORD:-}
     volumes:
       - dp-keys:/app/data/keys
     depends_on:

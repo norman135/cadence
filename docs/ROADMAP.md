@@ -6,8 +6,8 @@
 | | |
 |---|---|
 | **Status** | In development: M0 complete |
-| **Last updated** | 2026-09-23 |
-| **Current milestone** | M1: Identity & tenancy (not started) |
+| **Last updated** | 2026-09-26 |
+| **Current milestone** | M1: Identity & tenancy (in progress) |
 
 ---
 
@@ -476,19 +476,24 @@ The abstractions are already in place, so this is a configuration change rather 
 
 ---
 
-### M1 — Identity & tenancy · `v0.2.0`
+### M1 — Identity & tenancy · `v0.2.0` 🚧
 
 **Goal:** users can sign up, belong to organizations, and are only allowed to do what they are permitted to do.
 
+**Progress:** the account backend is done: auth and profile endpoints, 77 passing tests, ADR-0006. Organizations and tenancy are in progress: the domain model is written, the application use cases are being finished, and the infrastructure, endpoints and tests are next. The frontend has not started.
+
 **Accounts**
-- [ ] Registration, email confirmation, login, logout, password reset. Email goes through an in-process queue for now; M7 makes it durable.
-- [ ] Short-lived JWT access tokens (about 10 minutes)
-- [ ] Rotating refresh tokens in an httpOnly `SameSite=Strict` cookie, with reuse detection
+- [x] Registration, email confirmation, login, logout, password reset. Email goes through an in-process queue for now; M7 makes it durable.
+- [x] Short-lived JWT access tokens (about 10 minutes)
+- [x] Rotating refresh tokens in an httpOnly `SameSite=Strict` cookie, with reuse detection
+- [x] Profile endpoints (`/me`): read and update the profile, change the password (ends other sessions)
+- [x] Rate limiting: per IP on auth endpoints, a per-user token bucket on the rest of the API
+- [x] Bearer authentication described in the OpenAPI document
 
 **Organizations and permissions**
-- [ ] Organizations: create, switch, settings
-- [ ] Invitations with expiring tokens; member management
-- [ ] Roles: Owner / Admin / Member / Guest
+- [ ] Organizations: create, switch, settings *(domain model written)*
+- [ ] Invitations with expiring tokens; member management *(domain model written)*
+- [x] Roles: Owner / Admin / Member / Guest, with a single role → permission matrix in the domain
 - [ ] Permission-based authorization: a custom policy provider, with permission sets cached in HybridCache
 - [ ] Tenant resolution middleware and EF global query filters
 
@@ -501,7 +506,8 @@ The abstractions are already in place, so this is a configuration change rather 
 - [ ] Settings pages
 
 **Also**
-- [ ] ADRs 0006 and 0007
+- [x] ADR-0006 (tokens)
+- [ ] ADR-0007 (tenant isolation)
 
 **Performance focus:**
 - The permission check on the hot path makes **0 database queries** (served from cache).

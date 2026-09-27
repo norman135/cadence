@@ -1,10 +1,19 @@
+using Cadence.Application.Common.Abstractions;
+using Cadence.Application.Features.Auth;
+using Cadence.Infrastructure.Email;
+using Cadence.Infrastructure.Identity;
 using Cadence.Infrastructure.Persistence;
 using Cadence.Infrastructure.Persistence.Interceptors;
+using MailKit.Security;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using Npgsql;
 
 namespace Cadence.Infrastructure;
@@ -17,7 +26,7 @@ public static class DependencyInjection
     /// </summary>
     private const int DbContextPoolSize = 32;
 
-    /// <summary>Registers persistence, database health checks and database telemetry for the API.</summary>
+    /// <summary>Registers persistence, identity, sessions, email and database telemetry for the API.</summary>
     public static IServiceCollection AddInfrastructure(this IServiceCollection services)
     {
         services.AddCadenceDbContext();
@@ -28,6 +37,9 @@ public static class DependencyInjection
         services.AddOpenTelemetry()
             .WithTracing(tracing => tracing.AddNpgsql())
             .WithMetrics(metrics => metrics.AddMeter("Npgsql"));
+
+        services.AddCadenceIdentity();
+        services.AddEmail();
 
         return services;
     }
@@ -65,5 +77,105 @@ public static class DependencyInjection
             DbContextPoolSize);
 
         return services;
+    }
+
+    private static void AddCadenceIdentity(this IServiceCollection services)
+    {
+        services.AddOptions<AuthOptions>()
+            .BindConfiguration(AuthOptions.SectionName)
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
+        services.AddIdentityCore<ApplicationUser>(options =>
+            {
+                options.User.RequireUniqueEmail = true;
+
+                // NIST SP 800-63B: require length, not character classes.
+                options.Password.RequiredLength = AuthValidationRules.MinPasswordLength;
+                options.Password.RequireDigit = false;
+                options.Password.RequireLowercase = false;
+                options.Password.RequireUppercase = false;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequiredUniqueChars = 1;
+
+                options.Lockout.AllowedForNewUsers = true;
+                options.Lockout.MaxFailedAccessAttempts = 5;
+                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(10);
+
+                options.Tokens.PasswordResetTokenProvider = PasswordResetTokenProvider.ProviderName;
+            })
+            .AddEntityFrameworkStores<CadenceDbContext>()
+            .AddDefaultTokenProviders()
+            .AddTokenProvider<PasswordResetTokenProvider>(PasswordResetTokenProvider.ProviderName);
+
+        services.Configure<DataProtectionTokenProviderOptions>(options => options.TokenLifespan = TimeSpan.FromDays(1));
+
+        services.AddScoped<IIdentityService, IdentityService>();
+        services.AddScoped<ISessionService, SessionService>();
+        services.AddSingleton<AccessTokenIssuer>();
+
+        // Bearer authentication for API calls. Claims keep their JWT names ("sub", "email", "name").
+        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer();
+        services.AddOptions<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme)
+            .Configure<IOptions<AuthOptions>>((jwt, auth) =>
+            {
+                jwt.MapInboundClaims = false;
+                jwt.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidIssuer = auth.Value.Issuer,
+                    ValidAudience = auth.Value.Audience,
+                    IssuerSigningKey = AccessTokenIssuer.CreateSigningKey(auth.Value.SigningKey),
+                    ValidAlgorithms = [SecurityAlgorithms.HmacSha256],
+                    NameClaimType = "name",
+                    ClockSkew = TimeSpan.FromSeconds(30),
+                };
+            });
+    }
+
+    private static void AddEmail(this IServiceCollection services)
+    {
+        services.AddOptions<PublicUrlOptions>()
+            .BindConfiguration(PublicUrlOptions.SectionName)
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
+        services.AddOptions<EmailOptions>()
+            .BindConfiguration(EmailOptions.SectionName)
+            .PostConfigure<IConfiguration>(UseMailpitInDevelopment)
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
+        services.AddSingleton<EmailQueue>();
+        services.AddScoped<IAccountEmails, AccountEmails>();
+        services.AddHostedService<EmailDispatcher>();
+
+        services.TryAddSingleton<IEmailTransport>(static serviceProvider =>
+        {
+            var options = serviceProvider.GetRequiredService<IOptions<EmailOptions>>();
+            return string.IsNullOrWhiteSpace(options.Value.Smtp.Host)
+                ? ActivatorUtilities.CreateInstance<LogOnlyEmailTransport>(serviceProvider)
+                : new SmtpEmailTransport(options);
+        });
+    }
+
+    /// <summary>Aspire provides Mailpit as <c>ConnectionStrings:mailpit</c> (<c>Endpoint=smtp://host:port</c>).</summary>
+    private static void UseMailpitInDevelopment(EmailOptions options, IConfiguration configuration)
+    {
+        if (!string.IsNullOrWhiteSpace(options.Smtp.Host)
+            || configuration.GetConnectionString("mailpit") is not { } connectionString)
+        {
+            return;
+        }
+
+        var endpoint = connectionString.Split(';')
+            .Select(part => part.Split('=', 2))
+            .FirstOrDefault(pair => pair.Length == 2 && pair[0].Equals("Endpoint", StringComparison.OrdinalIgnoreCase))?[1];
+
+        if (Uri.TryCreate(endpoint, UriKind.Absolute, out var uri))
+        {
+            options.Smtp.Host = uri.Host;
+            options.Smtp.Port = uri.Port;
+            options.Smtp.Security = SecureSocketOptions.None;
+        }
     }
 }

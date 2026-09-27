@@ -6,4 +6,15 @@
  * OpenAPI spec version: 1
  */
 
+export * from './accessTokenResponse';
+export * from './changePasswordCommand';
+export * from './confirmEmailCommand';
+export * from './currentUserResponse';
+export * from './forgotPasswordCommand';
+export * from './loginCommand';
+export * from './registerCommand';
+export * from './registerResponse';
+export * from './resendConfirmationCommand';
+export * from './resetPasswordCommand';
 export * from './systemInfoResponse';
+export * from './updateProfileCommand';

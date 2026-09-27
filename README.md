@@ -200,7 +200,7 @@ Load tests, memory checks and benchmarks are described in [docs/performance.md](
 | Milestone | Release | Status |
 |---|---|---|
 | M0: Foundation | `v0.1.0` | ✅ Done |
-| M1: Identity & tenancy | `v0.2.0` | 🔜 Next |
+| M1: Identity & tenancy | `v0.2.0` | 🚧 In progress |
 | M2: Projects & issues | `v0.3.0` | Planned |
 | M3: Workflows & Kanban board | `v0.4.0` | Planned |
 | M4: Real-time collaboration | `v0.5.0` | Planned |
