@@ -49,6 +49,7 @@ internal static class ApiServiceCollectionExtensions
             })
             .AddOpenApi(options => options.Document
                 .AddBearerSecurity()
+                .AddUnboundRouteParameters()
                 .AddDocumentTransformer((document, _, _) =>
                 {
                     document.Info.Title = "Cadence API";

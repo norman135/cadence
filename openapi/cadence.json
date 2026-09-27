@@ -353,6 +353,17 @@
         ],
         "summary": "Get an organization",
         "operationId": "GetOrganization",
+        "parameters": [
+          {
+            "name": "organizationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -377,6 +388,17 @@
         ],
         "summary": "Rename an organization",
         "operationId": "RenameOrganization",
+        "parameters": [
+          {
+            "name": "organizationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -404,6 +426,17 @@
         ],
         "summary": "Delete an organization and everything in it",
         "operationId": "DeleteOrganization",
+        "parameters": [
+          {
+            "name": "organizationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
         "responses": {
           "204": {
             "description": "No Content"
@@ -424,6 +457,15 @@
         "summary": "List members, one page at a time",
         "operationId": "ListMembers",
         "parameters": [
+          {
+            "name": "organizationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
           {
             "name": "after",
             "in": "query",
@@ -474,6 +516,15 @@
         "operationId": "ChangeMemberRole",
         "parameters": [
           {
+            "name": "organizationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
             "name": "userId",
             "in": "path",
             "description": "",
@@ -513,6 +564,15 @@
         "operationId": "RemoveMember",
         "parameters": [
           {
+            "name": "organizationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
             "name": "userId",
             "in": "path",
             "description": "",
@@ -542,6 +602,17 @@
         ],
         "summary": "List pending invitations",
         "operationId": "ListInvitations",
+        "parameters": [
+          {
+            "name": "organizationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -569,6 +640,17 @@
         ],
         "summary": "Invite someone by email",
         "operationId": "CreateInvitation",
+        "parameters": [
+          {
+            "name": "organizationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -606,6 +688,15 @@
         "summary": "Revoke a pending invitation",
         "operationId": "RevokeInvitation",
         "parameters": [
+          {
+            "name": "organizationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
           {
             "name": "invitationId",
             "in": "path",
