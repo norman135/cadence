@@ -2,6 +2,7 @@ using Cadence.Api.IntegrationTests.Infrastructure;
 using Cadence.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Npgsql;
 
 namespace Cadence.Api.IntegrationTests;
 
@@ -40,5 +41,16 @@ public sealed class PersistenceTests(CadenceApiFactory factory)
         await db.Database.SqlQueryRaw<int>("SELECT 1 AS \"Value\"").ToListAsync(TestContext.Current.CancellationToken);
 
         Assert.Equal(2, factory.Queries.Count);
+    }
+
+    [Fact]
+    public void The_data_source_applies_the_small_host_connection_defaults()
+    {
+        var dataSource = factory.Services.GetRequiredService<NpgsqlDataSource>();
+        var settings = new NpgsqlConnectionStringBuilder(dataSource.ConnectionString);
+
+        Assert.Equal(20, settings.MaxPoolSize);
+        Assert.Equal("cadence", settings.ApplicationName);
+        Assert.Equal(GssEncryptionMode.Disable, settings.GssEncryptionMode);
     }
 }
