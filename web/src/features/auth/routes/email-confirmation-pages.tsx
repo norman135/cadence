@@ -62,7 +62,11 @@ export function ConfirmEmailPage() {
   const failed = confirm.isError || !userId || !token;
 
   return (
-    <AuthCard title={failed ? 'Link not valid' : 'Confirming your email'}>
+    <AuthCard
+      title={
+        failed ? 'Link not valid' : confirm.isSuccess ? 'Email confirmed' : 'Confirming your email'
+      }
+    >
       {confirm.isSuccess && (
         <>
           <Alert variant="success">Your email is confirmed. You can sign in now.</Alert>
