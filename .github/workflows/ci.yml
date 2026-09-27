@@ -121,6 +121,7 @@ jobs:
       COMPOSE_FILE: docker-compose.yml:docker-compose.build.yml
       CADENCE_DOMAIN: localhost
       POSTGRES_PASSWORD: ci-only-not-a-secret
+      JWT_SIGNING_KEY: ci-only-signing-key-not-a-secret-0123456789
     defaults:
       run:
         working-directory: deploy
