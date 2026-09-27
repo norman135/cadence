@@ -1,15 +1,44 @@
 import { Link, Outlet } from 'react-router';
+import { useSession, useSignOut } from '@/shared/auth';
+import { Button } from '@/shared/ui/button';
 import { CadenceLogo } from '@/shared/ui/cadence-logo';
+
+function SessionActions() {
+  const { status } = useSession();
+  const signOut = useSignOut();
+
+  if (status === 'unknown') return null;
+
+  if (status === 'authenticated') {
+    return (
+      <Button variant="ghost" size="sm" onClick={() => void signOut()}>
+        Sign out
+      </Button>
+    );
+  }
+
+  return (
+    <div className="flex items-center gap-2">
+      <Button variant="ghost" size="sm" asChild>
+        <Link to="/login">Sign in</Link>
+      </Button>
+      <Button size="sm" asChild>
+        <Link to="/register">Get started</Link>
+      </Button>
+    </div>
+  );
+}
 
 export function RootLayout() {
   return (
     <div className="flex min-h-svh flex-col">
       <header className="border-b">
-        <div className="mx-auto flex h-14 max-w-5xl items-center px-4 sm:px-6">
+        <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4 sm:px-6">
           <Link to="/" className="flex items-center gap-2 font-semibold tracking-tight">
             <CadenceLogo className="size-7" />
             Cadence
           </Link>
+          <SessionActions />
         </div>
       </header>
 
