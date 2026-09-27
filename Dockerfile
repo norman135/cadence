@@ -40,7 +40,9 @@ COPY src/Cadence.ServiceDefaults/Cadence.ServiceDefaults.csproj src/Cadence.Serv
 COPY src/Cadence.Api/Cadence.Api.csproj src/Cadence.Api/
 COPY src/Cadence.Migrator/Cadence.Migrator.csproj src/Cadence.Migrator/
 
-RUN --mount=type=cache,target=/root/.nuget/packages \
+# The NuGet cache mount is locked: a multi-arch build runs this stage once per platform in parallel,
+# and concurrent restores into one cache delete each other's temporary files.
+RUN --mount=type=cache,target=/root/.nuget/packages,sharing=locked \
     dotnet restore src/Cadence.Api/Cadence.Api.csproj -a $TARGETARCH -p:PublishReadyToRun=true \
  && dotnet restore src/Cadence.Migrator/Cadence.Migrator.csproj -a $TARGETARCH -p:PublishReadyToRun=true
 
@@ -50,7 +52,7 @@ COPY --from=web /src/web/dist/ src/Cadence.Api/wwwroot/
 # ReadyToRun precompiles to native code: faster startup and less JIT memory at runtime.
 # Analyzers and OpenAPI generation already ran in CI, so they are skipped here.
 ARG PUBLISH_FLAGS="-c Release --no-restore -p:PublishReadyToRun=true -p:RunAnalyzers=false -p:OpenApiGenerateDocuments=false"
-RUN --mount=type=cache,target=/root/.nuget/packages \
+RUN --mount=type=cache,target=/root/.nuget/packages,sharing=locked \
     dotnet publish src/Cadence.Api/Cadence.Api.csproj -a $TARGETARCH $PUBLISH_FLAGS \
       -p:MinVerVersionOverride=$VERSION -o /out/app \
  && dotnet publish src/Cadence.Migrator/Cadence.Migrator.csproj -a $TARGETARCH $PUBLISH_FLAGS \
