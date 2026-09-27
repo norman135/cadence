@@ -2,7 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
-import { z } from 'zod';
+import { z } from 'zod/mini';
 import {
   getGetCurrentUserQueryKey,
   useChangePassword,
@@ -17,17 +17,19 @@ import { TextField } from '@/shared/ui/text-field';
 import { useCurrentUser } from '@/shared/workspace';
 
 const profileSchema = z.object({
-  displayName: z.string().trim().min(1, 'Enter your name.').max(100),
+  displayName: z.string().check(z.trim(), z.minLength(1, 'Enter your name.'), z.maxLength(100)),
 });
 const passwordSchema = z
   .object({
-    currentPassword: z.string().min(1, 'Enter your current password.'),
-    newPassword: z.string().min(10, 'Use at least 10 characters.').max(128),
+    currentPassword: z.string().check(z.minLength(1, 'Enter your current password.')),
+    newPassword: z.string().check(z.minLength(10, 'Use at least 10 characters.'), z.maxLength(128)),
   })
-  .refine((values) => values.newPassword !== values.currentPassword, {
-    path: ['newPassword'],
-    message: 'The new password must be different.',
-  });
+  .check(
+    z.refine((values) => values.newPassword !== values.currentPassword, {
+      path: ['newPassword'],
+      error: 'The new password must be different.',
+    }),
+  );
 
 export function ProfileSettingsPage() {
   return (
