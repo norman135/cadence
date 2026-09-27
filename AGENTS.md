@@ -41,9 +41,12 @@ npm ci
 npm run dev | lint | format:check | typecheck | test | build | budget
 npm run api:generate                           # after any API contract change
 
-# Production stack from source, then end-to-end checks
-cd deploy && POSTGRES_PASSWORD=local docker compose -f docker-compose.yml -f docker-compose.build.yml up -d --build
+# Production stack from source (plus Mailpit), then end-to-end checks
+cd deploy
+export POSTGRES_PASSWORD=local JWT_SIGNING_KEY=local-only-signing-key-at-least-32-characters
+docker compose -f docker-compose.yml -f docker-compose.build.yml -f docker-compose.e2e.yml up -d --build
 ../perf/smoke-test.sh https://localhost && ../perf/measure-memory.sh 350
+cd ../web && npx playwright install chromium && npm run e2e
 ```
 
 ## Before opening a pull request
@@ -54,7 +57,7 @@ Run what CI runs (`.github/workflows/ci.yml`) and make sure all of it passes:
 2. Building regenerates `openapi/cadence.json`. Commit it if it changed.
 3. In `web/`: `npm run api:generate`, then commit any change to `src/shared/api/generated`
 4. `npm run lint`, `npm run format:check`, `npm run typecheck`, `npm test`, `npm run build`, `npm run budget`
-5. For container or deployment changes: build the stack and run `perf/smoke-test.sh`
+5. For container, deployment or user-journey changes: build the stack, run `perf/smoke-test.sh` and `npm run e2e`
 
 ## Backend conventions
 
