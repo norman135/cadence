@@ -45,6 +45,10 @@ public sealed partial class FakeEmailTransport : IEmailTransport
         return query[name];
     }
 
+    /// <summary>The last path segment of the first link in the email, e.g. an invitation token.</summary>
+    public static string LinkPathSegment(EmailMessage message) =>
+        Uri.UnescapeDataString(new Uri(LinkPattern().Match(message.TextBody).Value).Segments[^1]);
+
     [GeneratedRegex(@"https?://\S+")]
     private static partial Regex LinkPattern();
 }

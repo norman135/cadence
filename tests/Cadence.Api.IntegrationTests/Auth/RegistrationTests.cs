@@ -17,7 +17,7 @@ public sealed class RegistrationTests(CadenceApiFactory factory)
 
         var registered = await _client.RegisterAsync(email);
         Assert.Equal(HttpStatusCode.Accepted, registered.StatusCode);
-        var body = await registered.Content.ReadFromJsonAsync<RegisterResponse>(TestContext.Current.CancellationToken);
+        var body = await registered.Content.ReadJsonAsync<RegisterResponse>(TestContext.Current.CancellationToken);
         Assert.True(body!.EmailConfirmationRequired);
 
         await (await _client.LoginAsync(email)).AssertProblemAsync(HttpStatusCode.Forbidden, "auth.email_not_confirmed");
@@ -49,7 +49,7 @@ public sealed class RegistrationTests(CadenceApiFactory factory)
             TestContext.Current.CancellationToken);
 
         await response.AssertProblemAsync(HttpStatusCode.BadRequest);
-        var problem = await response.Content.ReadFromJsonAsync<ValidationProblem>(TestContext.Current.CancellationToken);
+        var problem = await response.Content.ReadJsonAsync<ValidationProblem>(TestContext.Current.CancellationToken);
         Assert.Equal(["displayName", "email", "password"], problem!.Errors.Keys.Order());
     }
 
