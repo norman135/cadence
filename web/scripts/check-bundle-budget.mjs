@@ -36,18 +36,32 @@ for (const [key, chunk] of Object.entries(manifest)) {
 
 const initialJsFiles = [...initialChunks].map((key) => manifest[key].file);
 const initialCssFiles = [...new Set([...initialChunks].flatMap((key) => manifest[key].css ?? []))];
+
+// What navigating to a lazy route downloads: its chunk plus every chunk it imports statically
+// (shared vendor chunks such as form libraries) that the initial bundle doesn't already contain.
+const routeCost = (key) => {
+  const files = new Set();
+  const walk = (current) => {
+    if (initialChunks.has(current) || files.has(manifest[current].file)) return;
+    files.add(manifest[current].file);
+    for (const imported of manifest[current].imports ?? []) walk(imported);
+  };
+  walk(key);
+  return [...files];
+};
+
 const lazyChunks = Object.entries(manifest)
   .filter(([key, chunk]) => chunk.isDynamicEntry && !initialChunks.has(key))
-  .map(([key, chunk]) => ({ name: chunk.name ?? key, file: chunk.file }));
+  .map(([key, chunk]) => ({ name: chunk.name ?? key, files: routeCost(key) }));
 
 const sum = (files) => files.reduce((total, file) => total + gzipSize(file), 0);
 
 const results = [
   { check: 'Initial JavaScript', size: sum(initialJsFiles), budget: BUDGETS.initialJs },
   { check: 'Initial CSS', size: sum(initialCssFiles), budget: BUDGETS.initialCss },
-  ...lazyChunks.map(({ name, file }) => ({
+  ...lazyChunks.map(({ name, files }) => ({
     check: `Lazy chunk: ${name}`,
-    size: gzipSize(file),
+    size: sum(files),
     budget: BUDGETS.lazyChunk,
   })),
 ];
