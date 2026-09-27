@@ -1,0 +1,21 @@
+<Project Sdk="Aspire.AppHost.Sdk/13.5.4">
+
+  <!-- Local development orchestration only. Nothing in this project is deployed. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <AspireUseCliBundle>true</AspireUseCliBundle>
+    <UserSecretsId>bf90a814-4bca-4e51-abb9-ce482162a5e3</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Cadence.Api\Cadence.Api.csproj" />
+    <ProjectReference Include="..\Cadence.Migrator\Cadence.Migrator.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Aspire.Hosting.JavaScript" />
+    <PackageReference Include="Aspire.Hosting.PostgreSQL" />
+    <PackageReference Include="CommunityToolkit.Aspire.Hosting.MailPit" />
+  </ItemGroup>
+
+</Project>

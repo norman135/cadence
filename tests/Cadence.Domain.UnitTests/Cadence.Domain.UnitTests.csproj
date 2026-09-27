@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Cadence.Domain\Cadence.Domain.csproj" />
+  </ItemGroup>
+
+</Project>

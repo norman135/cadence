@@ -1,0 +1,20 @@
+# Keep the build context small: only src/, web/ and the root build files are needed.
+.git
+.github
+.vs
+.vscode
+.idea
+**/bin/
+**/obj/
+**/node_modules/
+**/*.user
+web/dist/
+web/coverage/
+tests/
+docs/
+perf/
+deploy/
+openapi/
+BenchmarkDotNet.Artifacts/
+TestResults/
+*.md

@@ -1,0 +1,42 @@
+<Project>
+
+  <!-- Shared settings for every .NET project in the repository. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+
+    <!-- Quality gates: analyzers and code style are enforced at build time, and warnings fail the build. -->
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <AnalysisLevel>latest-recommended</AnalysisLevel>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <!-- Required for IDE0005 (unused usings) at build time; XML docs also feed OpenAPI descriptions. -->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+
+    <!-- Culture-invariant runtime: smaller container image (no ICU) and lower memory. The UI owns localization. -->
+    <InvariantGlobalization>true</InvariantGlobalization>
+
+    <Deterministic>true</Deterministic>
+    <ContinuousIntegrationBuild Condition="'$(CI)' == 'true'">true</ContinuousIntegrationBuild>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <Product>Cadence</Product>
+    <Authors>Norman Mico</Authors>
+    <Copyright>Copyright (c) 2026 Norman Mico</Copyright>
+    <RepositoryUrl>https://github.com/norman135/cadence</RepositoryUrl>
+  </PropertyGroup>
+
+  <!-- Versions come from git tags (v1.2.3) via MinVer. Container builds pass MinVerVersionOverride instead. -->
+  <PropertyGroup>
+    <MinVerTagPrefix>v</MinVerTagPrefix>
+    <MinVerDefaultPreReleaseIdentifiers>alpha.0</MinVerDefaultPreReleaseIdentifiers>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MinVer" PrivateAssets="all" />
+  </ItemGroup>
+
+</Project>

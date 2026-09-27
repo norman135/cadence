@@ -1,0 +1,19 @@
+<Project>
+
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
+
+  <!-- Everything under tests/ is an xUnit v3 test project unless it sets IsTestProject=false (e.g. benchmarks). -->
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+    <IsTestProject Condition="'$(IsTestProject)' == ''">true</IsTestProject>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+
+  <!-- Item conditions are evaluated after all properties, so a project's own IsTestProject value applies here. -->
+  <!-- Tests run on Microsoft.Testing.Platform (opted in via global.json), so no VSTest adapter is needed. -->
+  <ItemGroup Condition="'$(IsTestProject)' == 'true'">
+    <PackageReference Include="xunit.v3" />
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+</Project>
