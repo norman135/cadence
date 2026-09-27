@@ -1,5 +1,6 @@
 import { http, HttpResponse } from 'msw';
 import { describe, expect, it } from 'vitest';
+import { session } from '@/shared/auth/session';
 import { server } from '@/test/msw-server';
 import { ApiError } from './api-error';
 import { httpClient } from './http-client';
@@ -15,6 +16,16 @@ describe('httpClient', () => {
     server.use(http.delete('*/api/v1/things/1', () => new HttpResponse(null, { status: 204 })));
 
     await expect(httpClient('/api/v1/things/1', { method: 'DELETE' })).resolves.toBeUndefined();
+  });
+
+  it('returns undefined for 202 Accepted without a body', async () => {
+    server.use(
+      http.post('*/api/v1/auth/forgot-password', () => new HttpResponse(null, { status: 202 })),
+    );
+
+    await expect(
+      httpClient('/api/v1/auth/forgot-password', { method: 'POST' }),
+    ).resolves.toBeUndefined();
   });
 
   it('throws an ApiError carrying the problem details of a failed response', async () => {
@@ -38,6 +49,32 @@ describe('httpClient', () => {
     expect(apiError.status).toBe(400);
     expect(apiError.isClientError).toBe(true);
     expect(apiError.problem?.errors).toEqual({ name: ['Name is required.'] });
+  });
+
+  it('sends the access token and, after a 401, refreshes once and retries', async () => {
+    session.start({
+      accessToken: 'expired-token',
+      expiresAt: new Date(Date.now() + 600_000).toISOString(),
+    });
+    const seen: (string | null)[] = [];
+    server.use(
+      http.get('*/api/v1/me', ({ request }) => {
+        const authorization = request.headers.get('Authorization');
+        seen.push(authorization);
+        return authorization === 'Bearer fresh-token'
+          ? HttpResponse.json({ ok: true })
+          : new HttpResponse(null, { status: 401 });
+      }),
+      http.post('*/api/v1/auth/refresh', () =>
+        HttpResponse.json({
+          accessToken: 'fresh-token',
+          expiresAt: new Date(Date.now() + 600_000).toISOString(),
+        }),
+      ),
+    );
+
+    await expect(httpClient('/api/v1/me')).resolves.toEqual({ ok: true });
+    expect(seen).toEqual(['Bearer expired-token', 'Bearer fresh-token']);
   });
 
   it('throws an ApiError with a generic message when the body is not JSON', async () => {
