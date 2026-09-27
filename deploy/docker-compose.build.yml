@@ -1,0 +1,19 @@
+# Builds the application image from source instead of pulling a release from GHCR.
+# Used by CI and for testing the production stack locally:
+#
+#   docker compose -f docker-compose.yml -f docker-compose.build.yml up -d --build
+
+services:
+  app:
+    image: cadence:local
+    pull_policy: build
+    build:
+      context: ..
+      dockerfile: Dockerfile
+      args:
+        VERSION: ${CADENCE_BUILD_VERSION:-0.0.0-local}
+
+  migrate:
+    # Same image as the app; it is built once, before any container starts.
+    image: cadence:local
+    pull_policy: never

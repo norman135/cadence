@@ -13,6 +13,7 @@ Organize work into projects, move issues through custom workflows, plan sprints,
 ![PostgreSQL 18](https://img.shields.io/badge/PostgreSQL-18-4169E1?logo=postgresql&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-amd64_%7C_arm64-2496ED?logo=docker&logoColor=white)
 ![Status](https://img.shields.io/badge/status-in_development-orange)
+[![CI](https://github.com/norman135/cadence/actions/workflows/ci.yml/badge.svg?branch=develop)](https://github.com/norman135/cadence/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
 [Features](#features) · [Architecture](#architecture) · [Performance](#performance) · [Getting started](#getting-started) · [Roadmap](#roadmap) · [Docs](#documentation)
@@ -22,7 +23,7 @@ Organize work into projects, move issues through custom workflows, plan sprints,
 ---
 
 > [!NOTE]
-> **Cadence is under active development.** It is built milestone by milestone, in the open. Each milestone ships as a tagged release. The [roadmap](docs/ROADMAP.md) has the full plan and current progress.
+> **Cadence is under active development.** It is built milestone by milestone, in the open, and each milestone ships as a tagged release. **M0 (Foundation) is complete**: the architecture, CI/CD, container deployment and performance harness are in place, and product features start with M1. The [roadmap](docs/ROADMAP.md) has the full plan and current progress.
 
 ## Why Cadence?
 
@@ -148,9 +149,6 @@ The full playbook is in the [roadmap](docs/ROADMAP.md#8-performance-engineering-
 
 ## Getting started
 
-> [!IMPORTANT]
-> These instructions will work from the **v0.1.0 (M0: Foundation)** release onward.
-
 ### Prerequisites
 
 - [.NET 10 SDK](https://dotnet.microsoft.com/download)
@@ -165,7 +163,9 @@ cd cadence
 dotnet run --project src/Cadence.AppHost
 ```
 
-.NET Aspire starts PostgreSQL, Mailpit (to catch outgoing email), the API and the Vite dev server. It also opens a dashboard with logs, traces and metrics.
+Aspire starts PostgreSQL, Mailpit (to catch outgoing email), the database migrator, the API and the Vite dev server with hot reload. It also opens a dashboard with logs, traces and metrics for all of them; the app's URL is listed there as the `web` resource.
+
+The first run installs the frontend's npm packages and pulls the container images, so it takes a few minutes.
 
 ### Self-host with Docker
 
@@ -177,20 +177,30 @@ docker compose up -d
 
 Caddy gets an HTTPS certificate automatically. A one-shot container applies database migrations before the app starts. Upgrades are `docker compose pull && docker compose up -d`.
 
+To try the production stack on your own machine, built from source instead of pulled from the registry:
+
+```bash
+cd deploy
+POSTGRES_PASSWORD=local-test docker compose -f docker-compose.yml -f docker-compose.build.yml up -d --build
+```
+
+Then open https://localhost (Caddy uses a self-signed certificate for `localhost`).
+
 ### Run the tests
 
 ```bash
-dotnet test                       # unit, integration and architecture tests
+dotnet test                       # unit, integration and architecture tests (needs Docker)
 cd web && npm test                # frontend unit and component tests
-cd web && npx playwright test     # end-to-end tests
 ```
+
+Load tests, memory checks and benchmarks are described in [docs/performance.md](docs/performance.md).
 
 ## Roadmap
 
 | Milestone | Release | Status |
 |---|---|---|
-| M0: Foundation | `v0.1.0` | 🔜 Next |
-| M1: Identity & tenancy | `v0.2.0` | Planned |
+| M0: Foundation | `v0.1.0` | ✅ Done |
+| M1: Identity & tenancy | `v0.2.0` | 🔜 Next |
 | M2: Projects & issues | `v0.3.0` | Planned |
 | M3: Workflows & Kanban board | `v0.4.0` | Planned |
 | M4: Real-time collaboration | `v0.5.0` | Planned |
@@ -208,9 +218,11 @@ Each milestone's detailed scope and completion criteria are in [docs/ROADMAP.md]
 |---|---|
 | [Roadmap](docs/ROADMAP.md) | Constraints, architecture, technology choices, performance playbook, milestones |
 | [Contributing guide](CONTRIBUTING.md) | Branching model, pull request workflow, commit conventions |
-| Architecture decision records (`docs/adr/`) | The reasoning behind each significant decision *(from M0)* |
-| Architecture overview (`docs/architecture.md`) | Diagrams and module guide *(from M0)* |
-| Performance report (`docs/performance.md`) | Measured results for each release *(from M0)* |
+| [Agent guide](AGENTS.md) | Commands, conventions and constraints for AI coding agents |
+| [Architecture overview](docs/architecture.md) | Layers, request flow, frontend structure, build and delivery |
+| [Architecture decision records](docs/adr/README.md) | The reasoning behind each significant decision |
+| [Performance report](docs/performance.md) | Measured results for each release, and how to reproduce them |
+| [Changelog](CHANGELOG.md) | What changed in each release |
 | Deployment runbook (`docs/deployment.md`) | Install, upgrade, backup and restore *(M9)* |
 
 ## Development workflow

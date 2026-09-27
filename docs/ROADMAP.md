@@ -5,9 +5,9 @@
 
 | | |
 |---|---|
-| **Status** | Planning. No code yet |
+| **Status** | In development: M0 complete |
 | **Last updated** | 2026-09-23 |
-| **Current milestone** | M0: Foundation (not started) |
+| **Current milestone** | M1: Identity & tenancy (not started) |
 
 ---
 
@@ -71,8 +71,8 @@ These targets are measured from M0 onward and are **release gates** in M9. Resul
 | API p95 latency at 50 users | **≤ 300 ms**, 0% errors | k6 |
 | Real-time delay (board move reaching other clients) | **≤ 150 ms** p95 on LAN | Playwright two-client probe |
 | Cold start until healthy | **≤ 5 s** on 2 vCPU ARM64 | health check timing |
-| Initial JS bundle | **≤ 180 KB** gzipped | `size-limit` in CI |
-| Largest route chunk | **≤ 80 KB** gzipped | `size-limit` in CI |
+| Initial JS bundle | **≤ 180 KB** gzipped | bundle budget script in CI |
+| Largest route chunk | **≤ 80 KB** gzipped | bundle budget script in CI |
 | Lighthouse performance score (desktop) | **≥ 90** | Lighthouse CI |
 | DB round-trips for a typical endpoint | **≤ 3**, no N+1 queries | query-count assertions in integration tests |
 
@@ -137,7 +137,7 @@ src/
   Cadence.Application/      Commands and queries, handlers, validators, DTOs, abstractions, pipeline behaviors
   Cadence.Infrastructure/   EF Core + Npgsql, Identity, file storage, email, job queue, outbox, caching
   Cadence.Api/              Minimal API endpoints, SignalR hubs, auth, OpenAPI, middleware, SPA hosting
-  Cadence.Migrator/         Builds the EF Core migration bundle used by the one-shot migrate container
+  Cadence.Migrator/         One-shot console app that applies migrations, then exits (ADR-0015)
   Cadence.AppHost/          .NET Aspire orchestration (development only, not shipped)
   Cadence.ServiceDefaults/  OpenTelemetry, health checks, resilience defaults
 tests/
@@ -221,6 +221,8 @@ Each decision gets a full ADR in `docs/adr/` when it is implemented.
 | 0011 | UUIDv7 primary keys (`Guid.CreateVersion7()`), which insert in order and keep B-tree indexes compact |
 | 0012 | GC mode and runtime tuning for low-memory hosts, chosen by measurement |
 | 0013 | Native AOT evaluation: adopt only if EF Core and SignalR support is production-ready, and record the measurements either way |
+| 0014 | Commit the OpenAPI document and the generated frontend client; CI fails on drift *(added in M0)* |
+| 0015 | Apply migrations in a one-shot migrator process that shares the app image *(added in M0)* |
 
 ---
 
@@ -300,7 +302,7 @@ Performance is designed in from the start, not fixed at the end. Each milestone'
   - Brotli and gzip pre-compression.
   - Fingerprinted file names, served by `MapStaticAssets` with `Cache-Control: immutable`.
   - Icons tree-shaken; fonts from the system stack or one subset variable font.
-- **Budgets enforced in CI** with `size-limit`. A bundle visualizer report is uploaded as a CI artifact.
+- **Budgets enforced in CI** by `web/scripts/check-bundle-budget.mjs`, which reads Vite's manifest to measure the initial download separately from each lazy chunk.
 
 ### 8.7 Measurement and regression prevention
 
@@ -309,7 +311,8 @@ Performance is designed in from the start, not fixed at the end. Each milestone'
 | **k6** (`perf/k6/`) | Realistic user journeys at 10 and 50 users, with thresholds matching §3 |
 | **BenchmarkDotNet** | Micro-benchmarks for hot paths such as rank calculation, permission evaluation and serialization |
 | **Query-count assertions** | Catch N+1 queries and query-budget regressions in integration tests |
-| **`size-limit`** | Frontend bundle budgets |
+| **Bundle budget script** | Frontend bundle budgets (gzip, initial vs. lazy chunks) |
+| **`perf/smoke-test.sh`, `perf/measure-memory.sh`** | End-to-end checks and per-container memory budgets |
 | **Lighthouse CI** | Frontend performance score |
 | **dotnet-counters, dotnet-trace, dotnet-gcdump** | Memory and CPU profiling passes |
 | **React Profiler** | Render performance of board, backlog and lists |
@@ -328,7 +331,7 @@ flowchart LR
   Internet((Internet)) -->|443| Caddy["caddy<br/>TLS, HTTP/3, compression"]
   Caddy -->|8080| App["cadence-app"]
   App --> PG[("postgres")]
-  Migrate["cadence-migrate<br/>one-shot"] --> PG
+  Migrate["migrate<br/>one-shot, same image"] --> PG
   App --- Uploads[("uploads volume")]
   App --- Keys[("data-protection keys volume")]
   PG --- PGData[("pg-data volume")]
@@ -341,7 +344,7 @@ flowchart LR
 | `caddy` | `caddy:2-alpine` | 64 MB | ~25 MB |
 | `cadence-app` | `ghcr.io/norman135/cadence` (chiseled) | 320 MB | 120–200 MB |
 | `postgres` | `postgres:18-alpine` | 384 MB | 150–300 MB |
-| `cadence-migrate` | `ghcr.io/norman135/cadence-migrate` | 128 MB | Runs once, then exits |
+| `migrate` | `ghcr.io/norman135/cadence` (migrator entrypoint) | 128 MB | Runs once, then exits |
 | **Total** | | **~770 MB ceiling** | **~300–525 MB** |
 
 ### 9.3 PostgreSQL tuning (small host)
@@ -362,7 +365,7 @@ shared_preload_libraries = 'pg_stat_statements'
 
 ### 9.4 Production concerns
 
-- **Migrations** run in a one-shot `cadence-migrate` container using an EF Core migration bundle. The app never changes the schema on startup.
+- **Migrations** run in a one-shot `migrate` container: the app image with the migrator entrypoint ([ADR-0015](adr/0015-one-shot-migrator.md)). The app never changes the schema on startup.
 - **ASP.NET Data Protection keys** persist to a volume, so logins survive container restarts.
 - **Configuration** comes from environment variables. `deploy/.env.example` documents every setting. No secrets are committed.
 - **Health checks** at `/health/live` and `/health/ready` are wired into Compose `healthcheck` and `depends_on`.
@@ -403,63 +406,73 @@ The abstractions are already in place, so this is a configuration change rather 
 
 ---
 
-### M0 — Foundation · `v0.1.0`
+### M0 — Foundation · `v0.1.0` ✅
 
 **Goal:** an empty system that is already shaped like production. It builds, tests, packages into containers, deploys and measures itself before any features exist.
 
 **Repository and tooling**
-- [ ] Git repository with `.gitignore`, `.gitattributes`, `.editorconfig` and a license
-- [ ] `global.json` pinning the .NET 10 SDK
-- [ ] `Directory.Build.props`: nullable enabled, warnings as errors, analyzers on
-- [ ] `Directory.Packages.props`: central package management
+- [x] Git repository with `.gitignore`, `.gitattributes`, `.editorconfig` and a license
+- [x] `global.json` pinning the .NET 10 SDK, with `dotnet test` on Microsoft.Testing.Platform
+- [x] `Directory.Build.props`: nullable enabled, warnings as errors, analyzers on, MinVer versioning from git tags
+- [x] `Directory.Packages.props`: central package management
 
 **Backend skeleton**
-- [ ] Solution with every project from [§5](#backend-solution-layout)
-- [ ] Architecture tests enforcing the layer dependency rules
-- [ ] API skeleton:
+- [x] Solution (`Cadence.slnx`) with every project from [§5](#backend-solution-layout)
+- [x] Architecture tests enforcing the layer dependency rules and handler conventions
+- [x] API skeleton:
   - health checks
   - ProblemDetails errors
   - OpenAPI
   - API versioning
   - JSON source generation
   - `LoggerMessage` logging
-- [ ] EF Core `DbContext` on Npgsql, UUIDv7 key convention, first migration, compiled-model step, migration bundle project
+- [x] Domain building blocks (`Entity`, `AggregateRoot` with domain events, `Result`/`Error`) and a CQRS pipeline (source-generated Mediator with logging and validation behaviors)
+- [x] EF Core `DbContext` on Npgsql (pooled, capped connection pool, `snake_case`, slow-query interceptor) and a baseline migration
+- [x] Migrator: a one-shot console app instead of an EF migration bundle ([ADR-0015](adr/0015-one-shot-migrator.md))
+- [ ] ~~Compiled-model step~~, moved to **M2**. The model is empty until M1, so there is nothing to compile yet; it becomes worthwhile once the issue model exists.
+- UUIDv7 key convention: recorded in [ADR-0011](adr/0011-uuidv7-primary-keys.md). The first entities arrive in M1.
 
 **Local development**
-- [ ] Aspire AppHost running PostgreSQL, Mailpit, the API and the Vite dev server
+- [x] Aspire AppHost running PostgreSQL, Mailpit, the migrator, the API and the Vite dev server
 
 **Frontend skeleton**
-- [ ] React scaffold with Vite and strict TypeScript
-- [ ] ESLint (including feature-boundary rules) and Prettier
-- [ ] Tailwind v4, shadcn/ui, React Router, TanStack Query, React Compiler
-- [ ] Orval code-generation pipeline
+- [x] React scaffold with Vite 8 and strict TypeScript 6.0. TypeScript 7 waits for typescript-eslint support.
+- [x] ESLint (feature-boundary rules via generated `no-restricted-imports`) and Prettier
+- [x] Tailwind v4, shadcn/ui-style components, React Router, TanStack Query, React Compiler
+- [x] Orval code-generation pipeline, with the client committed ([ADR-0014](adr/0014-committed-openapi-contract-and-generated-client.md))
 
 **Containers and deployment**
-- [ ] Multi-stage, multi-arch `Dockerfile`: build the SPA, then `dotnet publish`, then a chiseled runtime image
-- [ ] `deploy/`:
+- [x] Multi-stage, multi-arch `Dockerfile`, cross-compiled without emulation, with a chiseled non-root runtime image
+- [x] `deploy/`:
   - `docker-compose.yml` with Caddy, memory limits and health checks
   - `Caddyfile`
   - `postgresql.conf`
   - `.env.example`
+  - `docker-compose.build.yml` for building from source
 
 **CI**
-- [ ] Backend build and tests
-- [ ] Frontend lint, type-check, tests and `size-limit`
-- [ ] Docker build for both architectures
+- [x] Backend: format, build, OpenAPI drift check, and tests
+- [x] Frontend: client drift check, lint, format, type-check, tests, build and bundle budgets
+- [x] Container job on amd64 **and** arm64: build, production stack smoke test, memory budgets, k6 load test
+- [x] Release workflow: multi-arch images to GHCR with provenance and an SBOM
 
 **Performance harness**
-- [ ] `Cadence.Benchmarks` project
-- [ ] k6 baseline script
-- [ ] Query-counter test utility
-- [ ] `docs/performance.md` with baseline numbers
+- [x] `Cadence.Benchmarks` project
+- [x] k6 baseline script
+- [x] Query-counter test utility (`QueryCounter` and `AssertAtMostAsync`)
+- [x] Bundle budget script. It reads Vite's manifest instead of using `size-limit`, so it can tell initial chunks from lazy chunks.
+- [x] `docs/performance.md` with baseline numbers
 
 **Documentation**
-- [ ] README
-- [ ] `CONTRIBUTING.md`
-- [ ] `docs/architecture.md`
-- [ ] ADRs 0001–0005 and 0011
+- [x] README
+- [x] `CONTRIBUTING.md`
+- [x] `docs/architecture.md`
+- [x] ADRs 0001–0005 and 0011, plus 0014 and 0015 for decisions made during M0
+- [x] `CHANGELOG.md`
 
 **Done when:** `docker compose up` serves the SPA shell and a healthy API on both amd64 and arm64 (verified in CI), the idle stack uses **≤ 350 MB**, and CI is green.
+
+**Result:** the idle stack uses **103 MiB**. p95 is **3–4 ms at 10 users** and **6–7 ms at 50 users**, with 0 errors. Cold start takes **1.1 s**, and initial JS is **113 KB** gzipped. Full details are in [performance.md](performance.md).
 
 ---
 
@@ -528,6 +541,7 @@ The abstractions are already in place, so this is a configuration change rather 
 
 **Also**
 - [ ] Development data seeder that generates 10,000 issues for performance testing
+- [ ] Compiled EF Core model (`dotnet ef dbcontext optimize`) regenerated with each migration, with a CI check that it is current. Moved from M0.
 
 **Performance focus:**
 - The list endpoint makes **≤ 2 queries**.
@@ -834,7 +848,7 @@ Three long-lived branches, all protected by GitHub rulesets. **No direct commits
 | Architecture | NetArchTest | Layer rules |
 | Frontend units and components | Vitest, Testing Library, MSW | Hooks, forms, complex components |
 | End-to-end | Playwright | Critical user journeys |
-| Performance | k6, BenchmarkDotNet, `size-limit`, Lighthouse CI | Targets in §3 |
+| Performance | k6, BenchmarkDotNet, bundle budget script, memory checks, Lighthouse CI (M9) | Targets in §3 |
 
 ### Documentation
 
@@ -848,15 +862,15 @@ Three long-lived branches, all protected by GitHub rulesets. **No direct commits
 
 ## 12. Prerequisites and open items
 
-- [ ] Install the **.NET 10 SDK**. The development machine currently has only 9.0.200.
-- [ ] Install **Docker Desktop**, with buildx for multi-arch builds.
+- [x] Install the **.NET 10 SDK** (10.0.401)
+- [x] Install **Docker Desktop**, with buildx for multi-arch builds
 - [x] Decide the **GitHub repository**: [`norman135/cadence`](https://github.com/norman135/cadence), with images at `ghcr.io/norman135/cadence`
 - [x] Write the project **README.md**, **CONTRIBUTING.md** and pull request template
 - [x] Choose a **license**: MIT
 - [x] Decide the **workflow**: `develop` → `staging` → `main`, pull requests only
 - [x] Set up **GitHub SSH access** on the development machine
-- [ ] **Push** the initial history and create the `staging` and `develop` branches
-- [ ] Apply the **branch rulesets**, allow **merge commits only**, and make `develop` the **default branch**
+- [x] **Push** the initial history and create the `staging` and `develop` branches
+- [x] Apply the **branch rulesets**, allow **merge commits only**, and make `develop` the **default branch**
 - [ ] Confirm the **target server's specs** (RAM, CPU architecture, storage type) to finalize memory limits and PostgreSQL tuning.
 
 ---
@@ -867,3 +881,4 @@ Three long-lived branches, all protected by GitHub rulesets. **No direct commits
 |---|---|
 | 2026-09-23 | Initial plan. Project Management platform chosen and named **Cadence**. Database switched from SQL Server to **PostgreSQL 18** for ARM64 support. Deployment is **self-hosted Docker Compose** (Azure dropped). Added **low-RAM performance requirements** (1–2 GB host, 10 concurrent users): Redis and Hangfire removed in favour of in-process caching and a PostgreSQL job queue; MediatR and AutoMapper replaced by source-generated alternatives. |
 | 2026-09-23 | Repository is a **monorepo** at `norman135/cadence` under the **MIT license**. Adopted a three-branch, pull-request-only workflow (`develop` → `staging` → `main`), with beta tags on `staging`, release tags on `main`, and a CI check enforcing the promotion path. |
+| 2026-09-23 | **M0 complete.** Changes from the original plan, each made for a concrete reason: <br>• The EF migration bundle became a one-shot **migrator console app** in the app image, because bundles are per-runtime and complicate cross-compiled multi-arch builds (ADR-0015). <br>• `size-limit` became a **manifest-based bundle budget script** that separates initial from lazy chunks. <br>• Feature boundaries use generated **`no-restricted-imports`** rules instead of eslint-plugin-boundaries, whose v7 API changed. <br>• **TypeScript 6.0** instead of 7, until typescript-eslint supports 7. <br>• The **compiled EF model moved to M2**, since the model is empty until then. <br>• Added **ADR-0014** (committed OpenAPI contract and client) and **ADR-0015** (migrator). <br>• The uploads volume will be added in M6, when attachments need it. |

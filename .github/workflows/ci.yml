@@ -1,0 +1,187 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [develop, staging, main]
+  push:
+    branches: [develop, staging, main]
+  workflow_dispatch:
+
+# Superseded runs for the same PR or branch are cancelled.
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+
+jobs:
+  backend:
+    name: Backend
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0 # MinVer derives the version from git tags.
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: global.json
+
+      - name: Restore
+        run: dotnet restore Cadence.slnx
+
+      - name: Check formatting
+        run: dotnet format Cadence.slnx --verify-no-changes --no-restore
+
+      - name: Build
+        run: dotnet build Cadence.slnx --configuration Release --no-restore
+
+      - name: Check the OpenAPI document is up to date
+        run: |
+          if ! git diff --exit-code -- openapi/; then
+            echo "::error::openapi/ is out of date. Build the solution locally and commit the regenerated document."
+            exit 1
+          fi
+
+      # Integration tests start PostgreSQL with Testcontainers; the runner provides Docker.
+      - name: Test
+        run: dotnet test --solution Cadence.slnx --configuration Release --no-build
+
+  frontend:
+    name: Frontend
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - name: Check out
+        uses: actions/checkout@v5
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version-file: web/.nvmrc
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check the generated API client is up to date
+        run: |
+          npm run api:generate
+          if ! git diff --exit-code -- src/shared/api/generated; then
+            echo "::error::The generated API client is out of date. Run 'npm run api:generate' in web/ and commit the result."
+            exit 1
+          fi
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Check formatting
+        run: npm run format:check
+
+      - name: Type-check
+        run: npm run typecheck
+
+      - name: Test
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+      - name: Check bundle budgets
+        run: npm run budget
+
+  # Builds the production image natively on each architecture Cadence supports, starts the
+  # production Compose stack, and checks it end to end, including the idle memory budget.
+  container:
+    name: Container (${{ matrix.arch }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: amd64
+            runner: ubuntu-24.04
+          - arch: arm64
+            runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 30
+    env:
+      COMPOSE_FILE: docker-compose.yml:docker-compose.build.yml
+      CADENCE_DOMAIN: localhost
+      POSTGRES_PASSWORD: ci-only-not-a-secret
+    defaults:
+      run:
+        working-directory: deploy
+    steps:
+      - name: Check out
+        uses: actions/checkout@v5
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          load: true
+          tags: cadence:local
+          build-args: VERSION=0.0.0-ci.${{ github.run_number }}
+          cache-from: type=gha,scope=image-${{ matrix.arch }}
+          cache-to: type=gha,mode=max,scope=image-${{ matrix.arch }}
+
+      - name: Start the production stack
+        run: docker compose up -d --no-build
+
+      - name: Wait for the app to be ready
+        run: |
+          for attempt in $(seq 1 60); do
+            if curl -skf https://localhost/health/ready > /dev/null; then
+              echo "Ready after about $((attempt * 2)) seconds."
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "::error::The stack did not become ready within 120 seconds."
+          exit 1
+
+      - name: Smoke test
+        run: ../perf/smoke-test.sh https://localhost
+
+      - name: Check idle memory budget
+        env:
+          MEMORY_LABEL: idle, ${{ matrix.arch }}
+        run: |
+          sleep 20 # let startup allocations settle
+          ../perf/measure-memory.sh 350
+
+      # 10 concurrent users for one minute; k6 fails the step if a latency or error threshold
+      # from ROADMAP §3 is missed.
+      - name: Load test (10 users)
+        run: >
+          docker run --rm --network host -v "$PWD/../perf/k6:/scripts:ro"
+          grafana/k6:latest run --quiet -e VUS=10 -e DURATION=1m /scripts/baseline.js
+
+      - name: Check memory budget after load
+        env:
+          MEMORY_LABEL: after 10-user load, ${{ matrix.arch }}
+        run: ../perf/measure-memory.sh 450
+
+      - name: Show container logs
+        if: failure()
+        run: docker compose logs --no-color
+
+      - name: Stop the stack
+        if: always()
+        run: docker compose down --volumes
