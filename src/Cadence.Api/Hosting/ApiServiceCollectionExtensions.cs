@@ -2,6 +2,7 @@ using System.Diagnostics;
 using Asp.Versioning;
 using Cadence.Api.Serialization;
 using Cadence.Application.Common.Abstractions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 
@@ -17,6 +18,10 @@ internal static class ApiServiceCollectionExtensions
         services.AddScoped<ICurrentUser, HttpCurrentUser>();
 
         services.AddAuthorization();
+        services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
+        services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
+        services.AddScoped<HttpTenantContext>();
+        services.AddScoped<ITenantContext>(static serviceProvider => serviceProvider.GetRequiredService<HttpTenantContext>());
         services.AddCadenceRateLimiting();
 
         // Source-generated serialization for API contracts; the reflection resolver remains as a fallback
@@ -44,6 +49,7 @@ internal static class ApiServiceCollectionExtensions
             })
             .AddOpenApi(options => options.Document
                 .AddBearerSecurity()
+                .AddUnboundRouteParameters()
                 .AddDocumentTransformer((document, _, _) =>
                 {
                     document.Info.Title = "Cadence API";

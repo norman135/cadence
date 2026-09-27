@@ -31,14 +31,38 @@ public sealed class ConventionTests
     }
 
     [Fact]
-    public void Messages_are_immutable_records_named_after_their_intent()
+    public void Queries_are_named_after_their_intent()
+    {
+        var result = s_application.That().ImplementInterface(typeof(IQuery<>)).Should().HaveNameEndingWith("Query").GetResult();
+
+        Assert.True(result.IsSuccessful, "Queries must end with 'Query': " + string.Join(", ", result.FailingTypeNames ?? []));
+    }
+
+    [Fact]
+    public void Commands_are_named_after_their_intent()
     {
         var result = s_application
-            .That().ImplementInterface(typeof(IQuery<>))
-            .Should().BeImmutable()
-            .And().HaveNameEndingWith("Query")
+            .That().ImplementInterface(typeof(ICommand<>))
+            .Should().HaveNameEndingWith("Command")
             .GetResult();
 
-        Assert.True(result.IsSuccessful, "Queries must be immutable and end with 'Query': " + string.Join(", ", result.FailingTypeNames ?? []));
+        Assert.True(result.IsSuccessful, "Commands must end with 'Command': " + string.Join(", ", result.FailingTypeNames ?? []));
+    }
+
+    [Fact]
+    public void Messages_are_immutable()
+    {
+        // Positional records use init-only setters, which are immutable after construction; any other
+        // setter makes a message mutable. (NetArchTest's BeImmutable treats init as mutable.)
+        var mutable = s_application
+            .That().ImplementInterface(typeof(IQuery<>)).Or().ImplementInterface(typeof(ICommand<>))
+            .GetTypes()
+            .SelectMany(type => type.GetProperties().Select(property => (type, property)))
+            .Where(pair => pair.property.SetMethod is { } setter
+                && !setter.ReturnParameter.GetRequiredCustomModifiers().Contains(typeof(System.Runtime.CompilerServices.IsExternalInit)))
+            .Select(pair => $"{pair.type.Name}.{pair.property.Name}")
+            .ToList();
+
+        Assert.True(mutable.Count == 0, "Messages must be immutable: " + string.Join(", ", mutable));
     }
 }

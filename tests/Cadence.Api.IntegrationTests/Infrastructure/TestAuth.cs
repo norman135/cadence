@@ -60,7 +60,7 @@ public static class TestAuth
 
     public static async Task<TestSession> ToSessionAsync(HttpResponseMessage response, string email, string password = Password)
     {
-        var body = await response.Content.ReadFromJsonAsync<AccessTokenResponse>();
+        var body = await response.Content.ReadJsonAsync<AccessTokenResponse>();
         return new TestSession(email, password, body!.AccessToken, RefreshCookie(response)!.Value.ToString());
     }
 

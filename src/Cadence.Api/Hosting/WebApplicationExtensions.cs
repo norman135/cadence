@@ -15,6 +15,7 @@ internal static class WebApplicationExtensions
         // Authentication runs first so rate limits can be partitioned per user rather than per IP.
         app.UseAuthentication();
         app.UseRateLimiter();
+        app.UseMiddleware<TenantResolutionMiddleware>();
         app.UseAuthorization();
 
         if (app.Environment.IsDevelopment())

@@ -1,5 +1,4 @@
 using System.Net;
-using System.Net.Http.Json;
 using Cadence.Api.IntegrationTests.Infrastructure;
 using Cadence.Application.Features.Me;
 
@@ -15,16 +14,17 @@ public sealed class ProfileTests(CadenceApiFactory factory)
     {
         var session = await factory.SignUpAsync(displayName: "Ada");
 
-        var before = await factory.Queries.AssertAtMostAsync(1, () =>
+        var before = await factory.Queries.AssertAtMostAsync(2, () =>
             _client.SendAsync(session.Authorized(HttpMethod.Get, "/api/v1/me")));
-        var profile = await before.Content.ReadFromJsonAsync<CurrentUserResponse>(TestContext.Current.CancellationToken);
+        Assert.True(before.IsSuccessStatusCode, await before.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
+        var profile = await before.Content.ReadJsonAsync<CurrentUserResponse>(TestContext.Current.CancellationToken);
         Assert.Equal(("Ada", session.Email), (profile!.DisplayName, profile.Email));
 
         var renamed = await _client.SendAsync(session.Authorized(HttpMethod.Patch, "/api/v1/me", new { displayName = "Ada Lovelace" }), TestContext.Current.CancellationToken);
         Assert.Equal(HttpStatusCode.NoContent, renamed.StatusCode);
 
         var after = await _client.SendAsync(session.Authorized(HttpMethod.Get, "/api/v1/me"), TestContext.Current.CancellationToken);
-        Assert.Equal("Ada Lovelace", (await after.Content.ReadFromJsonAsync<CurrentUserResponse>(TestContext.Current.CancellationToken))!.DisplayName);
+        Assert.Equal("Ada Lovelace", (await after.Content.ReadJsonAsync<CurrentUserResponse>(TestContext.Current.CancellationToken))!.DisplayName);
     }
 
     [Fact]

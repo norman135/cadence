@@ -9,4 +9,6 @@ internal sealed class HttpCurrentUser(IHttpContextAccessor httpContextAccessor) 
         Guid.TryParse(httpContextAccessor.HttpContext?.User.FindFirst("sub")?.Value, out var userId)
             ? userId
             : null;
+
+    public string? DisplayName => httpContextAccessor.HttpContext?.User.FindFirst("name")?.Value;
 }
