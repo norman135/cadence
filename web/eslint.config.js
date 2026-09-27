@@ -8,8 +8,9 @@ import tseslint from 'typescript-eslint';
 
 /*
  * Module boundaries (feature-sliced):
- *   app/       the shell: providers, router, layouts. It may import anything, but only a
- *              feature's public index (e.g. '@/features/home').
+ *   app/       the shell: providers, router, layouts. It may import a feature's public index
+ *              (e.g. '@/features/home') or one of its route pages ('@/features/x/routes/page'),
+ *              so the router can split every page into its own chunk. Nothing else inside.
  *   features/  one folder per feature. A feature may import itself and shared/, never
  *              another feature or the app shell.
  *   shared/    reusable building blocks. It may import only shared/.
@@ -57,8 +58,8 @@ export default defineConfig([
   {
     files: ['src/app/**/*.{ts,tsx}'],
     rules: restrictImports({
-      regex: '^@/features/[^/]+/.+',
-      message: "Import a feature through its public index, e.g. '@/features/home'.",
+      regex: '^@/features/[^/]+/(?!routes/[^/]+$).+',
+      message: "Import a feature through its public index or a route page, e.g. '@/features/home'.",
     }),
   },
 
