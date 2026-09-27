@@ -1,5 +1,8 @@
-# End-to-end test additions: Mailpit catches every outgoing email, so tests can follow the
-# links in them. Never use this file in production.
+# Test additions for end-to-end and load tests. Never use this file in production.
+#
+# - Mailpit catches every outgoing email, so tests can follow the links in them.
+# - Per-IP rate limits are lifted: every browser and every k6 virtual user shares one client
+#   address here, which a real team never does. The limiters keep their integration tests.
 #
 #   docker compose -f docker-compose.yml -f docker-compose.build.yml -f docker-compose.e2e.yml up -d --build
 #   cd ../web && npm run e2e
@@ -23,9 +26,8 @@ services:
       Cadence__Email__Smtp__Host: mailpit
       Cadence__Email__Smtp__Port: "1025"
       Cadence__Email__Smtp__Security: None
-      # Every browser shares one client IP here, so the per-IP sign-in limit (10/min) would
-      # make test runs flaky. Rate limiting itself is covered by the integration tests.
       Cadence__RateLimiting__AuthPermitsPerMinute: "1000"
+      Cadence__RateLimiting__ApiPermitsPerMinute: "100000"
     depends_on:
       mailpit:
         condition: service_started
