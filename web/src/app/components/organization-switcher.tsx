@@ -10,12 +10,12 @@ import {
 } from '@/shared/ui/dropdown-menu';
 import { useCurrentOrganization, useCurrentUser } from '@/shared/workspace';
 
-/** The organization's tile: its initial on the Ember gradient. */
+/** The organization's tile: its initial on the Ember gradient, in dark ink for contrast (5.9:1+). */
 export function OrganizationTile({ name }: { name: string }) {
   return (
     <span
       aria-hidden="true"
-      className="grid size-6 shrink-0 place-items-center rounded-[7px] bg-linear-135 from-[#ff7b45] to-[#d44c1c] text-xs font-bold text-white"
+      className="grid size-6 shrink-0 place-items-center rounded-[7px] bg-linear-135 from-[#ff7b45] to-[#f0612e] text-xs font-bold text-[#0b0e14]"
     >
       {name.trim().charAt(0).toUpperCase() || '?'}
     </span>

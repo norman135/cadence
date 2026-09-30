@@ -2,7 +2,9 @@
 
 All notable changes to Cadence are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses [Semantic Versioning](https://semver.org/). Each release corresponds to a milestone in the [roadmap](docs/ROADMAP.md).
 
-## [Unreleased] - M2: Brand & design system
+## [0.3.0] - M2: Brand & design system
+
+Cadence gets its own identity, and the whole app is rebuilt to its design system, in light and dark.
 
 ### Added
 
@@ -11,7 +13,27 @@ All notable changes to Cadence are documented here. The format follows [Keep a C
   - design tokens (`design/tokens.css`) for color (Tempo, Ember and Ink, in light and dark themes), type (Geist and Geist Mono), space, radius, elevation and motion
   - ten design boards, rendered to PNG: identity, color, typography, foundations, components, My work, board, issue, backlog and sprints, and flows (sign-in, command palette, mobile)
   - ADR-0016
+- **The app, rebuilt to the designs:**
+  - the new logo, favicon, installable app icons and a web manifest
+  - Geist and Geist Mono, self-hosted and preloaded (51 KB), with fallbacks that keep the layout still while they load
+  - a light, dark or system theme, chosen from the account menu, the profile page or the command palette, applied before the first paint and synced across tabs
+  - a split sign-in layout with the brand panel, a new app shell (sidebar, floating page panel, top bar with search), and My work as the starting page
+  - a phone layout: a navigation drawer and a bottom tab bar below 768 px
+  - the component kit restyled, plus tabs, tooltips, checkboxes, switches, keyboard keys, themed toasts, and workflow status and priority glyphs
+  - a style guide page in development builds, showing every component in both themes
+- **Quality:**
+  - visual regression tests: screenshots of the key pages in both themes, compared in CI with baselines rendered in a pinned Linux container
+  - axe accessibility scans of the same pages, failing on any serious or critical WCAG 2.2 AA issue
 - A new milestone, M2: Brand & design system, before projects and issues. Later milestones move up one number and one minor version.
+
+### Changed
+
+- The sign-in page's heading is now "Welcome back", and the organization home is now My work.
+- Button variant `outline` is now `secondary`, and badges use neutral and soft signal variants.
+
+### Fixed
+
+- Nine color-contrast failures that axe found, some of them in the designs themselves: subtle gray is no longer used for readable text, the organization tile uses dark ink, and three avatar colors are deeper.
 
 ## [0.2.0] - M1: Identity & tenancy
 

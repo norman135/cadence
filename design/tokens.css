@@ -77,7 +77,7 @@
 
   --text: var(--ink-900);
   --text-muted: var(--ink-500);
-  --text-subtle: var(--ink-400);
+  --text-subtle: var(--ink-400); /* placeholders, icons, disabled: never readable text (3.1:1) */
 
   --primary: var(--tempo-600);
   --primary-hover: var(--tempo-700);

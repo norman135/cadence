@@ -111,7 +111,7 @@ web/src/
   app/        shell: providers, router, layouts, error boundary
   features/   one folder per feature (auth, organizations, settings, home), each with a public index.ts
   shared/     api (client + generated hooks), auth (session), workspace (current organization),
-              ui (design system), forms, lib
+              theme (light / dark / system), ui (the component kit), forms, lib
   test/       Vitest setup, MSW server, render helpers
 ```
 
@@ -127,8 +127,13 @@ The rules are generated per feature folder, so new features are covered automati
 - **Session**: the access token lives only in memory (`shared/auth`). On load, and shortly before the token expires, the client exchanges the refresh cookie for a new token. Parallel refreshes are deduplicated in the tab and serialized across tabs with the Web Locks API, and a `401` triggers one refresh and a retry.
 - **Forms**: react-hook-form with `zod/mini` schemas that mirror the server rules. Server validation errors are mapped back onto the fields.
 - **Rendering**: the React Compiler memoizes components automatically.
-- **Styling**: Tailwind CSS v4 with semantic OKLCH design tokens (light and dark follow the OS), and shadcn/ui-style components in `shared/ui`.
-- **Testing**: Vitest (jsdom), Testing Library and Mock Service Worker. Requests without a handler fail the test.
+- **Design system** ([ADR-0016](adr/0016-brand-and-design-system.md)): the tokens in `design/tokens.css` are mirrored in `src/index.css` and exposed to Tailwind CSS v4 by semantic name (`bg-card`, `text-muted-foreground`, `bg-status-done`…). Components never use palette colors. `shared/ui` holds the kit (Radix primitives styled to design board 05), and `/style-guide` shows every component in both themes in development builds.
+- **Themes**: `<html data-theme="light|dark">`. A seven-line inline script applies the saved choice before the first paint, and `shared/theme` keeps it in sync with the OS and other tabs. The choice (system, light, dark) is stored per browser.
+- **Fonts**: Geist and Geist Mono from `@fontsource-variable`, served from the app's own origin. Only the Latin files download for English text (51 KB). The Latin Geist file is preloaded, and metric-matched fallbacks keep the layout from shifting while it loads.
+- **Testing**:
+  - unit and component tests with Vitest (jsdom), Testing Library and Mock Service Worker; requests without a handler fail the test
+  - the visual suite (`web/visual`): a screenshot of each key page in both themes against committed Linux baselines, plus an axe scan, with the API mocked in the browser
+  - end-to-end journeys (`web/e2e`) against the production stack
 
 ## Development environment
 
@@ -148,4 +153,5 @@ Vite proxies `/api`, `/health` and `/hubs` to the API through Aspire service dis
   - **Backend**: format, build (warnings are errors), OpenAPI drift check, and unit, integration and architecture tests.
   - **Frontend**: client drift check, lint, format check, type-check, tests, build and bundle budgets.
   - **Container**, on both amd64 and arm64: build the image, start the production stack, run the smoke tests, a memory check at idle, a 10-user k6 load test, and a memory check after load. On amd64 it then runs the **Playwright end-to-end tests** against the same stack, with Mailpit catching email (`deploy/docker-compose.e2e.yml`).
+  - **Visual & accessibility**: the visual suite, in the Playwright container image its baselines were rendered in.
 - **Release** (`.github/workflows/release.yml`): a `vX.Y.Z` tag publishes multi-arch images with provenance and an SBOM to `ghcr.io/norman135/cadence`, and creates a GitHub release.

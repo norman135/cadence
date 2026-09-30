@@ -17,6 +17,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "e2e": "playwright test",
+    "test:visual": "playwright test -c playwright.visual.config.ts",
+    "test:visual:update": "node scripts/update-visual-baselines.mjs",
     "api:generate": "orval && prettier --write src/shared/api/generated",
     "budget": "node scripts/check-bundle-budget.mjs"
   },
@@ -40,6 +42,7 @@
     "zod": "^4.6.5"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
     "@babel/core": "^7.29.7",
     "@eslint/js": "^10.0.1",
     "@playwright/test": "^1.63.0",

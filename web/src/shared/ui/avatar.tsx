@@ -1,14 +1,14 @@
 import { cn } from '@/shared/lib/utils';
 
-// Saturated enough for white initials in both themes (design/boards/board.js uses the same list).
+// Each carries white initials at 4.5:1 or more (WCAG AA); design/boards/board.js uses the same list.
 const COLORS = [
   '#0b7a70',
   '#3b6fd6',
   '#7c4ddb',
   '#c93f7d',
-  '#d44c1c',
-  '#b7810b',
-  '#1f8a4d',
+  '#c0431a',
+  '#8f6a0a',
+  '#1b7a44',
   '#556274',
 ];
 
