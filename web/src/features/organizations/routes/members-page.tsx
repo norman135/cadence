@@ -168,7 +168,7 @@ function MemberList({ organizationId, role }: { organizationId: string; role: Or
         </ul>
         {members.hasNextPage && (
           <Button
-            variant="outline"
+            variant="secondary"
             className="mt-4 self-center"
             disabled={members.isFetchingNextPage}
             onClick={() => void members.fetchNextPage()}
@@ -245,7 +245,7 @@ function MemberRow({
           ))}
         </Select>
       ) : (
-        <Badge variant="secondary">{member.role}</Badge>
+        <Badge variant={member.role === 'Owner' ? 'primary' : 'default'}>{member.role}</Badge>
       )}
       {(canManage || isSelf) && (
         <DropdownMenu>
@@ -298,7 +298,7 @@ function PendingInvitations({ organizationId }: { organizationId: string }) {
                   {new Date(invitation.expiresAt).toLocaleDateString()}
                 </p>
               </div>
-              <Button variant="outline" size="sm" onClick={() => void onRevoke(invitation.id)}>
+              <Button variant="secondary" size="sm" onClick={() => void onRevoke(invitation.id)}>
                 Revoke
               </Button>
             </li>

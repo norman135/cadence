@@ -136,7 +136,7 @@ export function OrganizationSettingsPage() {
                 />
                 <div className="flex justify-end gap-2">
                   <DialogClose asChild>
-                    <Button variant="outline">Cancel</Button>
+                    <Button variant="secondary">Cancel</Button>
                   </DialogClose>
                   <Button
                     variant="destructive"
