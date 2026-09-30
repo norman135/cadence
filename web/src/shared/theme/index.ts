@@ -5,3 +5,4 @@ export {
   type ResolvedTheme,
   type ThemePreference,
 } from './theme';
+export { ThemePicker } from './theme-picker';

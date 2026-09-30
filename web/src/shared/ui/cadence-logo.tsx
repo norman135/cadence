@@ -33,3 +33,14 @@ export function CadenceWordmark({ className, ...props }: ComponentProps<'span'>)
     </span>
   );
 }
+
+/** The bars alone, in the current text color: for empty states and busy backgrounds. */
+export function CadenceGlyph(props: ComponentProps<'svg'>) {
+  return (
+    <svg viewBox="0 0 64 64" aria-hidden="true" {...props}>
+      <rect x="15" y="33" width="8" height="16" rx="4" fill="currentColor" fillOpacity="0.55" />
+      <rect x="28" y="23" width="8" height="26" rx="4" fill="currentColor" fillOpacity="0.8" />
+      <rect x="41" y="15" width="8" height="34" rx="4" fill="currentColor" />
+    </svg>
+  );
+}

@@ -103,6 +103,7 @@ export const router = createBrowserRouter([
             children: [
               {
                 index: true,
+                handle: { title: 'My work' },
                 lazy: async () => ({
                   Component: (
                     await import('@/features/organizations/routes/organization-home-page')
@@ -111,6 +112,7 @@ export const router = createBrowserRouter([
               },
               {
                 path: 'settings/members',
+                handle: { title: 'Members' },
                 lazy: async () => ({
                   Component: (await import('@/features/organizations/routes/members-page'))
                     .MembersPage,
@@ -118,6 +120,7 @@ export const router = createBrowserRouter([
               },
               {
                 path: 'settings/organization',
+                handle: { title: 'Settings' },
                 lazy: async () => ({
                   Component: (
                     await import('@/features/organizations/routes/organization-settings-page')
@@ -126,6 +129,7 @@ export const router = createBrowserRouter([
               },
               {
                 path: 'settings/profile',
+                handle: { title: 'Profile' },
                 lazy: async () => ({ Component: (await settings()).ProfileSettingsPage }),
               },
               { path: '*', Component: NotFoundPage },
