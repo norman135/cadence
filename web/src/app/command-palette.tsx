@@ -9,7 +9,7 @@ import { Kbd } from '@/shared/ui/kbd';
 import { useCurrentOrganization, useCurrentUser } from '@/shared/workspace';
 
 const group =
-  '[&_[cmdk-group-heading]]:px-2.5 [&_[cmdk-group-heading]]:pt-2.5 [&_[cmdk-group-heading]]:pb-1 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-subtle-foreground';
+  '[&_[cmdk-group-heading]]:px-2.5 [&_[cmdk-group-heading]]:pt-2.5 [&_[cmdk-group-heading]]:pb-1 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-muted-foreground';
 
 /**
  * Ctrl+K: one box for pages, organizations and actions (design board 10). Later milestones add

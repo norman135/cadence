@@ -196,10 +196,10 @@ body.dark-board {
   border-radius: 7px;
   display: grid;
   place-items: center;
-  color: white;
+  color: var(--ink-950);
   font-size: 12px;
   font-weight: 700;
-  background: linear-gradient(135deg, var(--ember-400), var(--ember-600));
+  background: linear-gradient(135deg, var(--ember-400), var(--ember-500));
 }
 
 .nav-item {
@@ -242,7 +242,7 @@ body.dark-board {
   padding: 0 8px;
   font-size: var(--text-xs);
   font-weight: 500;
-  color: var(--text-subtle);
+  color: var(--text-muted);
 }
 
 .project-dot {

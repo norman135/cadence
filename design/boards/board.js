@@ -39,7 +39,7 @@ function bars(filled, color) {
     .join('');
 }
 
-const AVATAR_COLORS = ['#0b7a70', '#3b6fd6', '#7c4ddb', '#c93f7d', '#d44c1c', '#b7810b', '#1f8a4d', '#556274'];
+const AVATAR_COLORS = ['#0b7a70', '#3b6fd6', '#7c4ddb', '#c93f7d', '#c0431a', '#8f6a0a', '#1b7a44', '#556274'];
 
 function hash(text) {
   let h = 0;

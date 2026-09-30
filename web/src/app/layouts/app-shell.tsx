@@ -142,7 +142,7 @@ export function AppShell() {
               <button
                 type="button"
                 onClick={openPalette}
-                className="ml-auto hidden h-[30px] w-72 cursor-default items-center gap-2 rounded-md border bg-sunken px-2.5 text-sm text-subtle-foreground outline-none hover:border-input focus-visible:outline-2 focus-visible:outline-ring sm:flex"
+                className="ml-auto hidden h-[30px] w-72 cursor-default items-center gap-2 rounded-md border bg-sunken px-2.5 text-sm text-muted-foreground outline-none hover:border-input focus-visible:outline-2 focus-visible:outline-ring sm:flex"
               >
                 <Search className="size-4" />
                 Search or jump to…
@@ -190,10 +190,10 @@ function Sidebar({ base, onSearch }: { base: string; onSearch: () => void }) {
         </SidebarLink>
       </nav>
 
-      <p className="mt-4 mb-1 px-2 text-xs font-medium text-subtle-foreground">Projects</p>
-      <p className="px-2 py-1 text-[13px] text-subtle-foreground">No projects yet</p>
+      <p className="mt-4 mb-1 px-2 text-xs font-medium text-muted-foreground">Projects</p>
+      <p className="px-2 py-1 text-[13px] text-muted-foreground">No projects yet</p>
 
-      <p className="mt-4 mb-1 px-2 text-xs font-medium text-subtle-foreground">Team</p>
+      <p className="mt-4 mb-1 px-2 text-xs font-medium text-muted-foreground">Team</p>
       <nav aria-label="Team" className="flex flex-col gap-0.5">
         <SidebarLink to={`${base}/settings/members`} icon={Users}>
           Members
@@ -307,7 +307,7 @@ function UserMenu({ base }: { base: string }) {
 
 function MobileTabBar({ base, onSearch }: { base: string; onSearch: () => void }) {
   const tab =
-    'flex flex-col items-center justify-center gap-0.5 text-[10px] font-medium text-subtle-foreground outline-none focus-visible:text-foreground [&_svg]:size-5';
+    'flex flex-col items-center justify-center gap-0.5 text-[10px] font-medium text-muted-foreground outline-none focus-visible:text-foreground [&_svg]:size-5';
   const active = ({ isActive }: { isActive: boolean }) => cn(tab, isActive && 'text-primary');
 
   return (

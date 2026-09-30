@@ -68,6 +68,7 @@
   --sunken: #f1f3f6;
   --muted: var(--ink-100);
   --muted-foreground: var(--ink-500);
+  /* Placeholders, icons and disabled text only: 3.1:1 is below AA for readable text. */
   --subtle-foreground: var(--ink-400);
   --accent: var(--ink-100);
   --accent-foreground: var(--ink-900);
