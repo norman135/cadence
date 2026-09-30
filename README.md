@@ -27,7 +27,7 @@ Organize work into projects, move issues through custom workflows, plan sprints,
 ---
 
 > [!NOTE]
-> **Cadence is under active development.** It is built milestone by milestone, in the open, and each milestone ships as a tagged release. **M1 (Identity & tenancy) is complete**: people can sign up, create organizations, invite their team and manage roles, on top of the M0 foundation (architecture, CI/CD, container deployment and performance harness). **M2 (Brand & design system)** is under way: the designs are done, and the app is being rebuilt to match them before projects and issues arrive in M3. The [roadmap](docs/ROADMAP.md) has the full plan and current progress.
+> **Cadence is under active development.** It is built milestone by milestone, in the open, and each milestone ships as a tagged release. **M1 (Identity & tenancy) is complete**: people can sign up, create organizations, invite their team and manage roles, on top of the M0 foundation (architecture, CI/CD, container deployment and performance harness). **M2 (Brand & design system) is complete**: Cadence has its own identity, light and dark themes, and a design system the whole app is built on. Projects and issues arrive in M3. The [roadmap](docs/ROADMAP.md) has the full plan and current progress.
 
 ## Why Cadence?
 
@@ -206,6 +206,7 @@ Then open https://localhost (Caddy uses a self-signed certificate for `localhost
 dotnet test                       # unit, integration and architecture tests (needs Docker)
 cd web && npm test                # frontend unit and component tests
 cd web && npm run e2e             # Playwright end-to-end tests (needs the stack above running)
+cd web && npm run test:visual     # screenshots and accessibility of key pages (Linux; see docs)
 ```
 
 Load tests, memory checks and benchmarks are described in [docs/performance.md](docs/performance.md).
@@ -216,7 +217,7 @@ Load tests, memory checks and benchmarks are described in [docs/performance.md](
 |---|---|---|
 | M0: Foundation | `v0.1.0` | ✅ Done |
 | M1: Identity & tenancy | `v0.2.0` | ✅ Done |
-| M2: Brand & design system | `v0.3.0` | 🚧 Designs done, implementation next |
+| M2: Brand & design system | `v0.3.0` | ✅ Done |
 | M3: Projects & issues | `v0.4.0` | Planned |
 | M4: Workflows & Kanban board | `v0.5.0` | Planned |
 | M5: Real-time collaboration | `v0.6.0` | Planned |
