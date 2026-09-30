@@ -3,12 +3,45 @@ import { fileURLToPath, URL } from 'node:url';
 import babel from '@rolldown/plugin-babel';
 import tailwindcss from '@tailwindcss/vite';
 import react, { reactCompilerPreset } from '@vitejs/plugin-react';
-import { defineConfig } from 'vite';
+import { defineConfig, type Plugin } from 'vite';
 
 // The API origin the dev server proxies to. Aspire injects it through service discovery;
 // otherwise the API is expected on its default development port.
 const apiTarget =
   process.env.services__api__http__0 ?? process.env.CADENCE_API_URL ?? 'http://localhost:5080';
+
+/**
+ * Preloads the Latin Geist file so text renders in the brand font on first paint instead of
+ * swapping in later. The file name is content-hashed, so the tag is added after bundling.
+ */
+function preloadBrandFont(): Plugin {
+  return {
+    name: 'cadence:preload-brand-font',
+    apply: 'build',
+    transformIndexHtml: {
+      order: 'post',
+      handler(_html, context) {
+        const font = Object.keys(context.bundle ?? {}).find((file) =>
+          /geist-latin-wght-normal-[\w-]+\.woff2$/.test(file),
+        );
+        if (!font) return [];
+        return [
+          {
+            tag: 'link',
+            attrs: {
+              rel: 'preload',
+              href: `/${font}`,
+              as: 'font',
+              type: 'font/woff2',
+              crossorigin: '',
+            },
+            injectTo: 'head-prepend',
+          },
+        ];
+      },
+    },
+  };
+}
 
 export default defineConfig({
   plugins: [
@@ -17,6 +50,7 @@ export default defineConfig({
     // without hand-written useMemo/useCallback.
     babel({ presets: [reactCompilerPreset()] }),
     tailwindcss(),
+    preloadBrandFont(),
   ],
   resolve: {
     alias: {
