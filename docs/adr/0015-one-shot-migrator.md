@@ -25,4 +25,4 @@ It waits for the database to accept connections, logs the migrations it applies,
 - The API never alters the schema. It can start fast and later run with least-privilege credentials.
 - A failed migration stops the deployment before any new code serves traffic.
 - One image to build, sign and version. The migrator adds a few megabytes of duplicated dependencies.
-- The migrator is also the natural home for the demo data seeder (M9).
+- The migrator is also the natural home for the demo data seeder (M10).

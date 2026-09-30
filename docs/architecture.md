@@ -100,7 +100,7 @@ Membership changes invalidate the cache immediately, so a removed member loses a
 
 ### Email
 
-Handlers queue messages on a bounded in-process channel, and `EmailDispatcher` (a background service) sends them over SMTP with MailKit, so requests never wait for the mail server. Without an SMTP host, emails are logged and dropped. Links point at `Cadence:PublicUrl`. The queue is in memory for now; M7 moves it onto a durable outbox.
+Handlers queue messages on a bounded in-process channel, and `EmailDispatcher` (a background service) sends them over SMTP with MailKit, so requests never wait for the mail server. Without an SMTP host, emails are logged and dropped. Links point at `Cadence:PublicUrl`. The queue is in memory for now; M8 moves it onto a durable outbox.
 
 ## Frontend
 

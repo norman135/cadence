@@ -38,5 +38,5 @@ ASP.NET Core Identity provides accounts and credentials: PBKDF2 password hashing
 - API calls cost one HMAC check and no I/O. Sign-in and refresh are the only authentication paths that touch the database.
 - A revoked session's access token stays valid for at most 10 minutes. For this product that is an acceptable window. Permission checks (ADR-0007) are evaluated live, so a removed member loses access immediately.
 - Rotating the signing key (`Cadence:Auth:SigningKey`) invalidates all access tokens within one lifetime. Users are refreshed transparently, because refresh tokens don't depend on the key.
-- Revoked and expired refresh tokens accumulate. A retention job removes them in M7.
+- Revoked and expired refresh tokens accumulate. A retention job removes them in M8.
 - The auth endpoints are rate-limited per IP (10 per minute for sign-in and password flows, 60 per minute for refresh), in addition to Identity's account lockout.

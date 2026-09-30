@@ -8,7 +8,7 @@ public sealed record EmailMessage(string ToAddress, string ToName, string Subjec
 /// <summary>
 /// In-process queue between request handlers and the <see cref="EmailDispatcher"/>, so requests never
 /// wait for the mail server. It is bounded to cap memory use if the server is unreachable.
-/// Messages still queued at shutdown are lost; the durable outbox (M7) replaces this queue.
+/// Messages still queued at shutdown are lost; the durable outbox (M8) replaces this queue.
 /// </summary>
 internal sealed class EmailQueue
 {

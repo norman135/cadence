@@ -2,7 +2,7 @@
 
 <!-- What does this change do, and why? Link the milestone or issue it belongs to. -->
 
-Milestone: <!-- e.g. M3: Workflows & Kanban board -->
+Milestone: <!-- e.g. M4: Workflows & Kanban board -->
 
 ## Changes
 
