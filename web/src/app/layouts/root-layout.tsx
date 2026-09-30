@@ -1,7 +1,7 @@
 import { Link, Outlet } from 'react-router';
 import { useSession, useSignOut } from '@/shared/auth';
 import { Button } from '@/shared/ui/button';
-import { CadenceLogo } from '@/shared/ui/cadence-logo';
+import { CadenceWordmark } from '@/shared/ui/cadence-logo';
 
 function SessionActions() {
   const { status } = useSession();
@@ -34,9 +34,8 @@ export function RootLayout() {
     <div className="flex min-h-svh flex-col">
       <header className="border-b">
         <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4 sm:px-6">
-          <Link to="/" className="flex items-center gap-2 font-semibold tracking-tight">
-            <CadenceLogo className="size-7" />
-            Cadence
+          <Link to="/" aria-label="Cadence home" className="text-lg">
+            <CadenceWordmark />
           </Link>
           <SessionActions />
         </div>

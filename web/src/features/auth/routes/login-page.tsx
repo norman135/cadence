@@ -45,8 +45,8 @@ export function LoginPage() {
 
   return (
     <AuthCard
-      title="Sign in to Cadence"
-      description="Welcome back."
+      title="Welcome back"
+      description="Sign in to your Cadence workspace."
       footer={
         <>
           New to Cadence?{' '}
