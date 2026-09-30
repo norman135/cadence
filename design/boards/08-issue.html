@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>08 · Issue</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Geist+Mono:wght@400..600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="board.css" />
+    <script src="https://cdn.jsdelivr.net/npm/lucide@1.49.0/dist/umd/lucide.min.js"></script>
+    <style>
+      .content {
+        display: grid;
+        grid-template-columns: 1fr 300px;
+        flex: 1;
+        min-height: 0;
+      }
+      .doc {
+        padding: 28px 44px 0 48px;
+        overflow: hidden;
+      }
+      .doc h2 {
+        margin: 10px 0 14px;
+        font-size: 26px;
+        line-height: 32px;
+        letter-spacing: -0.022em;
+      }
+      .doc p {
+        font-size: 15px;
+        line-height: 24px;
+        margin: 0 0 12px;
+        max-width: 680px;
+      }
+      code {
+        font-family: var(--font-mono);
+        font-size: 0.86em;
+        padding: 1px 5px;
+        border-radius: 5px;
+        background: var(--surface-sunken);
+        border: 1px solid var(--border);
+      }
+      .check {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 15px;
+        padding: 3px 0;
+      }
+      .check.done span:last-child {
+        color: var(--text-muted);
+        text-decoration: line-through;
+        text-decoration-color: var(--ink-300);
+      }
+      .h {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 22px 0 10px;
+        font-weight: 600;
+        font-size: 14px;
+      }
+      .h .n {
+        color: var(--text-subtle);
+        font-weight: 500;
+      }
+      .sub {
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+      }
+      .sub .issue-row {
+        height: 38px;
+      }
+      .sub .issue-row:last-child {
+        border-bottom: 0;
+      }
+      .event {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 13px;
+        color: var(--text-muted);
+        padding: 5px 0 5px 4px;
+      }
+      .event b {
+        color: var(--text);
+        font-weight: 500;
+      }
+      .comment {
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 12px 14px;
+        margin: 8px 0;
+      }
+      .comment p {
+        font-size: 14px !important;
+        line-height: 21px !important;
+        margin: 6px 0 8px !important;
+      }
+      .react {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        height: 22px;
+        padding: 0 7px;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        font-size: 12px;
+      }
+      .react.mine {
+        background: var(--primary-soft);
+        border-color: color-mix(in oklab, var(--primary) 30%, transparent);
+        color: var(--primary-soft-fg);
+      }
+      .props {
+        border-left: 1px solid var(--border);
+        padding: 16px 18px;
+        background: var(--ink-25);
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+      .props .group {
+        margin: 16px 0 6px;
+        font-size: 12px;
+        font-weight: 500;
+        color: var(--text-subtle);
+      }
+      .mention {
+        color: var(--primary-soft-fg);
+        background: var(--primary-soft);
+        border-radius: 5px;
+        padding: 0 3px;
+        font-weight: 500;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="board">
+      <div class="board-head">
+        <img src="../logo/cadence-mark.svg" alt="" />
+        <span class="brand">Cadence</span>
+        <span class="sep"></span>
+        <span>Brand &amp; UI kit</span>
+        <span class="page">08 / 10 · Issue</span>
+      </div>
+
+      <h1 class="board-title">Issue</h1>
+      <p class="board-lede">
+        A document first, a form second. The title and description get a calm reading column, and
+        every field lives in the side panel where it can be changed in one click or one keystroke.
+        The history tells the story of the work, not just of the fields.
+      </p>
+
+      <div class="stage light">
+        <div class="app" data-theme="light" style="height: 960px">
+          <nav class="sidebar" data-active="issues"></nav>
+          <div class="main">
+            <div class="topbar">
+              <div class="crumbs">
+                <span class="project-dot" style="background: var(--tempo-500)">A</span>
+                <span class="dim">Atlas Mobile</span><i data-lucide="chevron-right"></i><span class="dim">Issues</span><i data-lucide="chevron-right"></i><span class="mono" style="font-size: 13px">ATL-142</span>
+              </div>
+              <span class="spacer"></span>
+              <span class="note" style="font-size: 12px">3 of 14</span>
+              <button class="btn ghost sm icon" aria-label="Previous"><i data-lucide="chevron-up"></i></button>
+              <button class="btn ghost sm icon" aria-label="Next"><i data-lucide="chevron-down"></i></button>
+              <span class="sep" style="width: 1px; height: 18px; background: var(--border)"></span>
+              <button class="btn ghost sm icon" aria-label="Copy link"><i data-lucide="link-2"></i></button>
+              <button class="btn ghost sm icon" aria-label="Subscribe"><i data-lucide="bell"></i></button>
+              <button class="btn ghost sm icon" aria-label="More"><i data-lucide="ellipsis"></i></button>
+            </div>
+
+            <div class="content">
+              <article class="doc">
+                <div class="row" style="gap: 8px">
+                  <span class="key" style="font-size: 13px">ATL-142</span>
+                  <span class="label"><i style="background: var(--label-teal)"></i>Backend</span>
+                  <span class="label"><i style="background: var(--label-red)"></i>Bug</span>
+                </div>
+                <h2>Offline sync drops edits made on the train</h2>
+                <p>
+                  When the connection flaps (tunnels, trains), edits made offline are sometimes
+                  lost. The outbox replays queued mutations in parallel, so a later edit can land
+                  before an earlier one and the server rejects it with <code>409 Conflict</code>.
+                </p>
+                <p>Replaying in order per issue should fix it. Conflicts need to surface in the activity feed instead of disappearing.</p>
+
+                <div class="h">Acceptance criteria</div>
+                <div class="check done"><span class="checkbox on"><i data-lucide="check"></i></span><span>Queued edits replay in the order they were made</span></div>
+                <div class="check done"><span class="checkbox on"><i data-lucide="check"></i></span><span>Replays for different issues still run in parallel</span></div>
+                <div class="check"><span class="checkbox"></span><span>A rejected edit shows in the activity feed with a retry action</span></div>
+
+                <div class="h">Sub-issues<span class="n">1 / 3</span><span class="spacer"></span><div class="progress" style="width: 120px"><i style="width: 33%; background: var(--status-done)"></i></div></div>
+                <div class="sub">
+                  <div class="issue-row"><span class="status" data-s="done"></span><span class="key">ATL-163</span><span class="title">Serialize outbox per issue</span><span class="avatar sm" data-name="Grace Hopper"></span></div>
+                  <div class="issue-row"><span class="status" data-s="progress"></span><span class="key">ATL-164</span><span class="title">Conflict entries in the activity feed</span><span class="avatar sm" data-name="Grace Hopper"></span></div>
+                  <div class="issue-row"><span class="status" data-s="todo"></span><span class="key">ATL-165</span><span class="title">Flaky-network test harness</span><span class="avatar sm" data-name="Dennis Ritchie"></span></div>
+                </div>
+
+                <div class="h" style="margin-top: 26px">Activity</div>
+                <div class="event"><span class="status" data-s="progress"></span><span><b>Grace Hopper</b> moved from Todo to In progress · 2 d ago</span></div>
+                <div class="event"><i data-lucide="git-pull-request" style="width: 14px; height: 14px; color: var(--success)"></i><span><b>Grace Hopper</b> linked pull request <span class="mono">#233</span> · 5 h ago</span></div>
+                <div class="comment">
+                  <div class="row" style="gap: 8px"><span class="avatar sm" data-name="Grace Hopper"></span><b style="font-weight: 500">Grace Hopper</b><span class="note" style="font-size: 12px">18 min ago</span></div>
+                  <p>Repro'd on a throttled connection: two edits 300 ms apart replay out of order about 1 in 5 times. Serializing per issue fixes it. <span class="mention">@Ada</span> can you check the conflict copy?</p>
+                  <div class="row" style="gap: 6px"><span class="react mine"><i data-lucide="thumbs-up" style="width: 13px; height: 13px"></i>2</span><span class="react"><i data-lucide="eye" style="width: 13px; height: 13px"></i>1</span><span class="react" style="color: var(--text-subtle)"><i data-lucide="smile-plus" style="width: 13px; height: 13px"></i></span></div>
+                </div>
+                <div class="input" style="height: 44px; margin-top: 10px; align-items: center; padding-right: 6px">
+                  <span class="avatar sm" data-name="Ada Lovelace"></span>
+                  <span class="ph">Leave a comment…</span>
+                  <span class="spacer"></span>
+                  <i data-lucide="paperclip"></i>
+                  <button class="btn primary sm">Comment</button>
+                </div>
+              </article>
+
+              <aside class="props">
+                <div class="prop"><span>Status</span><span class="val"><span class="status" data-s="progress"></span>In progress</span></div>
+                <div class="prop"><span>Priority</span><span class="val"><span class="priority" data-p="high"></span>High</span></div>
+                <div class="prop"><span>Assignee</span><span class="val"><span class="avatar sm" data-name="Grace Hopper"></span>Grace Hopper</span></div>
+                <div class="prop"><span>Estimate</span><span class="val"><span class="mono">5</span> points</span></div>
+                <div class="prop"><span>Sprint</span><span class="val"><i data-lucide="timer" style="width: 14px; height: 14px; color: var(--text-muted)"></i>Sprint 14</span></div>
+                <div class="prop"><span>Due</span><span class="val"><span class="badge warning" style="height: 20px">Oct 14</span></span></div>
+                <div class="prop"><span>Labels</span><span class="val" style="flex-wrap: wrap; height: auto"><span class="label"><i style="background: var(--label-teal)"></i>Backend</span><span class="label"><i style="background: var(--label-red)"></i>Bug</span></span></div>
+
+                <div class="group">Development</div>
+                <div class="card" style="padding: 10px 12px; box-shadow: none; font-size: 13px">
+                  <div class="row" style="gap: 8px"><i data-lucide="git-branch" style="width: 14px; height: 14px; color: var(--text-muted)"></i><span class="mono" style="font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">feature/atl-142-offline-sync</span></div>
+                  <div class="row" style="gap: 8px; margin-top: 8px"><i data-lucide="git-pull-request" style="width: 14px; height: 14px; color: var(--success)"></i><span style="flex: 1">Serialize outbox per issue</span><span class="mono muted" style="font-size: 12px">#233</span></div>
+                  <div class="row" style="gap: 6px; margin-top: 8px; font-size: 12px; color: var(--success)"><i data-lucide="circle-check" style="width: 13px; height: 13px"></i>Checks passed · 1 approval</div>
+                </div>
+
+                <div class="group">Relations</div>
+                <div class="row" style="gap: 8px; font-size: 13px; padding: 4px 0"><i data-lucide="octagon-alert" style="width: 14px; height: 14px; color: var(--danger)"></i><span class="muted">Blocks</span><span class="mono" style="font-size: 12px">ATL-147</span></div>
+                <div class="row" style="gap: 8px; font-size: 13px; padding: 4px 0"><i data-lucide="link-2" style="width: 14px; height: 14px; color: var(--text-muted)"></i><span class="muted">Related</span><span class="mono" style="font-size: 12px">NIM-88</span></div>
+
+                <div class="spacer"></div>
+                <div class="note" style="font-size: 12px; border-top: 1px solid var(--border); padding-top: 12px">
+                  Created by Ada Lovelace · Sep 24<br />Updated 18 min ago
+                  <div class="row" style="margin-top: 8px; justify-content: space-between">
+                    <span>3 subscribers</span>
+                    <span class="avatars"><span class="avatar sm" data-name="Ada Lovelace"></span><span class="avatar sm" data-name="Grace Hopper"></span><span class="avatar sm" data-name="Alan Turing"></span></span>
+                  </div>
+                </div>
+              </aside>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="screens.js"></script>
+    <script src="board.js"></script>
+  </body>
+</html>

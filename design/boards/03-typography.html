@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>03 · Typography</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Geist+Mono:wght@400..600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="board.css" />
+    <script src="https://cdn.jsdelivr.net/npm/lucide@1.49.0/dist/umd/lucide.min.js"></script>
+    <style>
+      .specimen {
+        display: grid;
+        grid-template-columns: 1.3fr 1fr;
+        gap: 24px;
+      }
+      .big {
+        font-size: 220px;
+        line-height: 0.9;
+        letter-spacing: -0.06em;
+        font-weight: 600;
+        margin: 8px 0 20px;
+      }
+      .alphabet {
+        font-size: 22px;
+        letter-spacing: -0.01em;
+        color: var(--text-muted);
+        line-height: 1.5;
+      }
+      .weights {
+        display: flex;
+        gap: 28px;
+        margin-top: 20px;
+        font-size: 28px;
+        letter-spacing: -0.02em;
+      }
+      .weights span small {
+        display: block;
+        font-family: var(--font-mono);
+        font-size: 11px;
+        color: var(--text-muted);
+        letter-spacing: 0;
+        margin-top: 4px;
+      }
+      .scale-row {
+        display: grid;
+        grid-template-columns: 150px 1fr 230px;
+        align-items: baseline;
+        gap: 24px;
+        padding: 18px 0;
+        border-bottom: 1px solid var(--border);
+      }
+      .scale-row:last-child {
+        border-bottom: 0;
+      }
+      .scale-row .tok {
+        font-family: var(--font-mono);
+        font-size: 12px;
+        color: var(--tempo-700);
+      }
+      .scale-row .spec {
+        font-family: var(--font-mono);
+        font-size: 12px;
+        color: var(--text-muted);
+        text-align: right;
+      }
+      .nums {
+        font-size: 30px;
+        letter-spacing: -0.02em;
+        font-variant-numeric: tabular-nums;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="board">
+      <div class="board-head">
+        <img src="../logo/cadence-mark.svg" alt="" />
+        <span class="brand">Cadence</span>
+        <span class="sep"></span>
+        <span>Brand &amp; UI kit</span>
+        <span class="page">03 / 10 · Typography</span>
+      </div>
+
+      <h1 class="board-title">Typography</h1>
+      <p class="board-lede">
+        One family in two cuts. <b>Geist</b> for everything people read, and <b>Geist Mono</b> for
+        what they copy: issue keys, branch names, code and figures that line up. Both are
+        open-source (SIL OFL), self-hosted as variable WOFF2 files, and preloaded, so the text
+        never waits on a font CDN.
+      </p>
+
+      <div class="specimen">
+        <div class="panel">
+          <p class="section-label">Geist · UI and display</p>
+          <div class="big">Aa</div>
+          <div class="alphabet">
+            ABCDEFGHIJKLMNOPQRSTUVWXYZ<br />abcdefghijklmnopqrstuvwxyz<br />0123456789 &amp; → ← ↑ ↓ ✓ “ ” ‘ ’ … — –
+          </div>
+          <div class="weights">
+            <span style="font-weight: 400">Regular<small>400 · body</small></span>
+            <span style="font-weight: 500">Medium<small>500 · labels, UI</small></span>
+            <span style="font-weight: 600">Semibold<small>600 · headings</small></span>
+          </div>
+        </div>
+        <div class="panel" style="display: flex; flex-direction: column">
+          <p class="section-label">Geist Mono · keys, code, numbers</p>
+          <div class="big mono" style="font-size: 150px; letter-spacing: -0.04em; font-weight: 500">{0}</div>
+          <div class="stack" style="gap: 14px; font-size: 15px">
+            <div class="row"><span class="mono" style="color: var(--tempo-700); font-weight: 500">ATL-142</span><span class="muted">Issue keys</span></div>
+            <div class="row"><span class="mono">feature/atl-142-offline-sync</span><span class="muted">Branches</span></div>
+            <div class="row"><span class="mono">POST /api/v1/issues</span><span class="muted">Code in text</span></div>
+          </div>
+          <div class="spacer"></div>
+          <div class="row" style="gap: 32px; margin-top: 24px">
+            <div><div class="nums">1,284</div><div class="note">Issues closed</div></div>
+            <div><div class="nums">42.5<span class="muted" style="font-size: 18px"> pts</span></div><div class="note">Velocity</div></div>
+            <div><div class="nums">3.2<span class="muted" style="font-size: 18px"> d</span></div><div class="note">Cycle time</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel" style="margin-top: 24px; padding-top: 20px; padding-bottom: 12px">
+        <div class="scale-row">
+          <span class="tok">display</span>
+          <span style="font-size: 48px; line-height: 52px; letter-spacing: -0.035em; font-weight: 600">Ship on a steady beat</span>
+          <span class="spec">48 / 52 · 600 · −3.5%<br />marketing, empty states</span>
+        </div>
+        <div class="scale-row">
+          <span class="tok">h1</span>
+          <span style="font-size: 30px; line-height: 36px; letter-spacing: -0.025em; font-weight: 600">Atlas Mobile · Sprint 14</span>
+          <span class="spec">30 / 36 · 600 · −2.5%<br />page titles</span>
+        </div>
+        <div class="scale-row">
+          <span class="tok">h2</span>
+          <span style="font-size: 24px; line-height: 30px; letter-spacing: -0.02em; font-weight: 600">Offline sync drops edits made on the train</span>
+          <span class="spec">24 / 30 · 600 · −2%<br />issue titles, dialogs</span>
+        </div>
+        <div class="scale-row">
+          <span class="tok">h3</span>
+          <span style="font-size: 18px; line-height: 26px; letter-spacing: -0.01em; font-weight: 600">Acceptance criteria</span>
+          <span class="spec">18 / 26 · 600 · −1%<br />sections, cards</span>
+        </div>
+        <div class="scale-row">
+          <span class="tok">text-lg</span>
+          <span style="font-size: 16px; line-height: 24px; max-width: 620px">Edits made while offline are queued and replayed in order once the device reconnects. Conflicts surface in the activity feed instead of being lost.</span>
+          <span class="spec">16 / 24 · 400<br />descriptions, comments</span>
+        </div>
+        <div class="scale-row">
+          <span class="tok">text-base</span>
+          <span style="font-size: 14px; line-height: 20px">Assign to Grace Hopper · Move to In review · Add label</span>
+          <span class="spec">14 / 20 · 400–500<br />the UI default</span>
+        </div>
+        <div class="scale-row">
+          <span class="tok">text-sm</span>
+          <span style="font-size: 13px; line-height: 18px; color: var(--text-muted)">Updated 12 minutes ago by Alan Turing · 4 comments · 2 attachments</span>
+          <span class="spec">13 / 18 · 400<br />secondary text, tables</span>
+        </div>
+        <div class="scale-row">
+          <span class="tok">text-xs</span>
+          <span style="font-size: 12px; line-height: 16px; font-weight: 500; color: var(--text-muted)">DUE OCT 14 · 5 POINTS · BACKEND</span>
+          <span class="spec">12 / 16 · 500<br />badges, captions, meta</span>
+        </div>
+      </div>
+
+      <div class="grid" style="grid-template-columns: repeat(3, 1fr); margin-top: 24px">
+        <div class="panel">
+          <p class="section-label">Rules</p>
+          <ul class="note" style="margin: 0; padding-left: 18px; line-height: 1.8">
+            <li><b style="color: var(--text)">Sentence case</b> everywhere, including buttons and titles.</li>
+            <li>The UI base is <b style="color: var(--text)">14 px</b>. Long-form text (descriptions, comments) is 16 px.</li>
+            <li>Headings tighten tracking as they grow; body text keeps the default.</li>
+            <li>Long-form text stops at <b style="color: var(--text)">72 characters</b> per line.</li>
+          </ul>
+        </div>
+        <div class="panel">
+          <p class="section-label">Numbers</p>
+          <ul class="note" style="margin: 0; padding-left: 18px; line-height: 1.8">
+            <li><b style="color: var(--text)">Tabular figures</b> in tables, counters, charts and timers, so columns don't jitter.</li>
+            <li>Relative time under a week ("3 d ago"), then absolute dates ("Oct 14").</li>
+            <li>Units are lighter and smaller than the number they follow.</li>
+          </ul>
+        </div>
+        <div class="panel">
+          <p class="section-label">Performance</p>
+          <ul class="note" style="margin: 0; padding-left: 18px; line-height: 1.8">
+            <li>Two variable WOFF2 files, Latin subset: <b style="color: var(--text)">52 KB</b> in total (29 + 23), cached immutably.</li>
+            <li><span class="mono">font-display: swap</span>, with metric-matched fallbacks so the layout doesn't shift when fonts arrive.</li>
+            <li>Geist is preloaded. Mono loads on first use.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <script src="board.js"></script>
+  </body>
+</html>

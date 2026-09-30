@@ -30,6 +30,19 @@ export const router = createBrowserRouter([
         ],
       },
 
+      // Development only: every component in both themes. Production builds drop the route and
+      // its chunk entirely.
+      ...(import.meta.env.DEV
+        ? [
+            {
+              path: '/style-guide',
+              lazy: async () => ({
+                Component: (await import('./routes/style-guide-page')).StyleGuidePage,
+              }),
+            },
+          ]
+        : []),
+
       // Account pages and other centered pages.
       {
         Component: AuthLayout,
@@ -90,6 +103,7 @@ export const router = createBrowserRouter([
             children: [
               {
                 index: true,
+                handle: { title: 'My work' },
                 lazy: async () => ({
                   Component: (
                     await import('@/features/organizations/routes/organization-home-page')
@@ -98,6 +112,7 @@ export const router = createBrowserRouter([
               },
               {
                 path: 'settings/members',
+                handle: { title: 'Members' },
                 lazy: async () => ({
                   Component: (await import('@/features/organizations/routes/members-page'))
                     .MembersPage,
@@ -105,6 +120,7 @@ export const router = createBrowserRouter([
               },
               {
                 path: 'settings/organization',
+                handle: { title: 'Settings' },
                 lazy: async () => ({
                   Component: (
                     await import('@/features/organizations/routes/organization-settings-page')
@@ -113,6 +129,7 @@ export const router = createBrowserRouter([
               },
               {
                 path: 'settings/profile',
+                handle: { title: 'Profile' },
                 lazy: async () => ({ Component: (await settings()).ProfileSettingsPage }),
               },
               { path: '*', Component: NotFoundPage },

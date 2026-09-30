@@ -4,9 +4,36 @@ Cadence targets a **1–2 GB RAM server with about 10 concurrent users**, and mu
 
 ## Results
 
+### v0.3.0 (M2: Brand & design system)
+
+M2 changes the frontend only: the design tokens, self-hosted fonts, a theme script, a rebuilt app shell and the restyled components. The server is unchanged, so its numbers move only within run-to-run noise.
+
+**Environment:** the same as v0.2.0.
+
+| Metric | Target | Measured | Change from v0.2.0 | |
+|---|---|---|---|---|
+| Whole stack at idle | ≤ 450 MB | **103 MiB** (app 62, PostgreSQL 25, Caddy 16) | −14 MiB (noise) | ✅ |
+| App container memory under 10-user load | ≤ 200 MB | **78 MiB** | +3 MiB | ✅ |
+| API p95, 10 users | ≤ 100 ms | **3.5 ms** | −0.6 ms | ✅ |
+| Page (index.html) p95, 10 users | ≤ 100 ms | **4.6 ms** | −2.3 ms | ✅ |
+| API p95, 50 users | ≤ 300 ms | **3.2 ms** | −1.5 ms | ✅ |
+| Error rate, 10 and 50 users | 0% | **0%** | — | ✅ |
+| Initial JavaScript (gzip) | ≤ 180 KB | **126.9 KB** | +2.7 KB | ✅ |
+| Initial CSS (gzip) | ≤ 30 KB | **9.0 KB** | +2.6 KB | ✅ |
+| Fonts (Latin, WOFF2) | ≤ 60 KB | **51.3 KB** (Geist 29.4 + Geist Mono 22.6) | new | ✅ |
+| Largest lazy route (gzip, all chunks it downloads) | ≤ 80 KB | **63.4 KB** (members page) | +0.5 KB | ✅ |
+
+**Where the bytes went.** The initial bundle gained the theme module, the new logo and wordmark, and the account layout (+2.7 KB). Two things were deliberately kept out of it:
+- the tooltip provider, which would have pulled in Radix's positioning code (about 12 KB) and now lives in the app shell's chunk
+- the sign-in brand panel, a lazy 3.3 KB chunk
+
+The CSS grew with the token set and the new components, and is still under a third of its budget.
+
+**Fonts.** Geist is preloaded, so text renders in the brand font on the first paint. Geist Mono loads when monospace text first appears. Metric-matched fallbacks (Arial at 104.76% size-adjust, Courier New) keep line breaks stable if a font arrives late.
+
 ### v0.2.0 (M1: Identity & tenancy)
 
-M1 adds ASP.NET Core Identity, JWT validation, rate limiting, the HybridCache membership cache, a background email dispatcher, and the signed-in web app. The load test is still the anonymous baseline from M0, so latency figures are comparable between releases. Authenticated journeys join the load test in M2, once there are projects and issues to read.
+M1 adds ASP.NET Core Identity, JWT validation, rate limiting, the HybridCache membership cache, a background email dispatcher, and the signed-in web app. The load test is still the anonymous baseline from M0, so latency figures are comparable between releases. Authenticated journeys join the load test in M3, once there are projects and issues to read.
 
 **Environment:** the same as v0.1.0. The stack runs with `docker-compose.e2e.yml`, which adds Mailpit (left out of the memory totals) and lifts per-IP rate limits, because every k6 user shares one IP.
 
@@ -118,4 +145,4 @@ Integration tests wrap requests in `QueryCounter.AssertAtMostAsync(n, ...)`, whi
 | BenchmarkDotNet (`tests/Cadence.Benchmarks`) | Micro-benchmarks of hot paths |
 | `SlowQueryInterceptor` | Logs database commands slower than 50 ms |
 | `pg_stat_statements` | Top queries by total time in production |
-| `dotnet-counters`, `dotnet-gcdump` | Runtime and GC profiling (M9 deep dive) |
+| `dotnet-counters`, `dotnet-gcdump` | Runtime and GC profiling (M10 deep dive) |

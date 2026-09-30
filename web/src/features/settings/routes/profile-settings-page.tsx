@@ -10,6 +10,7 @@ import {
 } from '@/shared/api/generated/endpoints';
 import { session } from '@/shared/auth';
 import { applyServerErrors } from '@/shared/forms/server-errors';
+import { ThemePicker } from '@/shared/theme';
 import { Alert } from '@/shared/ui/alert';
 import { Button } from '@/shared/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/card';
@@ -36,8 +37,23 @@ export function ProfileSettingsPage() {
     <div className="flex max-w-2xl flex-col gap-6">
       <h1 className="text-2xl font-semibold tracking-tight">Your profile</h1>
       <ProfileCard />
+      <AppearanceCard />
       <PasswordCard />
     </div>
+  );
+}
+
+function AppearanceCard() {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Appearance</CardTitle>
+        <CardDescription>How Cadence looks in this browser.</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <ThemePicker />
+      </CardContent>
+    </Card>
   );
 }
 
