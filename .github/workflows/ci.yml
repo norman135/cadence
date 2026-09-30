@@ -105,6 +105,50 @@ jobs:
 
   # Builds the production image natively on each architecture Cadence supports, starts the
   # production Compose stack, and checks it end to end, including the idle memory budget.
+  # Screenshots of the key pages in both themes, compared with the committed baselines, plus an
+  # axe accessibility scan of each. The API is mocked, so no backend is needed. The job runs in
+  # the Playwright image the baselines were rendered in, because font rendering differs between
+  # systems; `npm run test:visual:update` uses the same image.
+  visual:
+    name: Visual & accessibility
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    container:
+      image: mcr.microsoft.com/playwright:v1.63.0-noble
+      options: --ipc=host
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - name: Check out
+        uses: actions/checkout@v5
+
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Check the image matches @playwright/test
+        run: |
+          expected="$(node -p "require('@playwright/test/package.json').version")"
+          case "$PLAYWRIGHT_IMAGE" in
+            *":v$expected-"*) echo "Playwright $expected" ;;
+            *) echo "::error::Update the Visual job image to v$expected (and re-run npm run test:visual:update)." && exit 1 ;;
+          esac
+        env:
+          PLAYWRIGHT_IMAGE: mcr.microsoft.com/playwright:v1.63.0-noble
+
+      - name: Visual and accessibility tests
+        run: npx playwright test -c playwright.visual.config.ts
+
+      - name: Upload the report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-report
+          path: |
+            web/playwright-report
+            web/test-results
+          retention-days: 7
+
   container:
     name: Container (${{ matrix.arch }})
     strategy:
