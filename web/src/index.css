@@ -1,85 +1,247 @@
 @import 'tailwindcss';
+@import '@fontsource-variable/geist/wght.css';
+@import '@fontsource-variable/geist-mono/wght.css';
 
 /*
- * Design tokens (shadcn/ui conventions). Colors are OKLCH so light and dark themes keep
- * consistent perceived contrast. Components use semantic names (bg-background, text-primary...),
- * never raw palette colors, so themes can change without touching components.
+ * Cadence design tokens: the app's copy of design/tokens.css (ADR-0016), with the same values.
+ * Components use the semantic names below (bg-card, text-muted-foreground, bg-status-done...),
+ * never palette colors, so a theme is only a change of values.
+ *
+ * Themes: <html data-theme="light|dark">, set before first paint by the script in index.html
+ * and kept in sync by shared/theme.
  */
-:root {
-  --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0.015 280);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0.015 280);
-  --primary: oklch(0.51 0.23 277);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.967 0.005 280);
-  --secondary-foreground: oklch(0.21 0.015 280);
-  --muted: oklch(0.967 0.005 280);
-  --muted-foreground: oklch(0.52 0.02 280);
-  --accent: oklch(0.955 0.025 277);
-  --accent-foreground: oklch(0.35 0.15 277);
-  --destructive: oklch(0.577 0.245 27.325);
-  --success: oklch(0.6 0.15 155);
-  --border: oklch(0.922 0.006 280);
-  --input: oklch(0.922 0.006 280);
-  --ring: oklch(0.51 0.23 277);
+
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
+/* Metric-matched fallbacks, so text keeps its size and line breaks while Geist loads. */
+@font-face {
+  font-family: 'Geist Fallback';
+  src: local('Arial');
+  size-adjust: 104.76%;
+  ascent-override: 95.94%;
+  descent-override: 28.16%;
+  line-gap-override: 0%;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: oklch(0.155 0.012 280);
-    --foreground: oklch(0.975 0.004 280);
-    --card: oklch(0.2 0.014 280);
-    --card-foreground: oklch(0.975 0.004 280);
-    --primary: oklch(0.68 0.17 277);
-    --primary-foreground: oklch(0.155 0.012 280);
-    --secondary: oklch(0.27 0.015 280);
-    --secondary-foreground: oklch(0.975 0.004 280);
-    --muted: oklch(0.27 0.015 280);
-    --muted-foreground: oklch(0.71 0.02 280);
-    --accent: oklch(0.3 0.06 277);
-    --accent-foreground: oklch(0.9 0.05 277);
-    --destructive: oklch(0.704 0.191 22.216);
-    --success: oklch(0.72 0.15 155);
-    --border: oklch(1 0 0 / 10%);
-    --input: oklch(1 0 0 / 15%);
-    --ring: oklch(0.68 0.17 277);
-  }
+@font-face {
+  font-family: 'Geist Mono Fallback';
+  src: local('Courier New');
+  size-adjust: 100%;
+  ascent-override: 100.5%;
+  descent-override: 29.5%;
+  line-gap-override: 0%;
+}
+
+:root {
+  color-scheme: light;
+
+  /* Palette (design/tokens.css) */
+  --tempo-50: #eefbf8;
+  --tempo-100: #d0f4ec;
+  --tempo-300: #67d5c3;
+  --tempo-400: #2dc2ae;
+  --tempo-500: #139f8f;
+  --tempo-600: #0b7a70;
+  --tempo-700: #0b655d;
+  --ember-400: #ff7b45;
+  --ember-500: #f0612e;
+  --ember-600: #d44c1c;
+  --ink-25: #fafbfc;
+  --ink-50: #f5f6f8;
+  --ink-100: #eceef2;
+  --ink-200: #dfe2e8;
+  --ink-300: #c6cbd5;
+  --ink-400: #8b93a5;
+  --ink-500: #646c7e;
+  --ink-900: #151a23;
+  --ink-950: #0b0e14;
+
+  /* Surfaces and text */
+  --canvas: var(--ink-50);
+  --background: #ffffff;
+  --foreground: var(--ink-900);
+  --card: #ffffff;
+  --card-foreground: var(--ink-900);
+  --popover: #ffffff;
+  --popover-foreground: var(--ink-900);
+  --sunken: #f1f3f6;
+  --muted: var(--ink-100);
+  --muted-foreground: var(--ink-500);
+  --subtle-foreground: var(--ink-400);
+  --accent: var(--ink-100);
+  --accent-foreground: var(--ink-900);
+  --border: var(--ink-200);
+  --input: var(--ink-300);
+
+  /* Brand and actions */
+  --primary: var(--tempo-600);
+  --primary-hover: var(--tempo-700);
+  --primary-foreground: #ffffff;
+  --primary-soft: var(--tempo-50);
+  --primary-soft-foreground: var(--tempo-700);
+  --brand-accent: var(--ember-500);
+  --ring: color-mix(in oklab, var(--tempo-500) 45%, transparent);
+
+  /* Signals */
+  --success: #17804a;
+  --success-soft: #e8f7ee;
+  --warning: #b77d0a;
+  --warning-soft: #fdf4e1;
+  --destructive: #d93a40;
+  --destructive-soft: #fdecec;
+  --info: #2f6fd6;
+  --info-soft: #eaf1fd;
+
+  /* Work tracking */
+  --status-backlog: var(--ink-400);
+  --status-todo: var(--ink-500);
+  --status-progress: #e8a317;
+  --status-review: #8b5cf6;
+  --status-done: var(--tempo-500);
+  --status-canceled: var(--ink-400);
+  --priority-urgent: #e5484d;
+  --priority-high: var(--ember-500);
+  --priority-medium: #e8a317;
+  --priority-low: var(--ink-400);
+
+  /* Elevation */
+  --shadow-color: 11 14 20;
+  --elevation-sm: 0 1px 2px rgb(var(--shadow-color) / 0.06);
+  --elevation-md:
+    0 1px 2px rgb(var(--shadow-color) / 0.06), 0 4px 12px rgb(var(--shadow-color) / 0.08);
+  --elevation-lg:
+    0 2px 4px rgb(var(--shadow-color) / 0.06), 0 16px 40px rgb(var(--shadow-color) / 0.16);
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --canvas: var(--ink-950);
+  --background: #10141b;
+  --foreground: #e9ecf1;
+  --card: #10141b;
+  --card-foreground: #e9ecf1;
+  --popover: #171c25;
+  --popover-foreground: #e9ecf1;
+  --sunken: #0d1117;
+  --muted: #1c2230;
+  --muted-foreground: var(--ink-400);
+  --subtle-foreground: var(--ink-500);
+  --accent: #1c2230;
+  --accent-foreground: #e9ecf1;
+  --border: #232935;
+  --input: #2f3645;
+
+  --primary: var(--tempo-400);
+  --primary-hover: var(--tempo-300);
+  --primary-foreground: var(--ink-950);
+  --primary-soft: rgb(45 194 174 / 0.12);
+  --primary-soft-foreground: var(--tempo-300);
+  --brand-accent: var(--ember-400);
+  --ring: color-mix(in oklab, var(--tempo-400) 50%, transparent);
+
+  --success: #3cc47a;
+  --success-soft: rgb(60 196 122 / 0.12);
+  --warning: #f0a92b;
+  --warning-soft: rgb(240 169 43 / 0.12);
+  --destructive: #f2686c;
+  --destructive-soft: rgb(242 104 108 / 0.12);
+  --info: #6aa2fa;
+  --info-soft: rgb(106 162 250 / 0.12);
+
+  --status-todo: var(--ink-300);
+
+  --elevation-sm: 0 1px 2px rgb(0 0 0 / 0.4);
+  --elevation-md: 0 1px 2px rgb(0 0 0 / 0.4), 0 6px 16px rgb(0 0 0 / 0.35);
+  --elevation-lg: 0 2px 6px rgb(0 0 0 / 0.4), 0 24px 56px rgb(0 0 0 / 0.55);
 }
 
 @theme inline {
-  --font-sans:
-    ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+  --font-sans: 'Geist Variable', 'Geist Fallback', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'Geist Mono Variable', 'Geist Mono Fallback', ui-monospace, monospace;
+
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+
+  --shadow-sm: var(--elevation-sm);
+  --shadow-md: var(--elevation-md);
+  --shadow-lg: var(--elevation-lg);
+
+  --ease-out: cubic-bezier(0.2, 0, 0, 1);
+
+  --color-canvas: var(--canvas);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-sunken: var(--sunken);
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
+  --color-subtle-foreground: var(--subtle-foreground);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
-  --color-destructive: var(--destructive);
-  --color-success: var(--success);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-soft: var(--primary-soft);
+  --color-primary-soft-foreground: var(--primary-soft-foreground);
+  --color-brand-accent: var(--brand-accent);
+
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-destructive: var(--destructive);
+  --color-destructive-soft: var(--destructive-soft);
+  --color-info: var(--info);
+  --color-info-soft: var(--info-soft);
+
+  --color-status-backlog: var(--status-backlog);
+  --color-status-todo: var(--status-todo);
+  --color-status-progress: var(--status-progress);
+  --color-status-review: var(--status-review);
+  --color-status-done: var(--status-done);
+  --color-status-canceled: var(--status-canceled);
+  --color-priority-urgent: var(--priority-urgent);
+  --color-priority-high: var(--priority-high);
+  --color-priority-medium: var(--priority-medium);
+  --color-priority-low: var(--priority-low);
 }
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-border outline-ring;
+  }
+
+  html {
+    font-feature-settings: 'ss01', 'cv11';
   }
 
   body {
-    @apply bg-background text-foreground antialiased;
+    @apply bg-background text-sm text-foreground antialiased;
+  }
+
+  :focus-visible {
+    outline-width: 2px;
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    ::before,
+    ::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
   }
 }

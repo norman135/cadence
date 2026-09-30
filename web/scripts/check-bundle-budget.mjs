@@ -6,7 +6,7 @@
 //
 // Usage: npm run build && npm run budget
 
-import { readFileSync } from 'node:fs';
+import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { gzipSync } from 'node:zlib';
 
@@ -15,6 +15,7 @@ const BUDGETS = {
   initialJs: 180 * KB,
   initialCss: 30 * KB,
   lazyChunk: 80 * KB,
+  fonts: 60 * KB,
 };
 
 const distDir = new URL('../dist/', import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1');
@@ -56,9 +57,20 @@ const lazyChunks = Object.entries(manifest)
 
 const sum = (files) => files.reduce((total, file) => total + gzipSize(file), 0);
 
+// Fonts: the Latin files an English-speaking user downloads (other subsets load only when a page
+// contains their characters). WOFF2 is already compressed, so this is the file size.
+const latinFonts = readdirSync(join(distDir, 'assets')).filter((file) =>
+  /-latin-wght-normal-[\w-]+\.woff2$/.test(file),
+);
+const fontBytes = latinFonts.reduce(
+  (total, file) => total + statSync(join(distDir, 'assets', file)).size,
+  0,
+);
+
 const results = [
   { check: 'Initial JavaScript', size: sum(initialJsFiles), budget: BUDGETS.initialJs },
   { check: 'Initial CSS', size: sum(initialCssFiles), budget: BUDGETS.initialCss },
+  { check: `Fonts (Latin, ${latinFonts.length} files)`, size: fontBytes, budget: BUDGETS.fonts },
   ...lazyChunks.map(({ name, files }) => ({
     check: `Lazy chunk: ${name}`,
     size: sum(files),
