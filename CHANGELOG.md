@@ -2,6 +2,17 @@
 
 All notable changes to Cadence are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses [Semantic Versioning](https://semver.org/). Each release corresponds to a milestone in the [roadmap](docs/ROADMAP.md).
 
+## [Unreleased] - M2: Brand & design system
+
+### Added
+
+- **Brand and design system** in `design/`:
+  - the Cadence identity: logo mark, lockups and voice
+  - design tokens (`design/tokens.css`) for color (Tempo, Ember and Ink, in light and dark themes), type (Geist and Geist Mono), space, radius, elevation and motion
+  - ten design boards, rendered to PNG: identity, color, typography, foundations, components, My work, board, issue, backlog and sprints, and flows (sign-in, command palette, mobile)
+  - ADR-0016
+- A new milestone, M2: Brand & design system, before projects and issues. Later milestones move up one number and one minor version.
+
 ## [0.2.0] - M1: Identity & tenancy
 
 People can now sign up, work in organizations and invite their team, and each organization's data is isolated from every other's.

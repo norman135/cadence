@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="design/logo/cadence-mark.svg" width="72" height="72" alt="Cadence logo" />
+
 # Cadence
 
 **Project and work management for teams, built to run fast on small hardware.**
@@ -16,14 +18,16 @@ Organize work into projects, move issues through custom workflows, plan sprints,
 [![CI](https://github.com/norman135/cadence/actions/workflows/ci.yml/badge.svg?branch=develop)](https://github.com/norman135/cadence/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
-[Features](#features) · [Architecture](#architecture) · [Performance](#performance) · [Getting started](#getting-started) · [Roadmap](#roadmap) · [Docs](#documentation)
+[Features](#features) · [Design](#design) · [Architecture](#architecture) · [Performance](#performance) · [Getting started](#getting-started) · [Roadmap](#roadmap) · [Docs](#documentation)
 
 </div>
+
+<p align="center"><img src="design/exports/07-board.png" alt="Design of the Cadence board: a dark Kanban board with live presence and a teammate dragging a card" width="100%" /></p>
 
 ---
 
 > [!NOTE]
-> **Cadence is under active development.** It is built milestone by milestone, in the open, and each milestone ships as a tagged release. **M1 (Identity & tenancy) is complete**: people can sign up, create organizations, invite their team and manage roles, on top of the M0 foundation (architecture, CI/CD, container deployment and performance harness). Projects and issues arrive in M2. The [roadmap](docs/ROADMAP.md) has the full plan and current progress.
+> **Cadence is under active development.** It is built milestone by milestone, in the open, and each milestone ships as a tagged release. **M1 (Identity & tenancy) is complete**: people can sign up, create organizations, invite their team and manage roles, on top of the M0 foundation (architecture, CI/CD, container deployment and performance harness). **M2 (Brand & design system)** is under way: the designs are done, and the app is being rebuilt to match them before projects and issues arrive in M3. The [roadmap](docs/ROADMAP.md) has the full plan and current progress.
 
 ## Why Cadence?
 
@@ -50,6 +54,15 @@ Most project management tools assume cloud-scale infrastructure. Cadence assumes
 | **Search** | Full-text search across issues and comments, a ⌘K command palette, saved filters |
 | **Reporting** | Velocity, cycle and lead time, cumulative flow, workload, org dashboards |
 | **Admin** | Audit log, signed outgoing webhooks, scoped API keys, email notification preferences |
+
+## Design
+
+Cadence has its own brand and design system: a teal-and-ember identity, Geist type, and light and dark themes designed as equals. The tokens, component kit and product screens live in [`design/`](design/README.md) and are rendered from code, so the designs are reviewed like everything else.
+
+| | | |
+|---|---|---|
+| [![My work](design/exports/06-home.png)](design/exports/06-home.png) | [![Issue](design/exports/08-issue.png)](design/exports/08-issue.png) | [![Backlog and sprints](design/exports/09-backlog.png)](design/exports/09-backlog.png) |
+| My work | Issue | Backlog & sprints |
 
 ## Tech stack
 
@@ -203,14 +216,15 @@ Load tests, memory checks and benchmarks are described in [docs/performance.md](
 |---|---|---|
 | M0: Foundation | `v0.1.0` | ✅ Done |
 | M1: Identity & tenancy | `v0.2.0` | ✅ Done |
-| M2: Projects & issues | `v0.3.0` | Planned |
-| M3: Workflows & Kanban board | `v0.4.0` | Planned |
-| M4: Real-time collaboration | `v0.5.0` | Planned |
-| M5: Sprints & planning | `v0.6.0` | Planned |
-| M6: Rich collaboration & search | `v0.7.0` | Planned |
-| M7: Background processing & integrations | `v0.8.0` | Planned |
-| M8: Reporting & dashboards | `v0.9.0` | Planned |
-| M9: Hardening & release | `v1.0.0` | Planned |
+| M2: Brand & design system | `v0.3.0` | 🚧 Designs done, implementation next |
+| M3: Projects & issues | `v0.4.0` | Planned |
+| M4: Workflows & Kanban board | `v0.5.0` | Planned |
+| M5: Real-time collaboration | `v0.6.0` | Planned |
+| M6: Sprints & planning | `v0.7.0` | Planned |
+| M7: Rich collaboration & search | `v0.8.0` | Planned |
+| M8: Background processing & integrations | `v0.9.0` | Planned |
+| M9: Reporting & dashboards | `v0.10.0` | Planned |
+| M10: Hardening & release | `v1.0.0` | Planned |
 
 Each milestone's detailed scope and completion criteria are in [docs/ROADMAP.md](docs/ROADMAP.md).
 
@@ -223,9 +237,10 @@ Each milestone's detailed scope and completion criteria are in [docs/ROADMAP.md]
 | [Agent guide](AGENTS.md) | Commands, conventions and constraints for AI coding agents |
 | [Architecture overview](docs/architecture.md) | Layers, request flow, frontend structure, build and delivery |
 | [Architecture decision records](docs/adr/README.md) | The reasoning behind each significant decision |
+| [Design system](design/README.md) | Brand, tokens, components and screen designs |
 | [Performance report](docs/performance.md) | Measured results for each release, and how to reproduce them |
 | [Changelog](CHANGELOG.md) | What changed in each release |
-| Deployment runbook (`docs/deployment.md`) | Install, upgrade, backup and restore *(M9)* |
+| Deployment runbook (`docs/deployment.md`) | Install, upgrade, backup and restore *(M10)* |
 
 ## Development workflow
 
