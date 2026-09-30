@@ -6,6 +6,8 @@ export interface ProblemDetails {
   detail?: string;
   instance?: string;
   traceId?: string;
+  /** Stable machine-readable error code, e.g. `auth.invalid_credentials`. */
+  code?: string;
   /** Validation failures keyed by camelCase field name. */
   errors?: Record<string, string[]>;
 }
@@ -20,6 +22,11 @@ export class ApiError extends Error {
     this.name = 'ApiError';
     this.status = status;
     this.problem = problem;
+  }
+
+  /** The stable error code, when the server sent one. */
+  get code(): string | undefined {
+    return this.problem?.code;
   }
 
   /** True for 4xx responses: retrying the same request will not help. */
@@ -41,4 +48,14 @@ export class ApiError extends Error {
 
     return new ApiError(response.status, problem);
   }
+}
+
+/** A user-facing message for any error thrown by an API call. */
+export function errorMessage(error: unknown): string {
+  if (error instanceof ApiError) {
+    return error.status >= 500
+      ? 'Something went wrong on our side. Please try again.'
+      : error.message;
+  }
+  return 'Could not reach the server. Check your connection and try again.';
 }

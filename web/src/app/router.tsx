@@ -1,26 +1,125 @@
+import { Suspense } from 'react';
 import { createBrowserRouter } from 'react-router';
+import { AuthLayout } from './layouts/auth-layout';
 import { RootLayout } from './layouts/root-layout';
+import { RedirectIfAuthenticated, RequireAuth } from './routes/guards';
+import { HomeRoute } from './routes/home-route';
 import { NotFoundPage } from './routes/not-found-page';
 import { RouteErrorBoundary } from './routes/route-error-boundary';
 
-/**
- * Application routes. Feature pages are lazy-loaded, so each one becomes its own chunk and the
- * initial bundle only contains the app shell (see the bundle budgets in scripts/).
- */
+// Each feature is its own lazily loaded chunk; the initial bundle is only the shell and session.
+const auth = () => import('@/features/auth');
+const settings = () => import('@/features/settings');
+
 export const router = createBrowserRouter([
   {
-    path: '/',
-    Component: RootLayout,
     ErrorBoundary: RouteErrorBoundary,
     children: [
       {
-        index: true,
-        lazy: async () => {
-          const { HomePage } = await import('@/features/home');
-          return { Component: HomePage };
-        },
+        path: '/',
+        Component: RootLayout,
+        children: [
+          {
+            index: true,
+            element: (
+              <Suspense fallback={null}>
+                <HomeRoute />
+              </Suspense>
+            ),
+          },
+        ],
       },
-      { path: '*', Component: NotFoundPage },
+
+      // Account pages and other centered pages.
+      {
+        Component: AuthLayout,
+        children: [
+          {
+            Component: RedirectIfAuthenticated,
+            children: [
+              { path: '/login', lazy: async () => ({ Component: (await auth()).LoginPage }) },
+              { path: '/register', lazy: async () => ({ Component: (await auth()).RegisterPage }) },
+            ],
+          },
+          {
+            path: '/check-email',
+            lazy: async () => ({ Component: (await auth()).CheckEmailPage }),
+          },
+          {
+            path: '/confirm-email',
+            lazy: async () => ({ Component: (await auth()).ConfirmEmailPage }),
+          },
+          {
+            path: '/forgot-password',
+            lazy: async () => ({ Component: (await auth()).ForgotPasswordPage }),
+          },
+          {
+            path: '/reset-password',
+            lazy: async () => ({ Component: (await auth()).ResetPasswordPage }),
+          },
+          {
+            path: '/invitations/:token',
+            lazy: async () => ({
+              Component: (await import('@/features/organizations/routes/invitation-page'))
+                .InvitationPage,
+            }),
+          },
+          {
+            Component: RequireAuth,
+            children: [
+              {
+                path: '/welcome',
+                lazy: async () => ({
+                  Component: (
+                    await import('@/features/organizations/routes/create-organization-page')
+                  ).CreateOrganizationPage,
+                }),
+              },
+            ],
+          },
+        ],
+      },
+
+      // The signed-in app, scoped to an organization by its slug.
+      {
+        Component: RequireAuth,
+        children: [
+          {
+            path: '/:orgSlug',
+            lazy: async () => ({ Component: (await import('./layouts/app-shell')).AppShell }),
+            children: [
+              {
+                index: true,
+                lazy: async () => ({
+                  Component: (
+                    await import('@/features/organizations/routes/organization-home-page')
+                  ).OrganizationHomePage,
+                }),
+              },
+              {
+                path: 'settings/members',
+                lazy: async () => ({
+                  Component: (await import('@/features/organizations/routes/members-page'))
+                    .MembersPage,
+                }),
+              },
+              {
+                path: 'settings/organization',
+                lazy: async () => ({
+                  Component: (
+                    await import('@/features/organizations/routes/organization-settings-page')
+                  ).OrganizationSettingsPage,
+                }),
+              },
+              {
+                path: 'settings/profile',
+                lazy: async () => ({ Component: (await settings()).ProfileSettingsPage }),
+              },
+              { path: '*', Component: NotFoundPage },
+            ],
+          },
+        ],
+      },
     ],
   },
 ]);

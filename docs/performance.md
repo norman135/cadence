@@ -4,6 +4,36 @@ Cadence targets a **1–2 GB RAM server with about 10 concurrent users**, and mu
 
 ## Results
 
+### v0.2.0 (M1: Identity & tenancy)
+
+M1 adds ASP.NET Core Identity, JWT validation, rate limiting, the HybridCache membership cache, a background email dispatcher, and the signed-in web app. The load test is still the anonymous baseline from M0, so latency figures are comparable between releases. Authenticated journeys join the load test in M2, once there are projects and issues to read.
+
+**Environment:** the same as v0.1.0. The stack runs with `docker-compose.e2e.yml`, which adds Mailpit (left out of the memory totals) and lifts per-IP rate limits, because every k6 user shares one IP.
+
+| Metric | Target | Measured | Change from v0.1.0 | |
+|---|---|---|---|---|
+| Whole stack at idle | ≤ 450 MB | **117 MiB** (app 51, PostgreSQL 49, Caddy 17) | +14 MiB | ✅ |
+| App container memory under 10-user load | ≤ 200 MB | **75 MiB** | +14 MiB | ✅ |
+| App container memory under 50-user load | — | **77 MiB** | +15 MiB | ✅ |
+| API p95, 10 users | ≤ 100 ms | **4.1 ms** | +1.0 ms | ✅ |
+| Page (index.html) p95, 10 users | ≤ 100 ms | **6.9 ms** | +2.6 ms | ✅ |
+| API p95, 50 users | ≤ 300 ms | **4.7 ms** | −0.9 ms | ✅ |
+| Error rate, 10 and 50 users | 0% | **0%** (1,200 and 6,000 requests) | — | ✅ |
+| Cold start to ready | ≤ 5 s | **1.6–2.0 s** (three runs, container start to `/health/ready` through Caddy) | +0.5–0.9 s | ✅ |
+| Initial JavaScript (gzip) | ≤ 180 KB | **124.2 KB** | +10.8 KB | ✅ |
+| Initial CSS (gzip) | — (budget 30 KB) | **5.1 KB** | +1.2 KB | ✅ |
+| Largest lazy route (gzip, all chunks it downloads) | ≤ 80 KB | **62.9 KB** (members page) | new method | ✅ |
+| DB queries for a permission check | 0 | **0** (asserted by an integration test) | new | ✅ |
+
+**Where the memory went.** The idle app grew from 45 to 51 MiB, and from 61 to 75 MiB under load: Identity, the JWT handler, the rate limiter partitions and HybridCache are all resident now. At 50 users the app uses only 2 MiB more than at 10, so memory does not grow with the number of users at this scale.
+
+**Bundles.** The initial bundle gained the session and refresh logic (+10.8 KB). Everything else loads per page. The heaviest route, members, downloads 62.9 KB, including chunks it shares with other pages. Before switching forms to `zod/mini` it was 79.3 KB, just under its 80 KB budget.
+
+**Found while measuring:**
+
+- Npgsql tried GSS (Kerberos) encryption on every new connection, which failed in the chiseled image with an error on stderr. It is now disabled by default.
+- The anonymous k6 baseline ran into the new per-IP API limit (30% `429`s at 50 users), so the test stack lifts that limit. Authenticated traffic in production is limited per user.
+
 ### v0.1.0 (M0: Foundation)
 
 > M0 has no features yet, so these numbers are a **baseline for the platform itself**: the proxy, runtime, pipeline, database connectivity and SPA hosting. Later milestones add real workloads, and the numbers will be re-measured against the same targets.
@@ -46,7 +76,9 @@ The steady-state difference for a small DTO is within noise. The source-generate
 ```bash
 # 1. Start the production stack from source
 cd deploy
-POSTGRES_PASSWORD=local-test docker compose -f docker-compose.yml -f docker-compose.build.yml up -d --build
+export POSTGRES_PASSWORD=local-test JWT_SIGNING_KEY=local-test-signing-key-at-least-32-characters
+# The e2e override adds Mailpit and lifts per-IP rate limits: all k6 users share one IP.
+docker compose -f docker-compose.yml -f docker-compose.build.yml -f docker-compose.e2e.yml up -d --build
 
 # 2. Smoke test and idle memory
 ../perf/smoke-test.sh https://localhost

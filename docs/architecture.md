@@ -35,7 +35,7 @@ flowchart LR
 |---|---|---|
 | `Cadence.Domain` | Entities, aggregates, value objects, domain events, `Result`/`Error` | nothing |
 | `Cadence.Application` | Commands and queries, handlers, validators, pipeline behaviors, abstractions such as `IApplicationInfo` | Domain |
-| `Cadence.Infrastructure` | `CadenceDbContext`, migrations, database configuration and diagnostics | Application |
+| `Cadence.Infrastructure` | `CadenceDbContext`, migrations, database configuration and diagnostics; ASP.NET Core Identity, token issuing, email delivery and the membership cache | Application |
 | `Cadence.Api` | Endpoints, error handling, versioning, OpenAPI, SPA hosting, composition root | all of the above |
 | `Cadence.ServiceDefaults` | Health checks and opt-in OpenTelemetry | — |
 | `Cadence.Migrator` | Applies migrations, then exits ([ADR-0015](adr/0015-one-shot-migrator.md)) | Infrastructure |
@@ -78,6 +78,30 @@ The mediator and all handler registrations are generated at compile time ([ADR-0
 - OpenTelemetry tracing, metrics and log export switch on **only when `OTEL_EXPORTER_OTLP_ENDPOINT` is set**. Aspire sets it in development, and production leaves it off by default.
 - Logs are structured JSON in production and plain text in development. Log messages use `[LoggerMessage]` source generation.
 
+### Authentication
+
+Details and trade-offs are in [ADR-0006](adr/0006-jwt-access-tokens-and-rotating-refresh-tokens.md).
+
+- **Accounts** use ASP.NET Core Identity (PBKDF2 hashing, lockout, security stamps). Registration requires a confirmed email by default (`Cadence:Auth:RequireConfirmedEmail`), and self-registration can be switched off (`AllowRegistration`).
+- **Access tokens** are 10-minute HMAC-SHA256 JWTs, validated statelessly: authenticating a request costs no database or cache lookup.
+- **Refresh tokens** live in the `cadence_refresh` cookie (`HttpOnly`, `SameSite=Strict`, scoped to `/api/v1/auth`). Only their SHA-256 hash is stored. Each refresh rotates the token within its family; replaying an exchanged token revokes the family.
+- **Rate limits** are 10 requests per minute per IP on sign-in, registration and password endpoints, 60 per minute on refresh, and a 600-per-minute token bucket per user (or per IP when anonymous) on the rest of the API. Rejections are `429` problem details with `Retry-After`.
+
+### Multi-tenancy
+
+Everything a team owns belongs to an **organization**. Details are in [ADR-0007](adr/0007-tenant-isolation.md).
+
+1. Organization routes have the shape `/api/v1/organizations/{organizationId}/…`. `TenantResolutionMiddleware` loads the caller's membership from the **HybridCache membership cache** and binds the request to the organization (`ITenantContext`). Non-members get `404`, exactly like a missing organization.
+2. Endpoints declare what they need with `.RequirePermission(Permissions.X)`. The permission policy reads the cached membership, so authorization makes **0 database queries** on the hot path. One role → permission matrix in the domain defines Owner, Admin, Member and Guest.
+3. Every `ITenantScoped` entity has a named EF Core query filter that limits it to the resolved organization, and matches nothing when no organization is resolved. Cross-tenant queries (for example "my organizations") opt out explicitly with `IgnoreQueryFilters([QueryFilters.Tenant])`.
+4. `SaveChanges` refuses to write another organization's rows while a tenant is resolved, as defense in depth.
+
+Membership changes invalidate the cache immediately, so a removed member loses access on their next request.
+
+### Email
+
+Handlers queue messages on a bounded in-process channel, and `EmailDispatcher` (a background service) sends them over SMTP with MailKit, so requests never wait for the mail server. Without an SMTP host, emails are logged and dropped. Links point at `Cadence:PublicUrl`. The queue is in memory for now; M7 moves it onto a durable outbox.
+
 ## Frontend
 
 `web/` is a React 19 + TypeScript app built with Vite. Code is organized by feature:
@@ -85,20 +109,23 @@ The mediator and all handler registrations are generated at compile time ([ADR-0
 ```
 web/src/
   app/        shell: providers, router, layouts, error boundary
-  features/   one folder per feature (home, …), each with a public index.ts
-  shared/     api (client + generated hooks), ui (design system), lib
+  features/   one folder per feature (auth, organizations, settings, home), each with a public index.ts
+  shared/     api (client + generated hooks), auth (session), workspace (current organization),
+              ui (design system), forms, lib
   test/       Vitest setup, MSW server, render helpers
 ```
 
 ESLint enforces the boundaries:
-- `app` imports features only through their public index
+- `app` imports features only through their public index, or a single route page so each page gets its own chunk
 - features import only themselves and `shared`
 - `shared` imports only `shared`
 
 The rules are generated per feature folder, so new features are covered automatically.
 
 - **Server state**: TanStack Query hooks generated by Orval from the committed OpenAPI document ([ADR-0014](adr/0014-committed-openapi-contract-and-generated-client.md)). A single `httpClient` turns problem details into a typed `ApiError`. 4xx errors are not retried, and window-focus refetching is off (live updates will arrive over SignalR).
-- **Routing**: React Router, with each feature page lazy-loaded into its own chunk.
+- **Routing**: React Router, with each page lazy-loaded into its own chunk. `RequireAuth` sends visitors to sign in with a `returnTo`, and organization pages live under `/:orgSlug`.
+- **Session**: the access token lives only in memory (`shared/auth`). On load, and shortly before the token expires, the client exchanges the refresh cookie for a new token. Parallel refreshes are deduplicated in the tab and serialized across tabs with the Web Locks API, and a `401` triggers one refresh and a retry.
+- **Forms**: react-hook-form with `zod/mini` schemas that mirror the server rules. Server validation errors are mapped back onto the fields.
 - **Rendering**: the React Compiler memoizes components automatically.
 - **Styling**: Tailwind CSS v4 with semantic OKLCH design tokens (light and dark follow the OS), and shadcn/ui-style components in `shared/ui`.
 - **Testing**: Vitest (jsdom), Testing Library and Mock Service Worker. Requests without a handler fail the test.
@@ -120,5 +147,5 @@ Vite proxies `/api`, `/health` and `/hubs` to the API through Aspire service dis
 - **CI** (`.github/workflows/ci.yml`) runs on every pull request:
   - **Backend**: format, build (warnings are errors), OpenAPI drift check, and unit, integration and architecture tests.
   - **Frontend**: client drift check, lint, format check, type-check, tests, build and bundle budgets.
-  - **Container**, on both amd64 and arm64: build the image, start the production stack, run the smoke tests, a memory check at idle, a 10-user k6 load test, and a memory check after load.
+  - **Container**, on both amd64 and arm64: build the image, start the production stack, run the smoke tests, a memory check at idle, a 10-user k6 load test, and a memory check after load. On amd64 it then runs the **Playwright end-to-end tests** against the same stack, with Mailpit catching email (`deploy/docker-compose.e2e.yml`).
 - **Release** (`.github/workflows/release.yml`): a `vX.Y.Z` tag publishes multi-arch images with provenance and an SBOM to `ghcr.io/norman135/cadence`, and creates a GitHub release.

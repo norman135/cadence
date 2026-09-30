@@ -2,6 +2,39 @@
 
 All notable changes to Cadence are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses [Semantic Versioning](https://semver.org/). Each release corresponds to a milestone in the [roadmap](docs/ROADMAP.md).
 
+## [0.2.0] - M1: Identity & tenancy
+
+People can now sign up, work in organizations and invite their team, and each organization's data is isolated from every other's.
+
+### Added
+
+- **Accounts**:
+  - registration with email confirmation, sign-in, sign-out, and password reset by email
+  - a profile page: change your name, or your password (which signs out your other sessions)
+  - 10-minute access tokens kept only in memory, and rotating refresh tokens in an `HttpOnly`, `SameSite=Strict` cookie. Replaying a used refresh token ends that session everywhere ([ADR-0006](docs/adr/0006-jwt-access-tokens-and-rotating-refresh-tokens.md)).
+  - rate limits on sign-in, registration and password endpoints (per IP) and on the rest of the API (per user)
+  - email sent in the background over SMTP (any provider), with plain-text and HTML templates
+- **Organizations**:
+  - create, rename and delete organizations, and switch between them
+  - invitations by email that expire after 7 days, can be revoked, and work for new and existing accounts
+  - member management with Owner, Admin, Member and Guest roles. Ownership rules protect the last owner.
+  - tenant isolation enforced by the persistence layer, with permission checks served from an in-process cache ([ADR-0007](docs/adr/0007-tenant-isolation.md))
+- **Web app**: sign-in and account pages, protected routes, an app shell with an organization switcher, sidebar, account menu and a `Ctrl K` command palette, organization, member and profile settings, and an invitation page
+- **Quality**:
+  - backend: 116 unit, integration and architecture tests, including tenant isolation, token rotation and reuse detection, and query budgets on every endpoint
+  - frontend: 23 tests
+  - Playwright end-to-end tests against the production stack in CI: sign up, confirm by email, sign in, create and switch organizations, sign out
+
+### Changed
+
+- The production stack needs `JWT_SIGNING_KEY`, and should have `CADENCE_DOMAIN` and the `SMTP_*` settings. See `deploy/.env.example`.
+- Forms validate with `zod/mini`, which keeps each form page about 16 KB smaller.
+- The bundle budget now counts every chunk a route downloads, including chunks shared with other routes.
+
+### Fixed
+
+- New database connections no longer try GSS (Kerberos) encryption first, which failed and logged an error in the container image every time.
+
 ## [0.1.0] - M0: Foundation
 
 A production-shaped foundation with no product features yet. It builds, tests, packages into containers, deploys and measures itself.

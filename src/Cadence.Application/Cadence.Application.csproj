@@ -9,7 +9,11 @@
     <PackageReference Include="Mediator.Abstractions" />
     <!-- Generates the mediator and handler registrations at compile time: no reflection, no runtime scanning. -->
     <PackageReference Include="Mediator.SourceGenerator" PrivateAssets="all" IncludeAssets="runtime; build; native; contentfiles; analyzers" />
+    <!-- EF Core abstractions only (DbSet, LINQ), so handlers can project reads straight into DTOs (ADR-0002). -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+    <PackageReference Include="Microsoft.Extensions.Options" />
+    <PackageReference Include="Riok.Mapperly" PrivateAssets="all" ExcludeAssets="runtime" />
   </ItemGroup>
 
   <ItemGroup>
