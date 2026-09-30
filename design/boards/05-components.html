@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>05 · Components</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Geist+Mono:wght@400..600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="board.css" />
+    <script src="https://cdn.jsdelivr.net/npm/lucide@1.49.0/dist/umd/lucide.min.js"></script>
+    <style>
+      .kit {
+        border-radius: 20px;
+        padding: 32px;
+        border: 1px solid var(--border);
+        background: var(--surface);
+        color: var(--text);
+        display: flex;
+        flex-direction: column;
+        gap: 26px;
+      }
+      .kit[data-theme='dark'] {
+        background: var(--canvas);
+      }
+      .kit h4 {
+        margin: 0 0 12px;
+        font-family: var(--font-mono);
+        font-size: 11px;
+        font-weight: 500;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--text-muted);
+      }
+      .kit .theme-name {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 600;
+        font-size: 16px;
+        letter-spacing: -0.01em;
+      }
+      .kit .theme-name svg {
+        width: 18px;
+        height: 18px;
+        color: var(--primary);
+      }
+      .dialog {
+        border-radius: var(--radius-xl);
+        background: var(--surface-raised);
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow-lg);
+        padding: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="board">
+      <div class="board-head">
+        <img src="../logo/cadence-mark.svg" alt="" />
+        <span class="brand">Cadence</span>
+        <span class="sep"></span>
+        <span>Brand &amp; UI kit</span>
+        <span class="page">05 / 10 · Components</span>
+      </div>
+
+      <h1 class="board-title">Components</h1>
+      <p class="board-lede">
+        The building blocks in <span class="mono">web/src/shared/ui</span>. They are Radix
+        primitives styled with these tokens, so behaviour, focus and keyboard support come built in.
+        Each one renders in both themes from the same markup.
+      </p>
+
+      <div class="grid" style="grid-template-columns: 1fr 1fr" id="kits">
+        <div class="kit" data-theme="light"></div>
+        <div class="kit" data-theme="dark"></div>
+      </div>
+    </div>
+
+    <template id="kit">
+      <div class="theme-name"><i data-lucide="sun"></i><span>Light</span></div>
+
+      <div>
+        <h4>Buttons</h4>
+        <div class="row wrap">
+          <button class="btn primary"><i data-lucide="plus"></i>New issue</button>
+          <button class="btn secondary">Cancel</button>
+          <button class="btn soft"><i data-lucide="sparkles"></i>Suggest</button>
+          <button class="btn ghost hover">Ghost</button>
+          <button class="btn danger">Delete</button>
+          <button class="btn secondary icon" aria-label="More"><i data-lucide="ellipsis"></i></button>
+        </div>
+        <div class="row wrap" style="margin-top: 10px">
+          <button class="btn primary hover">Hover</button>
+          <button class="btn primary focus">Focus</button>
+          <button class="btn primary disabled">Disabled</button>
+          <button class="btn secondary sm"><i data-lucide="filter"></i>Filter</button>
+          <button class="btn secondary sm">Sort <span class="kbd" style="height: 18px; min-width: 18px">S</span></button>
+        </div>
+      </div>
+
+      <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 16px">
+        <div class="field">
+          <label>Title</label>
+          <div class="input focus">Offline sync drops edits<span style="width: 1px; height: 16px; background: var(--primary); margin-left: -6px"></span></div>
+          <span class="hint">Keep it short; details go in the description.</span>
+        </div>
+        <div class="field">
+          <label>Email</label>
+          <div class="input error">grace@</div>
+          <span class="error-text">Enter a valid email address.</span>
+        </div>
+        <div class="field">
+          <label>Search</label>
+          <div class="input"><i data-lucide="search"></i><span class="ph">Search issues…</span><span class="spacer"></span><span class="kbd">/</span></div>
+        </div>
+        <div class="field">
+          <label>Assignee</label>
+          <div class="input"><span class="avatar sm" data-name="Grace Hopper"></span>Grace Hopper<span class="spacer"></span><i data-lucide="chevrons-up-down"></i></div>
+        </div>
+      </div>
+
+      <div class="row" style="gap: 28px">
+        <span class="row" style="gap: 8px"><span class="checkbox on"><i data-lucide="check"></i></span>Checked</span>
+        <span class="row" style="gap: 8px"><span class="checkbox"></span>Unchecked</span>
+        <span class="row" style="gap: 8px"><span class="switch on"></span>Notify me</span>
+        <span class="row" style="gap: 8px"><span class="switch"></span>Off</span>
+      </div>
+
+      <div>
+        <h4>Badges, labels, keys</h4>
+        <div class="row wrap" style="gap: 8px">
+          <span class="badge solid-primary">Owner</span>
+          <span class="badge">Member</span>
+          <span class="badge success"><span class="dot" style="background: currentColor"></span>Active</span>
+          <span class="badge warning">Due tomorrow</span>
+          <span class="badge danger">Blocked</span>
+          <span class="label"><i style="background: var(--label-orange)"></i>Performance</span>
+          <span class="label"><i style="background: var(--label-blue)"></i>Frontend</span>
+          <span class="kbd">⌘</span><span class="kbd">K</span>
+        </div>
+      </div>
+
+      <div class="grid" style="grid-template-columns: auto 1fr; gap: 28px; align-items: start">
+        <div>
+          <h4>Avatars</h4>
+          <div class="row">
+            <span class="avatar xl" data-name="Ada Lovelace"></span>
+            <span class="avatar lg presence" data-name="Alan Turing"></span>
+            <span class="avatar" data-name="Katherine Johnson"></span>
+            <span class="avatars">
+              <span class="avatar" data-name="Grace Hopper"></span><span class="avatar" data-name="Margaret Hamilton"></span><span class="avatar" data-name="Dennis Ritchie"></span><span class="avatar" style="background: var(--surface-hover); color: var(--text-muted)">+4</span>
+            </span>
+          </div>
+        </div>
+        <div>
+          <h4>Tabs</h4>
+          <div class="stack" style="gap: 12px">
+            <div class="tabs" style="width: max-content">
+              <span class="tab active"><i data-lucide="list"></i>List</span>
+              <span class="tab"><i data-lucide="kanban"></i>Board</span>
+              <span class="tab"><i data-lucide="calendar-range"></i>Timeline</span>
+            </div>
+            <div class="underline-tabs"><span class="active">Activity</span><span>Comments 4</span><span>History</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 16px; align-items: start">
+        <div>
+          <h4>Menu</h4>
+          <div class="menu">
+            <div class="menu-label">Move to</div>
+            <div class="menu-item"><span class="status" data-s="todo"></span>Todo</div>
+            <div class="menu-item active"><span class="status" data-s="progress"></span>In progress<span class="kbd">2</span></div>
+            <div class="menu-item"><span class="status" data-s="review"></span>In review<span class="kbd">3</span></div>
+            <div class="menu-sep"></div>
+            <div class="menu-item"><i data-lucide="copy"></i>Copy link</div>
+            <div class="menu-item" style="color: var(--danger)"><i data-lucide="trash-2" style="color: var(--danger)"></i>Delete</div>
+          </div>
+        </div>
+        <div class="stack" style="gap: 16px">
+          <div>
+            <h4>Board card</h4>
+            <div class="k-card">
+              <div class="k-top"><span class="priority" data-p="high"></span><span class="key">ATL-142</span><span class="spacer"></span><span class="avatar sm" data-name="Grace Hopper"></span></div>
+              <div class="k-title">Offline sync drops edits made on the train</div>
+              <div class="k-meta"><span class="label"><i style="background: var(--label-teal)"></i>Backend</span><span class="badge warning" style="height: 20px">Oct 14</span></div>
+            </div>
+          </div>
+          <div>
+            <h4>Tooltip</h4>
+            <span class="tooltip">Assign to me <span class="kbd" style="height: 16px; min-width: 16px; font-size: 10px; background: transparent; color: inherit; border-color: rgb(127 127 127 / 0.4)">I</span></span>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <h4>Toast</h4>
+        <div class="toast">
+          <i data-lucide="circle-check" style="color: var(--success)"></i>
+          <div style="flex: 1">
+            <div class="t-title">ATL-142 moved to In review</div>
+            <div class="t-body">Grace and Alan were notified.</div>
+          </div>
+          <button class="btn ghost sm" style="margin: -4px -6px 0 0">Undo</button>
+        </div>
+      </div>
+
+      <div>
+        <h4>Dialog</h4>
+        <div class="dialog">
+          <div style="font-size: 16px; font-weight: 600; letter-spacing: -0.01em">Delete Atlas Mobile?</div>
+          <p class="note" style="margin: 6px 0 16px">
+            All 214 issues, 12 sprints and their history will be deleted. This can't be undone.
+          </p>
+          <div class="row" style="justify-content: flex-end; gap: 8px">
+            <button class="btn secondary">Cancel</button>
+            <button class="btn danger">Delete project</button>
+          </div>
+        </div>
+      </div>
+    </template>
+
+    <script>
+      const template = document.getElementById('kit');
+      document.querySelectorAll('.kit').forEach((kit) => {
+        kit.append(template.content.cloneNode(true));
+        if (kit.dataset.theme === 'dark') {
+          kit.querySelector('.theme-name span').textContent = 'Dark';
+          kit.querySelector('.theme-name i').dataset.lucide = 'moon';
+        }
+      });
+    </script>
+    <script src="board.js"></script>
+  </body>
+</html>

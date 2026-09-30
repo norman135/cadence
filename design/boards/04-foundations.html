@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>04 · Foundations</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Geist+Mono:wght@400..600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="board.css" />
+    <script src="https://cdn.jsdelivr.net/npm/lucide@1.49.0/dist/umd/lucide.min.js"></script>
+    <style>
+      .space-row {
+        display: grid;
+        grid-template-columns: 56px 1fr 60px;
+        align-items: center;
+        gap: 16px;
+        height: 30px;
+        font-family: var(--font-mono);
+        font-size: 12px;
+        color: var(--text-muted);
+      }
+      .space-row i {
+        display: block;
+        height: 14px;
+        border-radius: 3px;
+        background: linear-gradient(90deg, var(--tempo-400), var(--tempo-600));
+      }
+      .radii {
+        display: flex;
+        gap: 18px;
+        align-items: flex-end;
+      }
+      .radii figure {
+        margin: 0;
+        text-align: center;
+        font-family: var(--font-mono);
+        font-size: 11px;
+        color: var(--text-muted);
+      }
+      .radii .r {
+        width: 84px;
+        height: 84px;
+        border: 1.5px solid var(--tempo-500);
+        background: var(--primary-soft);
+        margin-bottom: 10px;
+      }
+      .elev {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+        padding: 28px;
+        border-radius: 16px;
+        background: var(--canvas);
+      }
+      .elev div {
+        height: 104px;
+        border-radius: 12px;
+        background: var(--surface-raised);
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        padding: 12px;
+        font-size: 12px;
+        border: 1px solid var(--border);
+      }
+      .elev b {
+        font-family: var(--font-mono);
+        font-weight: 500;
+        font-size: 12px;
+      }
+      .icons {
+        display: grid;
+        grid-template-columns: repeat(10, 1fr);
+        gap: 6px;
+      }
+      .icons span {
+        height: 52px;
+        border-radius: 10px;
+        display: grid;
+        place-items: center;
+        color: var(--text);
+        background: var(--surface-sunken);
+      }
+      .icons svg {
+        width: 20px;
+        height: 20px;
+      }
+      .curve {
+        height: 150px;
+        border-radius: 12px;
+        background: var(--surface-sunken);
+        position: relative;
+      }
+      .dur {
+        display: grid;
+        grid-template-columns: 120px 1fr 120px;
+        gap: 12px;
+        align-items: center;
+        font-size: 13px;
+        padding: 8px 0;
+      }
+      .dur i {
+        display: block;
+        height: 8px;
+        border-radius: 99px;
+        background: var(--tempo-500);
+      }
+      .layout {
+        display: grid;
+        grid-template-columns: 124px 1fr;
+        grid-template-rows: 26px 1fr;
+        gap: 6px;
+        height: 250px;
+        padding: 6px;
+        border-radius: 14px;
+        background: var(--canvas);
+        border: 1px solid var(--border);
+        font-family: var(--font-mono);
+        font-size: 11px;
+        color: var(--text-muted);
+      }
+      .layout > div {
+        border-radius: 8px;
+        display: grid;
+        place-items: center;
+        border: 1.5px dashed var(--border-strong);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="board">
+      <div class="board-head">
+        <img src="../logo/cadence-mark.svg" alt="" />
+        <span class="brand">Cadence</span>
+        <span class="sep"></span>
+        <span>Brand &amp; UI kit</span>
+        <span class="page">04 / 10 · Foundations</span>
+      </div>
+
+      <h1 class="board-title">Foundations</h1>
+      <p class="board-lede">
+        A 4 px rhythm, soft-but-not-bubbly corners, and borders before shadows. Motion is short and
+        decelerating: it confirms what happened and never makes anyone wait.
+      </p>
+
+      <div class="grid" style="grid-template-columns: 1fr 1fr 1fr">
+        <div class="panel">
+          <p class="section-label">Space · 4 px base</p>
+          <div class="stack" style="gap: 2px">
+            <div class="space-row"><span>1</span><i style="width: 4px"></i><span>4 px</span></div>
+            <div class="space-row"><span>2</span><i style="width: 8px"></i><span>8 px</span></div>
+            <div class="space-row"><span>3</span><i style="width: 12px"></i><span>12 px</span></div>
+            <div class="space-row"><span>4</span><i style="width: 16px"></i><span>16 px</span></div>
+            <div class="space-row"><span>6</span><i style="width: 24px"></i><span>24 px</span></div>
+            <div class="space-row"><span>8</span><i style="width: 32px"></i><span>32 px</span></div>
+            <div class="space-row"><span>12</span><i style="width: 48px"></i><span>48 px</span></div>
+            <div class="space-row"><span>16</span><i style="width: 64px"></i><span>64 px</span></div>
+          </div>
+          <p class="note" style="margin: 16px 0 0">
+            Controls: 28 (compact), <b style="color: var(--text)">32 (default)</b>, 40 (touch, auth
+            pages). List rows are 40, board cards pad 10 × 12.
+          </p>
+        </div>
+
+        <div class="panel">
+          <p class="section-label">Radius</p>
+          <div class="radii">
+            <figure><div class="r" style="border-radius: 6px"></div>sm · 6</figure>
+            <figure><div class="r" style="border-radius: 8px"></div>md · 8</figure>
+            <figure><div class="r" style="border-radius: 12px"></div>lg · 12</figure>
+            <figure><div class="r" style="border-radius: 16px"></div>xl · 16</figure>
+          </div>
+          <p class="note" style="margin: 18px 0 0">
+            sm: badges, checkboxes · md: buttons, inputs, menu items · lg: cards, popovers, board
+            columns · xl: dialogs, the app window. Nested corners shrink by the padding between
+            them.
+          </p>
+          <p class="section-label" style="margin-top: 26px">Density</p>
+          <div class="row" style="gap: 8px">
+            <button class="btn secondary sm">Compact 28</button>
+            <button class="btn secondary">Default 32</button>
+            <button class="btn secondary lg">Large 40</button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <p class="section-label">App layout</p>
+          <div class="layout">
+            <div style="grid-row: span 2">sidebar<br />248</div>
+            <div>top bar · 52</div>
+            <div style="background: var(--surface); border-style: solid; border-color: var(--border)">content · fluid</div>
+          </div>
+          <p class="note" style="margin: 16px 0 0">
+            The content panel floats on the canvas with an 8 px inset and a 12 px radius. Below
+            768 px, the sidebar becomes a drawer and the bottom bar takes over navigation.
+          </p>
+        </div>
+      </div>
+
+      <div class="grid" style="grid-template-columns: 1fr 1fr; margin-top: 24px">
+        <div class="panel">
+          <p class="section-label">Elevation · light and dark</p>
+          <div class="elev" data-theme="light">
+            <div style="box-shadow: var(--shadow-sm)"><b>shadow-sm</b><span class="muted">Cards, active nav</span></div>
+            <div style="box-shadow: var(--shadow-md)"><b>shadow-md</b><span class="muted">Dragged card, hover</span></div>
+            <div style="box-shadow: var(--shadow-lg)"><b>shadow-lg</b><span class="muted">Menus, dialogs</span></div>
+          </div>
+          <div class="elev" data-theme="dark" style="margin-top: 12px; color: var(--text)">
+            <div style="box-shadow: var(--shadow-sm)"><b>shadow-sm</b><span class="muted">Borders carry depth</span></div>
+            <div style="box-shadow: var(--shadow-md); background: var(--surface-hover)"><b>shadow-md</b><span class="muted">Lighter surface = higher</span></div>
+            <div style="box-shadow: var(--shadow-lg); background: #212838"><b>shadow-lg</b><span class="muted">Deep, soft shadow</span></div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <p class="section-label">Motion</p>
+          <div class="curve">
+            <svg viewBox="0 0 600 150" width="100%" height="150" preserveAspectRatio="none">
+              <path d="M40 130 C 144 130, 40 20, 560 20" fill="none" stroke="var(--tempo-500)" stroke-width="3" />
+              <path d="M40 130 L 560 20" fill="none" stroke="var(--border-strong)" stroke-width="1.5" stroke-dasharray="5 5" />
+              <circle cx="40" cy="130" r="5" fill="var(--tempo-600)" />
+              <circle cx="560" cy="20" r="5" fill="var(--ember-500)" />
+            </svg>
+            <span class="mono" style="position: absolute; left: 16px; top: 12px; font-size: 12px; color: var(--text-muted)">ease-out · cubic-bezier(0.2, 0, 0, 1)</span>
+          </div>
+          <div style="margin-top: 14px">
+            <div class="dur"><span>Fast · 120 ms</span><i style="width: 18%"></i><span class="muted">hover, press</span></div>
+            <div class="dur"><span>Base · 200 ms</span><i style="width: 30%"></i><span class="muted">menus, drag</span></div>
+            <div class="dur"><span>Slow · 320 ms</span><i style="width: 48%"></i><span class="muted">dialogs, panels</span></div>
+          </div>
+          <p class="note" style="margin: 8px 0 0">
+            Things arrive fast and settle softly. Live updates from teammates fade in with a brief
+            Tempo highlight. <span class="mono">prefers-reduced-motion</span> turns every
+            transition into an instant change.
+          </p>
+        </div>
+      </div>
+
+      <div class="panel" style="margin-top: 24px">
+        <div class="row" style="align-items: flex-start; gap: 40px">
+          <div style="width: 330px; flex-shrink: 0">
+            <p class="section-label">Iconography</p>
+            <p class="note" style="margin: 0">
+              <b style="color: var(--text)">Lucide</b>: open-source (ISC), tree-shaken per icon.
+              16 px in the UI, 1.75 stroke, rounded caps. Icons label nothing on their own: they
+              sit next to text, or carry an <span class="mono">aria-label</span> and a tooltip.
+              Status and priority glyphs are custom, drawn on the same 14 px grid.
+            </p>
+          </div>
+          <div class="icons" style="flex: 1">
+            <span><i data-lucide="inbox"></i></span>
+            <span><i data-lucide="circle-dot"></i></span>
+            <span><i data-lucide="kanban"></i></span>
+            <span><i data-lucide="list-todo"></i></span>
+            <span><i data-lucide="calendar-range"></i></span>
+            <span><i data-lucide="chart-line"></i></span>
+            <span><i data-lucide="users"></i></span>
+            <span><i data-lucide="settings"></i></span>
+            <span><i data-lucide="search"></i></span>
+            <span><i data-lucide="plus"></i></span>
+            <span><i data-lucide="git-pull-request"></i></span>
+            <span><i data-lucide="git-branch"></i></span>
+            <span><i data-lucide="message-square"></i></span>
+            <span><i data-lucide="paperclip"></i></span>
+            <span><i data-lucide="bell"></i></span>
+            <span><i data-lucide="tag"></i></span>
+            <span><i data-lucide="flag"></i></span>
+            <span><i data-lucide="link-2"></i></span>
+            <span><i data-lucide="timer"></i></span>
+            <span><i data-lucide="filter"></i></span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="board.js"></script>
+  </body>
+</html>
