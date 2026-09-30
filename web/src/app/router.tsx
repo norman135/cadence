@@ -30,6 +30,19 @@ export const router = createBrowserRouter([
         ],
       },
 
+      // Development only: every component in both themes. Production builds drop the route and
+      // its chunk entirely.
+      ...(import.meta.env.DEV
+        ? [
+            {
+              path: '/style-guide',
+              lazy: async () => ({
+                Component: (await import('./routes/style-guide-page')).StyleGuidePage,
+              }),
+            },
+          ]
+        : []),
+
       // Account pages and other centered pages.
       {
         Component: AuthLayout,
