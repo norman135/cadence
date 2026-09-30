@@ -76,7 +76,7 @@ export function AppShell() {
             <OrganizationSwitcher />
           </div>
           <Button
-            variant="outline"
+            variant="secondary"
             size="sm"
             className="w-full max-w-xs justify-start text-muted-foreground"
             onClick={() => {

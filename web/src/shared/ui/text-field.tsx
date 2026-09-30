@@ -17,7 +17,7 @@ export function TextField({ label, error, labelAccessory, id, ...props }: TextFi
   const errorId = `${inputId}-error`;
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-1.5">
       <div className="flex items-center justify-between">
         <Label htmlFor={inputId}>{label}</Label>
         {labelAccessory}
@@ -29,7 +29,7 @@ export function TextField({ label, error, labelAccessory, id, ...props }: TextFi
         {...props}
       />
       {error && (
-        <p id={errorId} className="text-sm text-destructive">
+        <p id={errorId} className="text-xs text-destructive">
           {error}
         </p>
       )}

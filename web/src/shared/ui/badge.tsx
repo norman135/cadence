@@ -2,16 +2,18 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import type { ComponentProps } from 'react';
 import { cn } from '@/shared/lib/utils';
 
+// A neutral chip by default; signal variants use soft fills so a list of badges stays calm.
 const badgeVariants = cva(
-  'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium whitespace-nowrap',
+  'inline-flex h-[22px] items-center gap-1.5 rounded-full border px-2 text-xs font-medium whitespace-nowrap [&_svg]:size-3.5 [&_svg]:shrink-0',
   {
     variants: {
       variant: {
-        default: 'border-transparent bg-primary text-primary-foreground',
-        secondary: 'bg-secondary text-secondary-foreground border-transparent',
-        outline: 'text-foreground',
-        success: 'border-transparent bg-success/15 text-success',
-        destructive: 'border-transparent bg-destructive/15 text-destructive',
+        default: 'bg-card text-muted-foreground',
+        primary: 'border-transparent bg-primary-soft text-primary-soft-foreground',
+        success: 'border-transparent bg-success-soft text-success',
+        warning: 'border-transparent bg-warning-soft text-warning',
+        destructive: 'border-transparent bg-destructive-soft text-destructive',
+        info: 'border-transparent bg-info-soft text-info',
       },
     },
     defaultVariants: {

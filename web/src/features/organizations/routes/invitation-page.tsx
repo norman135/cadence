@@ -77,7 +77,7 @@ export function InvitationPage() {
                 Create an account to join
               </Link>
             </Button>
-            <Button variant="outline" asChild>
+            <Button variant="secondary" asChild>
               <Link to={`/login?returnTo=${returnTo}`}>I already have an account</Link>
             </Button>
           </>
