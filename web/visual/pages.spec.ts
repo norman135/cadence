@@ -35,6 +35,10 @@ async function open(page: Page, path: string, signedIn: boolean, ready: string) 
   await page.goto(path);
   // The dev server compiles each route on first request, so allow for a cold start.
   await expect(page.getByRole('heading', { name: ready }).first()).toBeVisible({ timeout: 20_000 });
+  // Account pages load their decorative brand panel lazily; wait for it on wide screens.
+  if (!signedIn && (page.viewportSize()?.width ?? 0) >= 1024) {
+    await expect(page.getByText('Self-hosted: your data stays on your server')).toBeVisible();
+  }
   await page.evaluate(() => document.fonts.ready);
 }
 
