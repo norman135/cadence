@@ -4,7 +4,7 @@ import { Button } from '@/shared/ui/button';
 import { Card, CardContent } from '@/shared/ui/card';
 import { can, useCurrentOrganization } from '@/shared/workspace';
 
-/** The organization's landing page. Projects arrive in M2; until then it points to the next steps. */
+/** The organization's landing page. Projects arrive in M3; until then it points to the next steps. */
 export function OrganizationHomePage() {
   const { organization } = useCurrentOrganization();
   if (!organization) return null;

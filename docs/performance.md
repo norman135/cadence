@@ -6,7 +6,7 @@ Cadence targets a **1–2 GB RAM server with about 10 concurrent users**, and mu
 
 ### v0.2.0 (M1: Identity & tenancy)
 
-M1 adds ASP.NET Core Identity, JWT validation, rate limiting, the HybridCache membership cache, a background email dispatcher, and the signed-in web app. The load test is still the anonymous baseline from M0, so latency figures are comparable between releases. Authenticated journeys join the load test in M2, once there are projects and issues to read.
+M1 adds ASP.NET Core Identity, JWT validation, rate limiting, the HybridCache membership cache, a background email dispatcher, and the signed-in web app. The load test is still the anonymous baseline from M0, so latency figures are comparable between releases. Authenticated journeys join the load test in M3, once there are projects and issues to read.
 
 **Environment:** the same as v0.1.0. The stack runs with `docker-compose.e2e.yml`, which adds Mailpit (left out of the memory totals) and lifts per-IP rate limits, because every k6 user shares one IP.
 
@@ -118,4 +118,4 @@ Integration tests wrap requests in `QueryCounter.AssertAtMostAsync(n, ...)`, whi
 | BenchmarkDotNet (`tests/Cadence.Benchmarks`) | Micro-benchmarks of hot paths |
 | `SlowQueryInterceptor` | Logs database commands slower than 50 ms |
 | `pg_stat_statements` | Top queries by total time in production |
-| `dotnet-counters`, `dotnet-gcdump` | Runtime and GC profiling (M9 deep dive) |
+| `dotnet-counters`, `dotnet-gcdump` | Runtime and GC profiling (M10 deep dive) |

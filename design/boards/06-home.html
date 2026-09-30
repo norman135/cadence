@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>06 · My work</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Geist+Mono:wght@400..600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="board.css" />
+    <script src="https://cdn.jsdelivr.net/npm/lucide@1.49.0/dist/umd/lucide.min.js"></script>
+    <style>
+      .content {
+        display: grid;
+        grid-template-columns: 1fr 340px;
+        flex: 1;
+        min-height: 0;
+      }
+      .left {
+        padding: 28px 28px 0;
+        overflow: hidden;
+      }
+      .right {
+        border-left: 1px solid var(--border);
+        padding: 24px 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        background: var(--ink-25);
+      }
+      .stat {
+        padding: 14px 16px;
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--border);
+        background: var(--surface);
+      }
+      .stat .v {
+        font-size: 26px;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+        font-variant-numeric: tabular-nums;
+        margin-top: 4px;
+      }
+      .stat .l {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: var(--text-sm);
+        color: var(--text-muted);
+      }
+      .stat .l svg {
+        width: 14px;
+        height: 14px;
+      }
+      .section-head {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 26px 0 8px;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+      }
+      .section-head .n {
+        color: var(--text-subtle);
+        font-weight: 500;
+      }
+      .rows {
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+      }
+      .rows .issue-row:last-child {
+        border-bottom: 0;
+      }
+      .why {
+        font-size: 12px;
+        color: var(--text-muted);
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        white-space: nowrap;
+      }
+      .why svg {
+        width: 13px;
+        height: 13px;
+      }
+      .feed-item {
+        display: flex;
+        gap: 10px;
+        font-size: var(--text-sm);
+        line-height: 1.45;
+      }
+      .feed-item .when {
+        color: var(--text-subtle);
+        font-size: 12px;
+      }
+      .feed-item b {
+        font-weight: 500;
+      }
+      .feed-item .mono {
+        white-space: nowrap;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="board">
+      <div class="board-head">
+        <img src="../logo/cadence-mark.svg" alt="" />
+        <span class="brand">Cadence</span>
+        <span class="sep"></span>
+        <span>Brand &amp; UI kit</span>
+        <span class="page">06 / 10 · My work</span>
+      </div>
+
+      <h1 class="board-title">My work</h1>
+      <p class="board-lede">
+        Where every day starts: what needs you, in the order it needs you. Reviews and blockers
+        come first because they hold others up. The sprint's shape and the team's latest moves sit
+        at the side, readable at a glance.
+      </p>
+
+      <div class="stage light">
+        <div class="app" data-theme="light" style="height: 920px">
+          <nav class="sidebar" data-active="home"></nav>
+          <div class="main">
+            <div class="topbar">
+              <div class="crumbs"><i data-lucide="house" style="width: 16px; height: 16px; color: var(--text-muted)"></i><span>My work</span></div>
+              <span class="spacer"></span>
+              <div class="input" style="width: 320px; height: 30px; background: var(--surface-sunken); border-color: var(--border)">
+                <i data-lucide="search"></i><span class="ph">Search or jump to…</span><span class="spacer"></span><span class="kbd">Ctrl</span><span class="kbd">K</span>
+              </div>
+              <button class="btn ghost icon" aria-label="Notifications"><i data-lucide="bell"></i></button>
+              <button class="btn primary sm"><i data-lucide="plus"></i>New issue</button>
+            </div>
+
+            <div class="content">
+              <div class="left">
+                <div class="note" style="font-size: 13px">Tuesday, September 30</div>
+                <h2 style="margin: 2px 0 4px; font-size: 30px; letter-spacing: -0.025em">Good morning, Ada</h2>
+                <p class="note" style="margin: 0; font-size: 14px">Three things need you today, and Sprint 14 ends in 6 days.</p>
+
+                <div class="grid" style="grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 22px">
+                  <div class="stat"><div class="l"><i data-lucide="circle-dot"></i>Assigned to me</div><div class="v">7</div></div>
+                  <div class="stat"><div class="l"><i data-lucide="git-pull-request"></i>Awaiting my review</div><div class="v">2</div></div>
+                  <div class="stat"><div class="l"><i data-lucide="calendar-clock" style="color: var(--warning)"></i>Due this week</div><div class="v">3</div></div>
+                  <div class="stat"><div class="l"><i data-lucide="circle-check" style="color: var(--status-done)"></i>Done this sprint</div><div class="v">5 <span style="font-size: 13px; font-weight: 500; color: var(--success)">+2</span></div></div>
+                </div>
+
+                <div class="section-head"><i data-lucide="zap" style="width: 16px; height: 16px; color: var(--accent)"></i>Needs you<span class="n">3</span></div>
+                <div class="rows">
+                  <div class="issue-row">
+                    <span class="priority" data-p="high"></span><span class="key">ATL-138</span><span class="status" data-s="review"></span>
+                    <span class="title">Push notification preferences screen</span>
+                    <span class="why"><i data-lucide="git-pull-request"></i>Margaret asked for your review</span>
+                    <span class="avatar sm" data-name="Margaret Hamilton"></span>
+                  </div>
+                  <div class="issue-row">
+                    <span class="priority" data-p="urgent"></span><span class="key">NIM-88</span><span class="status" data-s="progress"></span>
+                    <span class="title">Rate limit headers missing on 429 responses</span>
+                    <span class="why" style="color: var(--danger)"><i data-lucide="octagon-alert"></i>Blocks ATL-147</span>
+                    <span class="avatar sm" data-name="Ada Lovelace"></span>
+                  </div>
+                  <div class="issue-row">
+                    <span class="priority" data-p="medium"></span><span class="key">ATL-142</span><span class="status" data-s="progress"></span>
+                    <span class="title">Offline sync drops edits made on the train</span>
+                    <span class="why"><i data-lucide="at-sign"></i>Grace mentioned you</span>
+                    <span class="avatar sm" data-name="Grace Hopper"></span>
+                  </div>
+                </div>
+
+                <div class="section-head"><span class="status" data-s="progress"></span>In progress<span class="n">2</span></div>
+                <div class="rows">
+                  <div class="issue-row">
+                    <span class="priority" data-p="medium"></span><span class="key">ATL-151</span><span class="status" data-s="progress"></span>
+                    <span class="title">Reduce cold start below 1.5 s</span>
+                    <span class="label"><i style="background: var(--label-orange)"></i>Performance</span>
+                    <span class="badge warning" style="height: 20px">Oct 14</span>
+                  </div>
+                  <div class="issue-row">
+                    <span class="priority" data-p="low"></span><span class="key">WEB-31</span><span class="status" data-s="progress"></span>
+                    <span class="title">Changelog page renders release notes from Markdown</span>
+                    <span class="label"><i style="background: var(--label-blue)"></i>Frontend</span>
+                    <span class="date">Oct 20</span>
+                  </div>
+                </div>
+
+                <div class="section-head"><span class="status" data-s="todo"></span>Up next<span class="n">2</span></div>
+                <div class="rows">
+                  <div class="issue-row">
+                    <span class="priority" data-p="medium"></span><span class="key">NIM-91</span><span class="status" data-s="todo"></span>
+                    <span class="title">Webhook signatures with rotating secrets</span>
+                    <span class="label"><i style="background: var(--label-teal)"></i>Backend</span>
+                    <span class="date">Oct 22</span>
+                  </div>
+                  <div class="issue-row">
+                    <span class="priority" data-p="low"></span><span class="key">ATL-161</span><span class="status" data-s="todo"></span>
+                    <span class="title">Haptics on swipe actions</span>
+                    <span class="label"><i style="background: var(--label-green)"></i>Feature</span>
+                    <span class="date"></span>
+                  </div>
+                </div>
+              </div>
+
+              <aside class="right">
+                <div>
+                  <div class="row" style="justify-content: space-between">
+                    <div class="row" style="gap: 8px; font-weight: 600"><span class="project-dot" style="background: var(--tempo-500)">A</span>Sprint 14</div>
+                    <span class="note">Sep 23 – Oct 6</span>
+                  </div>
+                  <div class="row" style="align-items: baseline; gap: 6px; margin-top: 14px">
+                    <span style="font-size: 28px; font-weight: 600; letter-spacing: -0.02em">58%</span>
+                    <span class="note">21 of 36 points</span>
+                  </div>
+                  <div class="progress" style="margin-top: 10px; height: 8px">
+                    <i style="width: 58%; background: var(--status-done)"></i>
+                    <i style="width: 22%; background: var(--status-progress)"></i>
+                    <i style="width: 8%; background: var(--status-review)"></i>
+                  </div>
+                  <div class="row" style="gap: 14px; margin-top: 10px; font-size: 12px; color: var(--text-muted)">
+                    <span class="row" style="gap: 5px"><span class="status" data-s="done"></span>21</span>
+                    <span class="row" style="gap: 5px"><span class="status" data-s="progress"></span>8</span>
+                    <span class="row" style="gap: 5px"><span class="status" data-s="review"></span>3</span>
+                    <span class="row" style="gap: 5px"><span class="status" data-s="todo"></span>4</span>
+                  </div>
+
+                  <div class="card" style="margin-top: 16px; padding: 12px 12px 6px; box-shadow: none">
+                    <div class="row" style="justify-content: space-between; font-size: 12px"><span style="font-weight: 500">Burndown</span><span class="muted">On track</span></div>
+                    <svg viewBox="0 0 300 110" width="100%" height="110" style="display: block; margin-top: 6px">
+                      <g stroke="var(--border)" stroke-width="1">
+                        <line x1="0" y1="20" x2="300" y2="20" /><line x1="0" y1="55" x2="300" y2="55" /><line x1="0" y1="90" x2="300" y2="90" />
+                      </g>
+                      <line x1="4" y1="12" x2="296" y2="98" stroke="var(--ink-300)" stroke-width="1.5" stroke-dasharray="4 4" />
+                      <path d="M4 12 L36 14 L68 22 L100 30 L132 33 L164 46 L196 52 L204 52 L204 110 L4 110 Z" fill="rgb(19 159 143 / 0.12)" />
+                      <polyline points="4,12 36,14 68,22 100,30 132,33 164,46 196,52" fill="none" stroke="var(--tempo-500)" stroke-width="2.25" stroke-linejoin="round" />
+                      <circle cx="196" cy="52" r="4" fill="var(--surface)" stroke="var(--tempo-600)" stroke-width="2" />
+                    </svg>
+                  </div>
+                </div>
+
+                <div>
+                  <div class="row" style="justify-content: space-between; margin-bottom: 12px">
+                    <span style="font-weight: 600">Activity</span><span class="note">Atlas, Nimbus</span>
+                  </div>
+                  <div class="stack" style="gap: 14px">
+                    <div class="feed-item"><span class="avatar sm" data-name="Alan Turing"></span><div><b>Alan</b> moved <span class="mono">ATL-139</span> to Done<div class="when">4 min ago</div></div></div>
+                    <div class="feed-item"><span class="avatar sm" data-name="Grace Hopper"></span><div><b>Grace</b> commented on <span class="mono">ATL-142</span>: "Repro'd on a flaky connection, queue replays out of order."<div class="when">18 min ago</div></div></div>
+                    <div class="feed-item"><span class="avatar sm" data-name="Margaret Hamilton"></span><div><b>Margaret</b> opened pull request <span class="mono">#228</span> for <span class="mono">ATL-138</span><div class="when">1 h ago</div></div></div>
+                    <div class="feed-item"><span class="avatar sm" data-name="Katherine Johnson"></span><div><b>Katherine</b> added <span class="mono">ATL-160</span> to Sprint 14<div class="when">2 h ago</div></div></div>
+                  </div>
+                </div>
+              </aside>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="screens.js"></script>
+    <script src="board.js"></script>
+  </body>
+</html>

@@ -10,8 +10,9 @@ Guidance for AI coding agents working on Cadence. Human contributors will find i
 | [docs/architecture.md](docs/architecture.md) | How the system is built today |
 | [docs/adr/](docs/adr/README.md) | Why it is built that way. Do not contradict an accepted ADR without writing a new one. |
 | [docs/performance.md](docs/performance.md) | Performance targets, the current baseline and how to measure |
+| [design/](design/README.md) | The brand, the design tokens and the screen designs. UI work follows these boards. |
 
-Cadence is a monorepo: an ASP.NET Core (.NET 10) modular monolith in `src/`, a React 19 + TypeScript SPA in `web/`, tests in `tests/`, load tests and scripts in `perf/`, and the self-hosted Docker Compose stack in `deploy/`.
+Cadence is a monorepo: an ASP.NET Core (.NET 10) modular monolith in `src/`, a React 19 + TypeScript SPA in `web/`, tests in `tests/`, load tests and scripts in `perf/`, the self-hosted Docker Compose stack in `deploy/`, and the design system in `design/`.
 
 ## Hard constraints
 
@@ -86,7 +87,7 @@ Run what CI runs (`.github/workflows/ci.yml`) and make sure all of it passes:
 
 - **Structure.** `src/app` is the shell, `src/features/<name>` holds one folder per feature with a public `index.ts`, and `src/shared` holds reusable code. ESLint enforces the boundaries: features never import other features or the app shell, and `shared` never imports features.
 - **API access** goes only through the generated hooks in `src/shared/api/generated`. Never edit generated files; regenerate them. Never call `fetch` directly; use `httpClient`, which turns problem details into `ApiError`.
-- **Styling** uses Tailwind with the semantic tokens from `src/index.css` (`bg-card`, `text-muted-foreground`, …), never raw palette colors. Reuse the components in `src/shared/ui`.
+- **Styling** uses Tailwind with the semantic tokens from `src/index.css` (`bg-card`, `text-muted-foreground`, …), never raw palette colors. Reuse the components in `src/shared/ui`. New screens follow the boards in `design/`; if a design needs something the system lacks, extend `design/tokens.css` and the boards first.
 - **Forms** use react-hook-form with `zod/mini` schemas (`z.string().check(z.minLength(1, '…'))`), not the classic `zod` API, which costs about 16 KB more per route. Apply server field errors with `applyServerErrors`.
 - **Performance.** Route pages are lazy-loaded. Heavy libraries must load only on the routes that use them. `npm run budget` enforces 180 KB of initial JS and 80 KB per lazy chunk (gzip).
 - **Tests** use Vitest, Testing Library and MSW. Mock HTTP with `server.use(...)`; unhandled requests fail the test. Query elements by role, label or text.

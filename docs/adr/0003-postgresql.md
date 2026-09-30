@@ -6,9 +6,9 @@
 ## Context
 
 The target host can be an ARM64 machine (for example an Ampere cloud VM or a Raspberry Pi-class server) or an x86-64 one, with 1–2 GB of RAM. The database must work well with EF Core, fit comfortably in a few hundred megabytes, and cover the features Cadence needs:
-- full-text search (M6)
-- a reliable job queue (M7)
-- reporting queries (M8)
+- full-text search (M7)
+- a reliable job queue (M8)
+- reporting queries (M9)
 
 SQL Server was the initial choice, but Microsoft publishes no ARM64 Linux images for it, and its minimum memory requirement (2 GB) exceeds the whole host budget.
 

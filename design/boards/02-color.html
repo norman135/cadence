@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>02 · Color</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Geist+Mono:wght@400..600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="board.css" />
+    <script src="https://cdn.jsdelivr.net/npm/lucide@1.49.0/dist/umd/lucide.min.js"></script>
+    <style>
+      .scale {
+        display: grid;
+        grid-auto-flow: column;
+        grid-auto-columns: 1fr;
+        border-radius: 14px;
+        overflow: hidden;
+        border: 1px solid var(--border);
+      }
+      .sw {
+        height: 112px;
+        padding: 10px;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        font-size: 11px;
+        font-family: var(--font-mono);
+        line-height: 1.35;
+        position: relative;
+      }
+      .sw b {
+        font-family: var(--font-sans);
+        font-size: 13px;
+        font-weight: 600;
+      }
+      .sw .tag {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        font-family: var(--font-sans);
+        font-size: 10px;
+        font-weight: 600;
+        padding: 2px 6px;
+        border-radius: 999px;
+        background: rgb(255 255 255 / 0.9);
+        color: var(--ink-900);
+      }
+      .scale-head {
+        display: flex;
+        align-items: baseline;
+        gap: 12px;
+        margin: 0 0 12px;
+      }
+      .scale-head h3 {
+        margin: 0;
+        font-size: 20px;
+        letter-spacing: -0.02em;
+      }
+      .tokens {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px 20px;
+      }
+      .token {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .token .chip {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        flex-shrink: 0;
+      }
+      .token .name {
+        font-family: var(--font-mono);
+        font-size: 12px;
+        color: var(--text);
+      }
+      .token .use {
+        font-size: 12px;
+        color: var(--text-muted);
+      }
+      .theme-panel {
+        border-radius: 20px;
+        padding: 28px;
+        border: 1px solid var(--border);
+        background: var(--surface);
+        color: var(--text);
+      }
+      .signal {
+        border-radius: 14px;
+        padding: 14px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        border: 1px solid var(--border);
+        background: var(--surface);
+      }
+      .ratio {
+        display: grid;
+        grid-template-columns: 1fr auto auto;
+        align-items: center;
+        gap: 10px;
+        font-size: var(--text-sm);
+        padding: 8px 0;
+        border-bottom: 1px solid var(--border);
+      }
+      .ratio .sample {
+        height: 28px;
+        padding: 0 10px;
+        border-radius: 7px;
+        display: inline-flex;
+        align-items: center;
+        font-weight: 500;
+        width: max-content;
+      }
+      .aa {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        font-weight: 600;
+        padding: 2px 6px;
+        border-radius: 5px;
+        background: var(--success-soft);
+        color: var(--success);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="board">
+      <div class="board-head">
+        <img src="../logo/cadence-mark.svg" alt="" />
+        <span class="brand">Cadence</span>
+        <span class="sep"></span>
+        <span>Brand &amp; UI kit</span>
+        <span class="page">02 / 10 · Color</span>
+      </div>
+
+      <h1 class="board-title">Color</h1>
+      <p class="board-lede">
+        Three palettes and a strict job for each. <b style="color: var(--tempo-700)">Tempo</b> means
+        "act here". <b style="color: var(--ember-600)">Ember</b> is the brand's heartbeat and is
+        used sparingly. <b style="color: var(--ink-700)">Ink</b> does everything else. Components use
+        semantic tokens only, so dark mode is a token swap, not a redesign.
+      </p>
+
+      <div class="stack" style="gap: 28px">
+        <div>
+          <div class="scale-head"><h3>Tempo</h3><span class="note">Brand · primary actions, focus, selection, done</span></div>
+          <div class="scale" id="tempo"></div>
+        </div>
+        <div class="grid" style="grid-template-columns: 7fr 14fr; gap: 24px">
+          <div>
+            <div class="scale-head"><h3>Ember</h3><span class="note">Accent · the beat, highlights</span></div>
+            <div class="scale" id="ember"></div>
+          </div>
+          <div>
+            <div class="scale-head"><h3>Ink</h3><span class="note">Neutrals · text, surfaces, borders</span></div>
+            <div class="scale" id="ink"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid" style="grid-template-columns: 1fr 1fr; margin-top: 40px">
+        <div class="theme-panel" data-theme="light">
+          <p class="section-label">Semantic tokens · light</p>
+          <div class="tokens" data-tokens></div>
+        </div>
+        <div class="theme-panel" data-theme="dark">
+          <p class="section-label">Semantic tokens · dark</p>
+          <div class="tokens" data-tokens></div>
+        </div>
+      </div>
+
+      <div class="grid" style="grid-template-columns: 1.25fr 1fr; margin-top: 24px">
+        <div class="panel">
+          <p class="section-label">Signals</p>
+          <div class="grid" style="grid-template-columns: repeat(4, 1fr); gap: 12px">
+            <div class="signal">
+              <span class="badge success"><i data-lucide="circle-check" style="width: 13px; height: 13px"></i>Deployed</span>
+              <span class="mono" style="font-size: 11px">--success</span>
+              <span class="note">Completed, healthy, saved</span>
+            </div>
+            <div class="signal">
+              <span class="badge warning"><i data-lucide="clock" style="width: 13px; height: 13px"></i>Due tomorrow</span>
+              <span class="mono" style="font-size: 11px">--warning</span>
+              <span class="note">Needs attention soon</span>
+            </div>
+            <div class="signal">
+              <span class="badge danger"><i data-lucide="octagon-alert" style="width: 13px; height: 13px"></i>Blocked</span>
+              <span class="mono" style="font-size: 11px">--danger</span>
+              <span class="note">Errors, destructive actions</span>
+            </div>
+            <div class="signal">
+              <span class="badge info"><i data-lucide="info" style="width: 13px; height: 13px"></i>Sprint 14</span>
+              <span class="mono" style="font-size: 11px">--info</span>
+              <span class="note">Neutral information, links in text</span>
+            </div>
+          </div>
+
+          <p class="section-label" style="margin-top: 32px">Workflow status</p>
+          <div class="row wrap" style="gap: 22px">
+            <span class="row" style="gap: 8px"><span class="status" data-s="backlog"></span>Backlog</span>
+            <span class="row" style="gap: 8px"><span class="status" data-s="todo"></span>Todo</span>
+            <span class="row" style="gap: 8px"><span class="status" data-s="progress"></span>In progress</span>
+            <span class="row" style="gap: 8px"><span class="status" data-s="review"></span>In review</span>
+            <span class="row" style="gap: 8px"><span class="status" data-s="done"></span>Done</span>
+            <span class="row" style="gap: 8px"><span class="status" data-s="canceled"></span>Canceled</span>
+          </div>
+          <p class="note" style="margin: 10px 0 0">
+            Shape carries the meaning and color reinforces it, so status reads in grayscale and for
+            color-blind users. Custom workflow states pick one of these six categories.
+          </p>
+
+          <p class="section-label" style="margin-top: 28px">Priority</p>
+          <div class="row wrap" style="gap: 22px">
+            <span class="row" style="gap: 8px"><span class="priority" data-p="urgent"></span>Urgent</span>
+            <span class="row" style="gap: 8px"><span class="priority" data-p="high"></span>High</span>
+            <span class="row" style="gap: 8px"><span class="priority" data-p="medium"></span>Medium</span>
+            <span class="row" style="gap: 8px"><span class="priority" data-p="low"></span>Low</span>
+            <span class="row" style="gap: 8px"><span class="priority" data-p="none"></span>No priority</span>
+          </div>
+
+          <p class="section-label" style="margin-top: 28px">Labels</p>
+          <div class="row wrap" style="gap: 8px">
+            <span class="label"><i style="background: var(--label-teal)"></i>Backend</span>
+            <span class="label"><i style="background: var(--label-blue)"></i>Frontend</span>
+            <span class="label"><i style="background: var(--label-violet)"></i>Design</span>
+            <span class="label"><i style="background: var(--label-pink)"></i>Research</span>
+            <span class="label"><i style="background: var(--label-red)"></i>Bug</span>
+            <span class="label"><i style="background: var(--label-orange)"></i>Performance</span>
+            <span class="label"><i style="background: var(--label-amber)"></i>Tech debt</span>
+            <span class="label"><i style="background: var(--label-green)"></i>Feature</span>
+            <span class="label"><i style="background: var(--label-slate)"></i>Chore</span>
+          </div>
+          <p class="note" style="margin: 10px 0 0">
+            Nine label colors, shown as a dot on a neutral chip. Full-color label fills turn a board
+            into confetti.
+          </p>
+        </div>
+
+        <div class="panel">
+          <p class="section-label">Contrast (WCAG 2.2)</p>
+          <div class="ratio">
+            <span class="sample" style="background: var(--tempo-600); color: white">Create issue</span>
+            <span class="mono">5.21</span><span class="aa">AA</span>
+          </div>
+          <div class="ratio">
+            <span class="sample" style="background: var(--tempo-400); color: var(--ink-950)">Create issue · dark</span>
+            <span class="mono">8.68</span><span class="aa">AAA</span>
+          </div>
+          <div class="ratio">
+            <span class="sample" style="color: var(--tempo-700); padding: 0">Link text on white</span>
+            <span class="mono">6.92</span><span class="aa">AA</span>
+          </div>
+          <div class="ratio">
+            <span class="sample" style="color: var(--ink-500); padding: 0">Muted text on white</span>
+            <span class="mono">5.27</span><span class="aa">AA</span>
+          </div>
+          <div class="ratio">
+            <span class="sample" style="background: var(--ink-950); color: var(--ink-400)">Muted text on dark</span>
+            <span class="mono">6.27</span><span class="aa">AA</span>
+          </div>
+          <div class="ratio">
+            <span class="sample" style="background: var(--red-600); color: white">Delete project</span>
+            <span class="mono">4.54</span><span class="aa">AA</span>
+          </div>
+          <div class="ratio" style="border: 0">
+            <span class="sample" style="background: var(--ink-950); color: #e9ecf1">Body text on dark</span>
+            <span class="mono">16.3</span><span class="aa">AAA</span>
+          </div>
+          <p class="note" style="margin: 14px 0 0">
+            Every text pairing meets AA (4.5:1). Ember-500 is 3.3:1 on white, so it never carries
+            body text. It appears in the logo, charts, illustrations and large display type only.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const scales = {
+        tempo: [
+          ['50', '#eefbf8'], ['100', '#d0f4ec'], ['200', '#a2e8da'], ['300', '#67d5c3'],
+          ['400', '#2dc2ae', 'Primary · dark'], ['500', '#139f8f'], ['600', '#0b7a70', 'Primary · light'],
+          ['700', '#0b655d'], ['800', '#0e514c'], ['900', '#10433f'], ['950', '#032926'],
+        ],
+        ember: [
+          ['50', '#fff4ee'], ['100', '#ffe4d5'], ['200', '#ffc4a6'], ['300', '#ff9c6e'],
+          ['400', '#ff7b45', 'Logo'], ['500', '#f0612e'], ['600', '#d44c1c'], ['700', '#b03c17'],
+        ],
+        ink: [
+          ['0', '#ffffff'], ['25', '#fafbfc'], ['50', '#f5f6f8'], ['100', '#eceef2'], ['200', '#dfe2e8'],
+          ['300', '#c6cbd5'], ['400', '#8b93a5'], ['500', '#646c7e'], ['600', '#4a5163'], ['700', '#343a48'],
+          ['800', '#222733'], ['850', '#1b1f29'], ['900', '#151a23'], ['950', '#0b0e14'],
+        ],
+      };
+      const light = (hex) => {
+        const [r, g, b] = hex.match(/\w\w/g).map((x) => parseInt(x, 16));
+        return 0.299 * r + 0.587 * g + 0.114 * b > 150;
+      };
+      for (const [name, steps] of Object.entries(scales)) {
+        document.getElementById(name).innerHTML = steps
+          .map(([step, hex, tag]) => {
+            const fg = light(hex) ? '#151a23' : '#ffffff';
+            return `<div class="sw" style="background:${hex};color:${fg}">${tag ? `<span class="tag">${tag}</span>` : ''}<b>${step}</b>${hex}</div>`;
+          })
+          .join('');
+      }
+
+      const tokens = [
+        ['--canvas', 'App background, sidebar'],
+        ['--surface', 'Panels and cards'],
+        ['--surface-sunken', 'Board columns, wells'],
+        ['--surface-raised', 'Menus, dialogs'],
+        ['--border', 'Dividers, card edges'],
+        ['--text', 'Primary text'],
+        ['--text-muted', 'Secondary text'],
+        ['--primary', 'Primary actions, focus'],
+        ['--primary-soft', 'Selection, active filters'],
+        ['--accent', 'Brand beat, highlights'],
+      ];
+      document.querySelectorAll('[data-tokens]').forEach((el) => {
+        el.innerHTML = tokens
+          .map(([name, use]) => `<div class="token"><span class="chip" style="background:var(${name})"></span><div><div class="name">${name}</div><div class="use">${use}</div></div></div>`)
+          .join('');
+      });
+    </script>
+    <script src="board.js"></script>
+  </body>
+</html>

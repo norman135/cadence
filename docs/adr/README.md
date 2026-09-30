@@ -14,6 +14,7 @@ Each significant decision is recorded as a short, immutable ADR: the context, th
 | [0011](0011-uuidv7-primary-keys.md) | UUIDv7 primary keys | Accepted |
 | [0014](0014-committed-openapi-contract-and-generated-client.md) | Commit the OpenAPI document and the generated client | Accepted |
 | [0015](0015-one-shot-migrator.md) | Apply migrations in a one-shot migrator process | Accepted |
+| [0016](0016-brand-and-design-system.md) | Brand and design system | Accepted |
 
 Numbers 0008–0013 are reserved for the decisions planned in [the roadmap](../ROADMAP.md#7-architecture-decisions). Each is written when its milestone implements it.
 
