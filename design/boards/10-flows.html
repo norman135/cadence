@@ -1,0 +1,364 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>10 · Flows</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Geist+Mono:wght@400..600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="board.css" />
+    <script src="https://cdn.jsdelivr.net/npm/lucide@1.49.0/dist/umd/lucide.min.js"></script>
+    <style>
+      .window {
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--border);
+        background: var(--surface);
+      }
+      .chrome {
+        height: 38px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 0 14px;
+        background: var(--ink-50);
+        border-bottom: 1px solid var(--border);
+      }
+      .chrome i.dot {
+        width: 11px;
+        height: 11px;
+        border-radius: 50%;
+        background: var(--ink-300);
+        display: inline-block;
+      }
+      .chrome .url {
+        margin: 0 auto;
+        width: 340px;
+        height: 24px;
+        border-radius: 7px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        font-size: 12px;
+        color: var(--text-muted);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+      }
+      .signin {
+        display: grid;
+        grid-template-columns: 1fr 1.05fr;
+        height: 640px;
+      }
+      .signin .form {
+        padding: 44px 64px;
+        display: flex;
+        flex-direction: column;
+      }
+      .signin .art {
+        margin: 12px;
+        border-radius: 14px;
+        position: relative;
+        overflow: hidden;
+        padding: 40px;
+        color: white;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+      }
+      .float {
+        position: absolute;
+        width: 250px;
+        background: rgb(21 26 35 / 0.9);
+        border: 1px solid rgb(255 255 255 / 0.08);
+        border-radius: 12px;
+        padding: 10px 12px;
+        box-shadow: 0 20px 40px rgb(0 0 0 / 0.4);
+        font-size: 13px;
+        color: #e9ecf1;
+      }
+      .palette {
+        width: 100%;
+        border-radius: 16px;
+        background: var(--surface-raised);
+        border: 1px solid var(--border-strong);
+        box-shadow: var(--shadow-lg);
+        overflow: hidden;
+        color: var(--text);
+      }
+      .palette .q {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        height: 52px;
+        padding: 0 16px;
+        border-bottom: 1px solid var(--border);
+        font-size: 16px;
+      }
+      .palette .q svg {
+        width: 18px;
+        height: 18px;
+        color: var(--text-muted);
+      }
+      .palette .grp {
+        padding: 10px 16px 4px;
+        font-size: 12px;
+        color: var(--text-subtle);
+        font-weight: 500;
+      }
+      .palette .it {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        height: 38px;
+        margin: 0 6px;
+        padding: 0 10px;
+        border-radius: 8px;
+      }
+      .palette .it svg {
+        width: 16px;
+        height: 16px;
+        color: var(--text-muted);
+      }
+      .palette .it.on {
+        background: var(--surface-hover);
+        box-shadow: inset 2px 0 0 var(--primary);
+      }
+      .palette .it .kbd {
+        margin-left: auto;
+      }
+      .palette .foot {
+        display: flex;
+        gap: 16px;
+        padding: 10px 16px;
+        border-top: 1px solid var(--border);
+        font-size: 12px;
+        color: var(--text-muted);
+        margin-top: 6px;
+      }
+      mark {
+        background: none;
+        color: var(--primary);
+        font-weight: 600;
+      }
+      .phone {
+        width: 262px;
+        height: 560px;
+        border-radius: 44px;
+        padding: 10px;
+        background: #0b0e14;
+        box-shadow: 0 30px 60px rgb(11 14 20 / 0.35);
+        flex-shrink: 0;
+      }
+      .screen {
+        height: 100%;
+        border-radius: 35px;
+        overflow: hidden;
+        background: var(--surface);
+        color: var(--text);
+        display: flex;
+        flex-direction: column;
+        position: relative;
+      }
+      .status-bar {
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 26px;
+        font-size: 13px;
+        font-weight: 600;
+      }
+      .status-bar svg {
+        width: 14px;
+        height: 14px;
+      }
+      .tabbar {
+        margin-top: auto;
+        height: 64px;
+        border-top: 1px solid var(--border);
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        padding-bottom: 10px;
+        background: var(--surface);
+      }
+      .tabbar span {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 3px;
+        font-size: 10px;
+        color: var(--text-subtle);
+        font-weight: 500;
+      }
+      .tabbar span.on {
+        color: var(--primary);
+      }
+      .tabbar svg {
+        width: 20px;
+        height: 20px;
+      }
+      .m-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 11px 16px;
+        border-bottom: 1px solid var(--border);
+        font-size: 14px;
+      }
+      .m-row .t {
+        flex: 1;
+        line-height: 1.3;
+      }
+      .m-row .t small {
+        display: block;
+        font-family: var(--font-mono);
+        font-size: 11px;
+        color: var(--text-muted);
+        margin-top: 2px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="board">
+      <div class="board-head">
+        <img src="../logo/cadence-mark.svg" alt="" />
+        <span class="brand">Cadence</span>
+        <span class="sep"></span>
+        <span>Brand &amp; UI kit</span>
+        <span class="page">10 / 10 · Flows</span>
+      </div>
+
+      <h1 class="board-title">Sign in, command, go mobile</h1>
+      <p class="board-lede">
+        The first screen anyone sees, the shortcut power users live in, and the same product on a
+        phone. Everything is reachable from the keyboard, and nothing depends on a big screen.
+      </p>
+
+      <div class="window">
+        <div class="chrome">
+          <i class="dot"></i><i class="dot"></i><i class="dot"></i>
+          <div class="url"><i data-lucide="lock" style="width: 12px; height: 12px"></i>cadence.lumenlabs.dev/login</div>
+        </div>
+        <div class="signin">
+          <div class="form">
+            <div class="row" style="gap: 10px">
+              <img src="../logo/cadence-mark.svg" width="30" height="30" alt="" />
+              <span style="font-weight: 600; font-size: 20px; letter-spacing: -0.05em">cadence</span>
+            </div>
+            <div style="margin: auto 0; width: 100%; max-width: 380px">
+              <h2 style="margin: 0; font-size: 28px; letter-spacing: -0.025em">Welcome back</h2>
+              <p class="note" style="margin: 6px 0 26px; font-size: 14px">Sign in to Lumen Labs' workspace.</p>
+              <div class="stack" style="gap: 16px">
+                <div class="field"><label>Email</label><div class="input lg">ada@lumenlabs.dev</div></div>
+                <div class="field">
+                  <div class="row" style="justify-content: space-between"><label>Password</label><span style="font-size: 13px; color: var(--primary); font-weight: 500">Forgot password?</span></div>
+                  <div class="input lg focus"><span style="letter-spacing: 3px; font-size: 18px">••••••••••••</span><span class="spacer"></span><i data-lucide="eye-off"></i></div>
+                </div>
+                <button class="btn primary lg" style="width: 100%; margin-top: 4px">Sign in</button>
+              </div>
+              <p class="note" style="margin: 22px 0 0; text-align: center; font-size: 14px">New to Cadence? <span style="color: var(--primary); font-weight: 500">Create an account</span></p>
+            </div>
+            <p class="note" style="margin: 0; font-size: 12px">© 2026 Lumen Labs · Self-hosted Cadence 0.3</p>
+          </div>
+
+          <div class="art stage" style="padding: 40px; border-radius: 14px">
+            <div class="float" style="left: 56px; top: 56px; transform: rotate(-3deg)">
+              <div class="row" style="gap: 6px"><span class="priority" data-p="high"></span><span class="key" style="color: #8b93a5">ATL-142</span><span class="spacer"></span><span class="avatar sm" data-name="Grace Hopper"></span></div>
+              <div style="font-weight: 500; margin-top: 6px">Offline sync drops edits made on the train</div>
+            </div>
+            <div class="float" style="right: 44px; top: 120px; width: 220px; transform: rotate(2deg)">
+              <div class="row" style="gap: 8px"><span class="status" data-s="done"></span><span style="font-weight: 500">Sprint 13 shipped</span></div>
+              <div class="progress" style="margin-top: 10px; background: rgb(255 255 255 / 0.08)"><i style="width: 100%; background: var(--tempo-400)"></i></div>
+              <div style="font-size: 12px; color: #8b93a5; margin-top: 6px">34 points · 2 days early</div>
+            </div>
+            <div class="float" style="left: 110px; top: 206px; width: 230px; transform: rotate(-1deg)">
+              <div class="row" style="gap: 8px"><span class="avatar sm" data-name="Alan Turing"></span><span><b style="font-weight: 500">Alan</b> <span style="color: #8b93a5">reviewed</span> <span class="mono" style="font-size: 12px">#231</span></span></div>
+            </div>
+            <div style="position: relative">
+              <div style="font-size: 30px; line-height: 1.15; font-weight: 600; letter-spacing: -0.03em; max-width: 380px">Plan, track and ship <span style="color: var(--tempo-300)">in rhythm</span>.</div>
+              <div class="stack" style="gap: 8px; margin-top: 18px; font-size: 14px; color: rgb(233 236 241 / 0.75)">
+                <div class="row" style="gap: 8px"><i data-lucide="server" style="width: 16px; height: 16px; color: var(--tempo-300)"></i>Self-hosted: your data stays on your server</div>
+                <div class="row" style="gap: 8px"><i data-lucide="gauge" style="width: 16px; height: 16px; color: var(--tempo-300)"></i>Fast on a 1 GB machine, live for the whole team</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid" style="grid-template-columns: 1fr 1.42fr; margin-top: 28px; align-items: stretch">
+        <div class="stage" data-theme="dark" style="padding: 36px; display: flex; flex-direction: column; justify-content: center">
+          <div class="palette">
+            <div class="q"><i data-lucide="search"></i><span>off<span style="display: inline-block; width: 1.5px; height: 18px; background: var(--primary); vertical-align: -3px"></span></span><span class="spacer"></span><span class="kbd">Esc</span></div>
+            <div class="grp">Issues</div>
+            <div class="it on"><span class="status" data-s="progress"></span><span class="key">ATL-142</span><span><mark>Off</mark>line sync drops edits made on the train</span></div>
+            <div class="it"><span class="status" data-s="done"></span><span class="key">ATL-121</span><span><mark>Off</mark>line banner on every screen</span></div>
+            <div class="grp">Actions</div>
+            <div class="it"><i data-lucide="user-round-x"></i><span>Mark me as <mark>off</mark> for Sprint 15</span></div>
+            <div class="it"><i data-lucide="bell-off"></i><span>Turn notifications <mark>off</mark></span></div>
+            <div class="grp">Navigate</div>
+            <div class="it"><i data-lucide="kanban"></i><span>Go to board</span><span class="kbd">G</span><span class="kbd" style="margin-left: 4px">B</span></div>
+            <div class="foot"><span><span class="kbd">↑</span> <span class="kbd">↓</span> move</span><span><span class="kbd">↵</span> open</span><span><span class="kbd">Ctrl</span> <span class="kbd">↵</span> open in new tab</span></div>
+          </div>
+          <p class="note" style="margin: 18px 4px 0; color: rgb(233 236 241 / 0.65)">
+            <b style="color: #e9ecf1">Command palette.</b> One box for issues, people, projects and
+            actions. It downloads on first use, so it costs nothing until someone presses
+            <span class="mono">Ctrl K</span>.
+          </p>
+        </div>
+
+        <div class="stage light" style="padding: 32px 24px 28px; display: flex; gap: 16px; align-items: flex-end; justify-content: center">
+          <div class="phone">
+            <div class="screen" data-theme="light">
+              <div class="status-bar"><span>9:41</span><span class="row" style="gap: 5px"><i data-lucide="signal"></i><i data-lucide="wifi"></i><i data-lucide="battery-full"></i></span></div>
+              <div class="row" style="padding: 8px 16px 12px; justify-content: space-between">
+                <div><div class="note" style="font-size: 12px">Tuesday</div><div style="font-size: 22px; font-weight: 600; letter-spacing: -0.02em">My work</div></div>
+                <span class="avatar lg" data-name="Ada Lovelace"></span>
+              </div>
+              <div class="row" style="padding: 0 16px 10px; gap: 6px"><span class="badge solid-primary">Needs you 3</span><span class="badge">In progress 2</span></div>
+              <div class="m-row"><span class="status" data-s="review"></span><div class="t">Push notification preferences<small>ATL-138 · review</small></div><span class="avatar sm" data-name="Margaret Hamilton"></span></div>
+              <div class="m-row"><span class="status" data-s="progress"></span><div class="t">Rate limit headers missing on 429<small>NIM-88 · blocks ATL-147</small></div><span class="priority" data-p="urgent"></span></div>
+              <div class="m-row"><span class="status" data-s="progress"></span><div class="t">Offline sync drops edits<small>ATL-142 · mentioned</small></div><span class="avatar sm" data-name="Grace Hopper"></span></div>
+              <div class="m-row"><span class="status" data-s="progress"></span><div class="t">Reduce cold start below 1.5 s<small>ATL-151 · due Oct 14</small></div><span class="priority" data-p="medium"></span></div>
+              <div class="tabbar"><span class="on"><i data-lucide="house"></i>Home</span><span><i data-lucide="kanban"></i>Board</span><span><i data-lucide="inbox"></i>Inbox</span><span><i data-lucide="search"></i>Search</span></div>
+            </div>
+          </div>
+
+          <div class="phone" style="margin-bottom: 26px">
+            <div class="screen" data-theme="dark" style="background: var(--canvas)">
+              <div class="status-bar"><span>9:41</span><span class="row" style="gap: 5px"><i data-lucide="signal"></i><i data-lucide="wifi"></i><i data-lucide="battery-full"></i></span></div>
+              <div class="row" style="padding: 6px 16px 12px; gap: 8px">
+                <span class="project-dot" style="background: var(--tempo-500)">A</span><span style="font-weight: 600">Sprint 14</span><span class="spacer"></span><i data-lucide="sliders-horizontal" style="width: 18px; height: 18px; color: var(--text-muted)"></i>
+              </div>
+              <div class="row" style="padding: 0 16px 12px; gap: 6px; overflow: hidden">
+                <span class="badge">Todo 4</span><span class="badge solid-primary"><span class="status" data-s="progress"></span>In progress 3</span><span class="badge">In review 2</span>
+              </div>
+              <div class="stack" style="gap: 8px; padding: 0 12px">
+                <div class="k-card"><div class="k-top"><span class="priority" data-p="high"></span><span class="key">ATL-142</span><span class="spacer"></span><span class="avatar sm" data-name="Grace Hopper"></span></div><div class="k-title">Offline sync drops edits made on the train</div></div>
+                <div class="k-card"><div class="k-top"><span class="priority" data-p="medium"></span><span class="key">ATL-147</span><span class="spacer"></span><span class="avatar sm" data-name="Alan Turing"></span></div><div class="k-title">Biometric sign-in on Android</div></div>
+                <div class="k-card"><div class="k-top"><span class="priority" data-p="medium"></span><span class="key">ATL-151</span><span class="spacer"></span><span class="avatar sm" data-name="Ada Lovelace"></span></div><div class="k-title">Reduce cold start below 1.5 s</div></div>
+              </div>
+              <div class="note" style="text-align: center; font-size: 11px; margin-top: 10px">Swipe for the next column</div>
+              <div class="tabbar" style="background: var(--canvas)"><span><i data-lucide="house"></i>Home</span><span class="on"><i data-lucide="kanban"></i>Board</span><span><i data-lucide="inbox"></i>Inbox</span><span><i data-lucide="search"></i>Search</span></div>
+            </div>
+          </div>
+
+          <div class="card" style="width: 206px; flex-shrink: 0; padding: 22px 16px; text-align: center; align-self: center; box-shadow: var(--shadow-md)">
+            <div style="width: 56px; height: 56px; margin: 0 auto 14px; border-radius: 16px; display: grid; place-items: center; background: var(--primary-soft); color: var(--primary)">
+              <svg viewBox="0 0 64 64" width="34" height="34" aria-hidden="true"><rect x="15" y="33" width="8" height="16" rx="4" fill="currentColor" fill-opacity="0.55"/><rect x="28" y="23" width="8" height="26" rx="4" fill="currentColor" fill-opacity="0.8"/><rect x="41" y="15" width="8" height="34" rx="4" fill="currentColor"/></svg>
+            </div>
+            <div style="font-weight: 600; font-size: 16px; letter-spacing: -0.01em">Inbox zero</div>
+            <p class="note" style="margin: 6px 0 16px">Nothing needs you right now. New mentions, reviews and assignments land here.</p>
+            <button class="btn secondary sm">Notification settings</button>
+            <p class="section-label" style="margin: 18px 0 0; font-size: 10px">Empty state</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="board.js"></script>
+  </body>
+</html>
