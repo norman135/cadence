@@ -1,5 +1,4 @@
 using System.Net;
-using System.Net.Http.Json;
 using Cadence.Api.IntegrationTests.Infrastructure;
 using Cadence.Application.Features.System;
 
@@ -19,7 +18,7 @@ public sealed class SystemEndpointTests(CadenceApiFactory factory)
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.True(response.Headers.Contains("api-supported-versions"));
 
-        var info = await response.Content.ReadFromJsonAsync<SystemInfoResponse>(TestContext.Current.CancellationToken);
+        var info = await response.Content.ReadJsonAsync<SystemInfoResponse>(TestContext.Current.CancellationToken);
         Assert.NotNull(info);
         Assert.Equal("Cadence", info.Name);
         Assert.Equal("Testing", info.Environment);

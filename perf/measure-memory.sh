@@ -4,12 +4,17 @@
 #
 #   perf/measure-memory.sh 350            # budget for the idle stack
 #   perf/measure-memory.sh 450 cadence    # explicit project name
+#
+# Containers labelled cadence.test-only=true (Mailpit in end-to-end runs) are not part of a
+# real deployment, so they are left out.
 set -euo pipefail
 
 budget_mib="${1:?Usage: measure-memory.sh <budget-MiB> [compose-project]}"
 project="${2:-cadence}"
 
-mapfile -t containers < <(docker ps -q --filter "label=com.docker.compose.project=${project}")
+mapfile -t containers < <(
+  docker ps --filter "label=com.docker.compose.project=${project}"     --format '{{.ID}} {{.Label "cadence.test-only"}}' | awk '$2 != "true" { print $1 }'
+)
 if ((${#containers[@]} == 0)); then
   echo "No running containers found for Compose project '${project}'." >&2
   exit 1

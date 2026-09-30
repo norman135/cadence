@@ -32,6 +32,8 @@ var api = builder.AddProject<Projects.Cadence_Api>("api")
 // so the browser sees a single origin, as it does in production.
 builder.AddViteApp("web", "../../web")
     .WithReference(api)
-    .WaitFor(api);
+    .WaitFor(api)
+    // A fixed port, so links in development emails (Cadence:PublicUrl) always point at the app.
+    .WithEndpoint("http", endpoint => endpoint.Port = 5173);
 
 await builder.Build().RunAsync();

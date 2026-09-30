@@ -5,6 +5,7 @@ using Cadence.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.UsePlaceholderSettings();
 builder.AddServiceDefaults();
 
 builder.Services

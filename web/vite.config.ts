@@ -39,6 +39,8 @@ export default defineConfig({
   test: {
     // Worker threads start faster than child processes, and are reliable on Windows.
     pool: 'threads',
+    // Playwright owns e2e/.
+    include: ['src/**/*.test.{ts,tsx}'],
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.ts'],
     css: false,

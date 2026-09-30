@@ -41,9 +41,12 @@ npm ci
 npm run dev | lint | format:check | typecheck | test | build | budget
 npm run api:generate                           # after any API contract change
 
-# Production stack from source, then end-to-end checks
-cd deploy && POSTGRES_PASSWORD=local docker compose -f docker-compose.yml -f docker-compose.build.yml up -d --build
+# Production stack from source (plus Mailpit), then end-to-end checks
+cd deploy
+export POSTGRES_PASSWORD=local JWT_SIGNING_KEY=local-only-signing-key-at-least-32-characters
+docker compose -f docker-compose.yml -f docker-compose.build.yml -f docker-compose.e2e.yml up -d --build
 ../perf/smoke-test.sh https://localhost && ../perf/measure-memory.sh 350
+cd ../web && npx playwright install chromium && npm run e2e
 ```
 
 ## Before opening a pull request
@@ -54,7 +57,7 @@ Run what CI runs (`.github/workflows/ci.yml`) and make sure all of it passes:
 2. Building regenerates `openapi/cadence.json`. Commit it if it changed.
 3. In `web/`: `npm run api:generate`, then commit any change to `src/shared/api/generated`
 4. `npm run lint`, `npm run format:check`, `npm run typecheck`, `npm test`, `npm run build`, `npm run budget`
-5. For container or deployment changes: build the stack and run `perf/smoke-test.sh`
+5. For container, deployment or user-journey changes: build the stack, run `perf/smoke-test.sh` and `npm run e2e`
 
 ## Backend conventions
 
@@ -84,6 +87,7 @@ Run what CI runs (`.github/workflows/ci.yml`) and make sure all of it passes:
 - **Structure.** `src/app` is the shell, `src/features/<name>` holds one folder per feature with a public `index.ts`, and `src/shared` holds reusable code. ESLint enforces the boundaries: features never import other features or the app shell, and `shared` never imports features.
 - **API access** goes only through the generated hooks in `src/shared/api/generated`. Never edit generated files; regenerate them. Never call `fetch` directly; use `httpClient`, which turns problem details into `ApiError`.
 - **Styling** uses Tailwind with the semantic tokens from `src/index.css` (`bg-card`, `text-muted-foreground`, …), never raw palette colors. Reuse the components in `src/shared/ui`.
+- **Forms** use react-hook-form with `zod/mini` schemas (`z.string().check(z.minLength(1, '…'))`), not the classic `zod` API, which costs about 16 KB more per route. Apply server field errors with `applyServerErrors`.
 - **Performance.** Route pages are lazy-loaded. Heavy libraries must load only on the routes that use them. `npm run budget` enforces 180 KB of initial JS and 80 KB per lazy chunk (gzip).
 - **Tests** use Vitest, Testing Library and MSW. Mock HTTP with `server.use(...)`; unhandled requests fail the test. Query elements by role, label or text.
 
