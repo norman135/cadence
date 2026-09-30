@@ -1,7 +1,6 @@
 import { Home, Search, Settings, UserRound, Users } from 'lucide-react';
 import { lazy, Suspense, useEffect, useState } from 'react';
 import { Link, NavLink, Outlet } from 'react-router';
-import { Toaster } from 'sonner';
 import { OrganizationSwitcher } from '../components/organization-switcher';
 import { useSignOut } from '@/shared/auth';
 import { cn } from '@/shared/lib/utils';
@@ -15,6 +14,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/shared/ui/dropdown-menu';
+import { Toaster } from '@/shared/ui/toaster';
+import { TooltipProvider } from '@/shared/ui/tooltip';
 import { rememberOrganization, useCurrentOrganization, useCurrentUser } from '@/shared/workspace';
 import { NotFoundPage } from '../routes/not-found-page';
 
@@ -54,54 +55,56 @@ export function AppShell() {
   const base = `/${organization.slug}`;
 
   return (
-    <div className="flex min-h-svh">
-      <aside className="hidden w-60 shrink-0 flex-col gap-4 border-r bg-muted/30 p-3 md:flex">
-        <OrganizationSwitcher />
-        <nav className="flex flex-col gap-1" aria-label="Main">
-          <SidebarLink to={base} end icon={<Home />}>
-            Home
-          </SidebarLink>
-          <SidebarLink to={`${base}/settings/members`} icon={<Users />}>
-            Members
-          </SidebarLink>
-          <SidebarLink to={`${base}/settings/organization`} icon={<Settings />}>
-            Settings
-          </SidebarLink>
-        </nav>
-      </aside>
+    <TooltipProvider>
+      <div className="flex min-h-svh">
+        <aside className="hidden w-60 shrink-0 flex-col gap-4 border-r bg-muted/30 p-3 md:flex">
+          <OrganizationSwitcher />
+          <nav className="flex flex-col gap-1" aria-label="Main">
+            <SidebarLink to={base} end icon={<Home />}>
+              Home
+            </SidebarLink>
+            <SidebarLink to={`${base}/settings/members`} icon={<Users />}>
+              Members
+            </SidebarLink>
+            <SidebarLink to={`${base}/settings/organization`} icon={<Settings />}>
+              Settings
+            </SidebarLink>
+          </nav>
+        </aside>
 
-      <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex h-14 items-center justify-between gap-4 border-b px-4">
-          <div className="md:hidden">
-            <OrganizationSwitcher />
-          </div>
-          <Button
-            variant="secondary"
-            size="sm"
-            className="w-full max-w-xs justify-start text-muted-foreground"
-            onClick={() => {
-              setPaletteOpen(true);
-            }}
-          >
-            <Search aria-hidden="true" />
-            Search or jump to…
-            <kbd className="ml-auto rounded border px-1.5 text-xs">Ctrl K</kbd>
-          </Button>
-          <UserMenu organizationSlug={organization.slug} />
-        </header>
+        <div className="flex min-w-0 flex-1 flex-col">
+          <header className="flex h-14 items-center justify-between gap-4 border-b px-4">
+            <div className="md:hidden">
+              <OrganizationSwitcher />
+            </div>
+            <Button
+              variant="secondary"
+              size="sm"
+              className="w-full max-w-xs justify-start text-muted-foreground"
+              onClick={() => {
+                setPaletteOpen(true);
+              }}
+            >
+              <Search aria-hidden="true" />
+              Search or jump to…
+              <kbd className="ml-auto rounded border px-1.5 text-xs">Ctrl K</kbd>
+            </Button>
+            <UserMenu organizationSlug={organization.slug} />
+          </header>
 
-        <main className="flex-1 p-4 sm:p-6">
-          <Outlet />
-        </main>
+          <main className="flex-1 p-4 sm:p-6">
+            <Outlet />
+          </main>
+        </div>
+
+        {paletteOpen && (
+          <Suspense fallback={null}>
+            <CommandPalette open onOpenChange={setPaletteOpen} />
+          </Suspense>
+        )}
+        <Toaster />
       </div>
-
-      {paletteOpen && (
-        <Suspense fallback={null}>
-          <CommandPalette open onOpenChange={setPaletteOpen} />
-        </Suspense>
-      )}
-      <Toaster richColors closeButton position="bottom-right" />
-    </div>
+    </TooltipProvider>
   );
 }
 
