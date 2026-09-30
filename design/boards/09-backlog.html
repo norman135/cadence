@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>09 · Backlog</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Geist+Mono:wght@400..600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="board.css" />
+    <script src="https://cdn.jsdelivr.net/npm/lucide@1.49.0/dist/umd/lucide.min.js"></script>
+    <style>
+      .content {
+        display: grid;
+        grid-template-columns: 1fr 290px;
+        flex: 1;
+        min-height: 0;
+        position: relative;
+      }
+      .list {
+        overflow: hidden;
+      }
+      .sprint-head {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        height: 44px;
+        padding: 0 16px;
+        border-bottom: 1px solid var(--border);
+        background: var(--surface-sunken);
+      }
+      .sprint-head b {
+        font-weight: 600;
+      }
+      .cap {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 12px;
+        color: var(--text-muted);
+        font-variant-numeric: tabular-nums;
+      }
+      .issue-row .pts {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        color: var(--text-muted);
+        width: 20px;
+        text-align: right;
+      }
+      .issue-row .checkbox {
+        opacity: 0.9;
+      }
+      .side {
+        border-left: 1px solid var(--border);
+        padding: 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+      }
+      .person {
+        display: grid;
+        grid-template-columns: 20px 1fr auto;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+      }
+      .person .bar {
+        grid-column: 2 / 4;
+        height: 5px;
+        border-radius: 99px;
+        background: var(--surface-hover);
+        overflow: hidden;
+        margin-top: -2px;
+      }
+      .person .bar i {
+        display: block;
+        height: 100%;
+        border-radius: 99px;
+      }
+      .bulk {
+        position: absolute;
+        left: 50%;
+        bottom: 22px;
+        transform: translateX(-60%);
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        padding: 6px 6px 6px 14px;
+        border-radius: 12px;
+        background: var(--surface-raised);
+        border: 1px solid var(--border-strong);
+        box-shadow: var(--shadow-lg);
+        font-size: 13px;
+      }
+    </style>
+  </head>
+  <body class="dark-board">
+    <div class="board" data-theme="dark" style="color: var(--text)">
+      <div class="board-head">
+        <img src="../logo/cadence-mark.svg" alt="" />
+        <span class="brand">Cadence</span>
+        <span class="sep"></span>
+        <span>Brand &amp; UI kit</span>
+        <span class="page">09 / 10 · Backlog &amp; sprints</span>
+      </div>
+
+      <h1 class="board-title">Backlog &amp; sprints</h1>
+      <p class="board-lede">
+        Planning is a conversation about capacity, so the numbers stay visible: points per
+        sprint, load per person, and the team's recent velocity. Select with Shift or Ctrl, drag
+        or bulk-move, and see what happens to capacity before you commit.
+      </p>
+
+      <div class="stage">
+        <div class="app" data-theme="dark" style="height: 900px">
+          <nav class="sidebar" data-active="backlog"></nav>
+          <div class="main">
+            <div class="topbar">
+              <div class="crumbs">
+                <span class="project-dot" style="background: var(--tempo-500)">A</span>
+                <span class="dim">Atlas Mobile</span><i data-lucide="chevron-right"></i><span>Backlog</span>
+              </div>
+              <span class="spacer"></span>
+              <button class="btn secondary sm"><i data-lucide="play"></i>Start Sprint 15</button>
+              <button class="btn primary sm"><i data-lucide="plus"></i>New issue</button>
+            </div>
+            <div class="toolbar">
+              <div class="input" style="width: 240px; height: 28px"><i data-lucide="search"></i><span class="ph">Filter by title, key or label</span></div>
+              <button class="btn secondary sm"><i data-lucide="filter"></i>Filter</button>
+              <span class="spacer"></span>
+              <span class="note">Group by <b style="color: var(--text); font-weight: 500">Sprint</b></span>
+              <button class="btn ghost sm"><i data-lucide="sliders-horizontal"></i>Display</button>
+            </div>
+
+            <div class="content">
+              <div class="list" id="list"></div>
+
+              <aside class="side">
+                <div>
+                  <div style="font-weight: 600">Sprint 15 plan</div>
+                  <div class="note" style="font-size: 12px">Oct 7 – Oct 20 · 10 working days</div>
+                </div>
+                <div class="card" style="padding: 12px; box-shadow: none">
+                  <div class="row" style="justify-content: space-between; font-size: 12px"><span class="muted">Velocity, last 3 sprints</span><b style="font-weight: 600">34 pts</b></div>
+                  <svg viewBox="0 0 240 64" width="100%" height="64" style="display: block; margin-top: 8px">
+                    <rect x="8" y="22" width="44" height="42" rx="5" fill="var(--surface-hover)" />
+                    <rect x="68" y="14" width="44" height="50" rx="5" fill="var(--surface-hover)" />
+                    <rect x="128" y="18" width="44" height="46" rx="5" fill="var(--surface-hover)" />
+                    <rect x="188" y="26" width="44" height="38" rx="5" fill="var(--tempo-500)" opacity="0.9" />
+                    <line x1="0" y1="18" x2="240" y2="18" stroke="var(--ember-400)" stroke-width="1.5" stroke-dasharray="4 4" />
+                  </svg>
+                  <div class="row" style="justify-content: space-between; font-size: 11px; color: var(--text-subtle); font-family: var(--font-mono)"><span>S11</span><span>S12</span><span>S13</span><span style="color: var(--primary)">S15</span></div>
+                </div>
+
+                <div>
+                  <div class="row" style="justify-content: space-between; margin-bottom: 10px"><span style="font-weight: 500; font-size: 13px">Capacity</span><span class="note" style="font-size: 12px">26 of 38 pts</span></div>
+                  <div class="stack" style="gap: 12px">
+                    <div class="person"><span class="avatar sm" data-name="Grace Hopper"></span><span>Grace</span><span class="mono" style="font-size: 12px; color: var(--warning)">11 / 10</span><div class="bar"><i style="width: 100%; background: var(--amber-400)"></i></div></div>
+                    <div class="person"><span class="avatar sm" data-name="Alan Turing"></span><span>Alan</span><span class="mono muted" style="font-size: 12px">6 / 8</span><div class="bar"><i style="width: 75%; background: var(--tempo-400)"></i></div></div>
+                    <div class="person"><span class="avatar sm" data-name="Katherine Johnson"></span><span>Katherine</span><span class="mono muted" style="font-size: 12px">5 / 8</span><div class="bar"><i style="width: 62%; background: var(--tempo-400)"></i></div></div>
+                    <div class="person"><span class="avatar sm" data-name="Dennis Ritchie"></span><span>Dennis</span><span class="mono muted" style="font-size: 12px">4 / 6</span><div class="bar"><i style="width: 66%; background: var(--tempo-400)"></i></div></div>
+                    <div class="person"><span class="avatar sm" data-name="Margaret Hamilton"></span><span>Margaret</span><span class="mono muted" style="font-size: 12px">0 / 6</span><div class="bar"><i style="width: 0"></i></div></div>
+                  </div>
+                </div>
+                <div class="card" style="padding: 10px 12px; box-shadow: none; border-color: color-mix(in oklab, var(--warning) 40%, transparent); background: var(--warning-soft); font-size: 13px">
+                  <div class="row" style="gap: 8px; color: var(--warning); font-weight: 500"><i data-lucide="triangle-alert" style="width: 15px; height: 15px"></i>Grace is over capacity</div>
+                  <div class="note" style="margin-top: 4px; font-size: 12px">Margaret has room for 6 points.</div>
+                </div>
+              </aside>
+
+              <div class="bulk">
+                <span><b style="font-weight: 600">3</b> selected</span>
+                <span style="width: 1px; height: 18px; background: var(--border); margin: 0 6px"></span>
+                <button class="btn ghost sm"><i data-lucide="calendar-range"></i>Move to sprint</button>
+                <button class="btn ghost sm"><i data-lucide="user-round"></i>Assign</button>
+                <button class="btn ghost sm"><i data-lucide="flag"></i>Priority</button>
+                <button class="btn ghost sm icon" aria-label="Clear"><i data-lucide="x"></i></button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const sections = [
+        {
+          head: `<i data-lucide="chevron-down" style="width:15px;height:15px;color:var(--text-muted)"></i><b>Sprint 14</b><span class="badge solid-primary" style="height:20px">Active</span><span class="note" style="font-size:12px">Sep 23 – Oct 6</span><span class="spacer"></span><span class="cap">36 / 40 pts<div class="progress" style="width:90px"><i style="width:90%;background:var(--tempo-400)"></i></div></span>`,
+          rows: [
+            ['done', 'medium', 'ATL-139', 'Pull-to-refresh on every list', ['Feature', 'green'], 2, 'Alan Turing'],
+            ['review', 'high', 'ATL-138', 'Push notification preferences screen', ['Frontend', 'blue'], 3, 'Margaret Hamilton'],
+            ['progress', 'high', 'ATL-142', 'Offline sync drops edits made on the train', ['Backend', 'teal'], 5, 'Grace Hopper'],
+            ['todo', 'urgent', 'ATL-156', 'Crash when opening a shared link from the lock screen', ['Bug', 'red'], 2, 'Dennis Ritchie'],
+          ],
+        },
+        {
+          head: `<i data-lucide="chevron-down" style="width:15px;height:15px;color:var(--text-muted)"></i><b>Sprint 15</b><span class="badge" style="height:20px">Planned</span><span class="note" style="font-size:12px">Oct 7 – Oct 20</span><span class="spacer"></span><span class="cap">26 / 38 pts<div class="progress" style="width:90px"><i style="width:68%;background:var(--tempo-400)"></i></div></span>`,
+          rows: [
+            ['todo', 'high', 'ATL-166', 'Share sheet extension for iOS', ['Feature', 'green'], 5, 'Grace Hopper'],
+            ['todo', 'medium', 'ATL-167', 'Accessibility pass on the board view', ['Design', 'violet'], 3, 'Katherine Johnson', true],
+            ['todo', 'medium', 'ATL-158', 'Upgrade React Native to 0.82', ['Tech debt', 'amber'], 3, 'Alan Turing', true],
+            ['todo', 'low', 'ATL-168', 'Reduce APK size by splitting ABIs', ['Performance', 'orange'], 2, 'Dennis Ritchie', true],
+          ],
+        },
+        {
+          head: `<i data-lucide="chevron-down" style="width:15px;height:15px;color:var(--text-muted)"></i><b>Backlog</b><span class="note" style="font-size:12px">42 issues</span><span class="spacer"></span><span class="cap">Sorted by priority</span>`,
+          rows: [
+            ['backlog', 'high', 'ATL-160', 'Spike: background refresh budget on Android', ['Research', 'pink'], null, null],
+            ['backlog', 'medium', 'ATL-170', 'Widgets for My work on the home screen', ['Feature', 'green'], 8, null],
+            ['backlog', 'low', 'ATL-171', 'Localize dates and plurals for German', ['Chore', 'slate'], 2, null],
+          ],
+        },
+      ];
+      const row = ([s, p, key, title, [label, color], pts, who, selected]) => `
+        <div class="issue-row${selected ? ' selected' : ''}">
+          <span class="checkbox${selected ? ' on' : ''}" style="${selected ? '' : 'visibility:hidden'}">${selected ? '<i data-lucide="check"></i>' : ''}</span>
+          <span class="priority" data-p="${p}"></span><span class="key">${key}</span><span class="status" data-s="${s}"></span>
+          <span class="title">${title}</span>
+          <span class="label"><i style="background:var(--label-${color})"></i>${label}</span>
+          <span class="pts">${pts ?? ''}</span>
+          ${who ? `<span class="avatar sm" data-name="${who}"></span>` : '<span class="avatar sm" style="background:transparent;border:1px dashed var(--border-strong)"></span>'}
+        </div>`;
+      document.getElementById('list').innerHTML = sections
+        .map((section) => `<div class="sprint-head">${section.head}</div>${section.rows.map(row).join('')}`)
+        .join('');
+    </script>
+    <script src="screens.js"></script>
+    <script src="board.js"></script>
+  </body>
+</html>

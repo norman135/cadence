@@ -1,6 +1,5 @@
 import { Check, ChevronsUpDown, Plus } from 'lucide-react';
 import { Link } from 'react-router';
-import { Button } from '@/shared/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,6 +10,18 @@ import {
 } from '@/shared/ui/dropdown-menu';
 import { useCurrentOrganization, useCurrentUser } from '@/shared/workspace';
 
+/** The organization's tile: its initial on the Ember gradient, in dark ink for contrast (5.9:1+). */
+export function OrganizationTile({ name }: { name: string }) {
+  return (
+    <span
+      aria-hidden="true"
+      className="grid size-6 shrink-0 place-items-center rounded-[7px] bg-linear-135 from-[#ff7b45] to-[#f0612e] text-xs font-bold text-[#0b0e14]"
+    >
+      {name.trim().charAt(0).toUpperCase() || '?'}
+    </span>
+  );
+}
+
 /** Switches between the user's organizations; the choice lives in the URL (`/:orgSlug`). */
 export function OrganizationSwitcher() {
   const { data } = useCurrentUser();
@@ -18,30 +29,31 @@ export function OrganizationSwitcher() {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          variant="ghost"
-          className="w-full justify-between px-2"
-          aria-label="Switch organization"
-        >
-          <span className="truncate font-semibold">{current?.name ?? 'Select organization'}</span>
-          <ChevronsUpDown className="text-muted-foreground" aria-hidden="true" />
-        </Button>
+      <DropdownMenuTrigger
+        aria-label="Switch organization"
+        className="flex h-9 min-w-0 flex-1 cursor-default items-center gap-2.5 rounded-md px-2 font-semibold tracking-[-0.01em] outline-none hover:bg-accent focus-visible:outline-2 focus-visible:outline-ring data-[state=open]:bg-accent"
+      >
+        {current && <OrganizationTile name={current.name} />}
+        <span className="truncate">{current?.name ?? 'Select organization'}</span>
+        <ChevronsUpDown className="ml-auto size-3.5 shrink-0 text-subtle-foreground" />
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="w-60">
+      <DropdownMenuContent align="start" className="w-64">
         <DropdownMenuLabel>Organizations</DropdownMenuLabel>
         {data?.organizations.map((organization) => (
           <DropdownMenuItem key={organization.id} asChild>
             <Link to={`/${organization.slug}`}>
+              <OrganizationTile name={organization.name} />
               <span className="flex-1 truncate">{organization.name}</span>
-              {organization.id === current?.id && <Check aria-label="Current" />}
+              {organization.id === current?.id && (
+                <Check aria-label="Current" className="text-primary" />
+              )}
             </Link>
           </DropdownMenuItem>
         ))}
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
           <Link to="/welcome">
-            <Plus aria-hidden="true" />
+            <Plus />
             New organization
           </Link>
         </DropdownMenuItem>

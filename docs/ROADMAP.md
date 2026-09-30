@@ -5,9 +5,9 @@
 
 | | |
 |---|---|
-| **Status** | In development: M1 complete |
-| **Last updated** | 2026-09-27 |
-| **Current milestone** | M2: Projects & issues (next) |
+| **Status** | In development: M2 complete |
+| **Last updated** | 2026-09-30 |
+| **Current milestone** | M3: Projects & issues (next) |
 
 ---
 
@@ -60,7 +60,7 @@ These are not negotiable. Every design decision must satisfy them.
 
 ## 3. Performance targets
 
-These targets are measured from M0 onward and are **release gates** in M9. Results are recorded in `docs/performance.md` for each release.
+These targets are measured from M0 onward and are **release gates** in M10. Results are recorded in `docs/performance.md` for each release.
 
 | Metric | Target | Measured with |
 |---|---|---|
@@ -223,6 +223,7 @@ Each decision gets a full ADR in `docs/adr/` when it is implemented.
 | 0013 | Native AOT evaluation: adopt only if EF Core and SignalR support is production-ready, and record the measurements either way |
 | 0014 | Commit the OpenAPI document and the generated frontend client; CI fails on drift *(added in M0)* |
 | 0015 | Apply migrations in a one-shot migrator process that shares the app image *(added in M0)* |
+| 0016 | Brand and design system: Tempo, Ember and Ink tokens, self-hosted Geist, Lucide icons; the design boards and `design/tokens.css` are the source of truth *(added in M2)* |
 
 ---
 
@@ -301,7 +302,7 @@ Performance is designed in from the start, not fixed at the end. Each milestone'
 - **Build output:**
   - Brotli and gzip pre-compression.
   - Fingerprinted file names, served by `MapStaticAssets` with `Cache-Control: immutable`.
-  - Icons tree-shaken; fonts from the system stack or one subset variable font.
+  - Icons tree-shaken. Fonts are Geist and Geist Mono, self-hosted as variable WOFF2 files with a Latin subset (52 KB together).
 - **Budgets enforced in CI** by `web/scripts/check-bundle-budget.mjs`, which reads Vite's manifest to measure the initial download separately from each lazy chunk.
 
 ### 8.7 Measurement and regression prevention
@@ -395,14 +396,15 @@ The abstractions are already in place, so this is a configuration change rather 
 |---|---|---|---|
 | M0 | Foundation | `v0.1.0` | A production-shaped empty system that builds, tests, containerizes and measures itself |
 | M1 | Identity & tenancy | `v0.2.0` | Accounts, organizations, invitations, permissions |
-| M2 | Projects & issues | `v0.3.0` | The core work-tracking domain |
-| M3 | Workflows & Kanban | `v0.4.0` | Custom workflows and a drag-and-drop board |
-| M4 | Real-time collaboration | `v0.5.0` | Live boards, presence, notifications |
-| M5 | Sprints & planning | `v0.6.0` | Backlog, sprint lifecycle, burndown |
-| M6 | Rich collaboration & search | `v0.7.0` | Rich text, mentions, attachments, full-text search |
-| M7 | Background processing | `v0.8.0` | Job queue, email, reminders, webhooks, audit log |
-| M8 | Reporting & dashboards | `v0.9.0` | Velocity, cycle time, flow and workload analytics |
-| M9 | Hardening & release | `v1.0.0` | Load-tested, secured, documented, shipped |
+| M2 | Brand & design system | `v0.3.0` | Identity, tokens, components and screen designs, applied to the app |
+| M3 | Projects & issues | `v0.4.0` | The core work-tracking domain |
+| M4 | Workflows & Kanban | `v0.5.0` | Custom workflows and a drag-and-drop board |
+| M5 | Real-time collaboration | `v0.6.0` | Live boards, presence, notifications |
+| M6 | Sprints & planning | `v0.7.0` | Backlog, sprint lifecycle, burndown |
+| M7 | Rich collaboration & search | `v0.8.0` | Rich text, mentions, attachments, full-text search |
+| M8 | Background processing | `v0.9.0` | Job queue, email, reminders, webhooks, audit log |
+| M9 | Reporting & dashboards | `v0.10.0` | Velocity, cycle time, flow and workload analytics |
+| M10 | Hardening & release | `v1.0.0` | Load-tested, secured, documented, shipped |
 
 ---
 
@@ -429,7 +431,7 @@ The abstractions are already in place, so this is a configuration change rather 
 - [x] Domain building blocks (`Entity`, `AggregateRoot` with domain events, `Result`/`Error`) and a CQRS pipeline (source-generated Mediator with logging and validation behaviors)
 - [x] EF Core `DbContext` on Npgsql (pooled, capped connection pool, `snake_case`, slow-query interceptor) and a baseline migration
 - [x] Migrator: a one-shot console app instead of an EF migration bundle ([ADR-0015](adr/0015-one-shot-migrator.md))
-- [ ] ~~Compiled-model step~~, moved to **M2**. The model is empty until M1, so there is nothing to compile yet; it becomes worthwhile once the issue model exists.
+- [ ] ~~Compiled-model step~~, moved to **M3**. The model is empty until M1, so there is nothing to compile yet; it becomes worthwhile once the issue model exists.
 - UUIDv7 key convention: recorded in [ADR-0011](adr/0011-uuidv7-primary-keys.md). The first entities arrive in M1.
 
 **Local development**
@@ -481,7 +483,7 @@ The abstractions are already in place, so this is a configuration change rather 
 **Goal:** users can sign up, belong to organizations, and are only allowed to do what they are permitted to do.
 
 **Accounts**
-- [x] Registration, email confirmation, login, logout, password reset. Email goes through an in-process queue for now; M7 makes it durable.
+- [x] Registration, email confirmation, login, logout, password reset. Email goes through an in-process queue for now; M8 makes it durable.
 - [x] Short-lived JWT access tokens (about 10 minutes)
 - [x] Rotating refresh tokens in an httpOnly `SameSite=Strict` cookie, with reuse detection
 - [x] Profile endpoints (`/me`): read and update the profile, change the password (ends other sessions)
@@ -527,7 +529,55 @@ A permission check costs **0 queries** with a warm cache. The idle stack uses **
 
 ---
 
-### M2 — Projects & issues · `v0.3.0`
+### M2 — Brand & design system · `v0.3.0` ✅
+
+**Goal:** Cadence looks and feels like one product before the feature milestones build on it. Every later screen follows these designs.
+
+**Design**
+- [x] Identity: logo mark (three rising beats), wordmark, lockups, app icon, usage rules, voice and tone
+- [x] Color: Tempo (brand teal), Ember (accent) and Ink (neutrals) scales, with semantic tokens for light and dark themes, WCAG AA text contrast, and status, priority and label colors
+- [x] Typography: Geist and Geist Mono, with a type scale on a 14 px UI base
+- [x] Foundations: 4 px spacing, radius, elevation, motion, iconography (Lucide) and app layout
+- [x] Components: buttons, inputs, selection controls, badges, labels, avatars, tabs, menus, tooltips, toasts, dialogs and board cards, in both themes
+- [x] Screens: My work, board (live), issue, backlog and sprint planning, sign-in, command palette, mobile and an empty state
+- [x] `design/tokens.css` and a reproducible PNG export (`design/render.mjs`)
+- [x] ADR-0016 (brand and design system)
+
+**Implementation**
+- [x] Tokens in `web/src/index.css` (Tailwind v4 `@theme`), with a theme switch (system, light, dark) remembered per browser
+- [x] Self-hosted Geist and Geist Mono: preloaded, `font-display: swap`, metric-matched fallbacks, and a 60 KB font budget
+- [x] Logo, favicon, app icons and web manifest
+- [x] `shared/ui` restyled to the component board, and the missing pieces added: tabs, tooltip, toast, checkbox, switch, kbd, status and priority glyphs, and avatar colors
+- [x] M1 screens rebuilt to the designs: split sign-in layout, app shell and sidebar, organization and member settings, profile
+- [x] The My work page as a shell (it fills in once issues exist in M3)
+- [x] Command palette styled to the design, with theme commands
+- [x] Responsive layout: sidebar drawer and bottom tab bar below 768 px
+- [x] A style-guide route in development builds that renders every component in both themes
+- [x] Visual regression: Playwright screenshots of key pages in both themes, compared in CI
+- [x] Accessibility: axe checks on every key page, visible focus everywhere, `prefers-reduced-motion` respected
+
+**Performance focus:**
+- Fonts stay at or below 60 KB.
+- The brand adds no JavaScript to the initial bundle. Glyphs are inline SVG, and icons are tree-shaken.
+- Initial CSS stays within its 30 KB budget.
+
+**Done when:**
+- Every M1 screen matches the boards in light and dark.
+- axe reports no serious or critical violations.
+- Visual snapshots run in CI.
+- All budgets are met.
+
+**Result:** all four criteria are met.
+- The M1 screens are rebuilt to the boards: 15 screenshots cover the key pages in both themes and the phone layout, compared in CI.
+- axe runs on every page and passes. On the way it found nine contrast failures, some in the designs themselves; both were fixed.
+- Fonts are 51.3 KB, and initial JS is 126.9 KB (+2.7 KB).
+- The server's numbers are unchanged: the idle stack uses 103 MiB, and p95 is 3.5 ms at 10 users.
+
+Full details are in [performance.md](performance.md#v030-m2-brand--design-system).
+
+---
+
+### M3 — Projects & issues · `v0.4.0`
 
 **Goal:** the core work-tracking domain.
 
@@ -537,7 +587,7 @@ A permission check costs **0 queries** with a warm cache. The idle stack uses **
 - [ ] Project members and roles
 
 **Issues**
-- [ ] Fields: type, title, description (Markdown for now; rich text arrives in M6), priority, assignee, reporter, labels, estimate, due date
+- [ ] Fields: type, title, description (Markdown for now; rich text arrives in M7), priority, assignee, reporter, labels, estimate, due date
 - [ ] Parent issues and sub-tasks, with depth rules
 - [ ] Issue links: blocks / relates to / duplicates
 - [ ] Readable keys (`CAD-123`) from a per-project sequence that stays safe under concurrent creates
@@ -566,7 +616,7 @@ A permission check costs **0 queries** with a warm cache. The idle stack uses **
 
 ---
 
-### M3 — Workflows & Kanban board · `v0.4.0`
+### M4 — Workflows & Kanban board · `v0.5.0`
 
 **Goal:** configurable workflows and a fast drag-and-drop board.
 
@@ -600,7 +650,7 @@ A permission check costs **0 queries** with a warm cache. The idle stack uses **
 
 ---
 
-### M4 — Real-time collaboration · `v0.5.0`
+### M5 — Real-time collaboration · `v0.6.0`
 
 **Goal:** everyone sees the same board, live.
 
@@ -632,7 +682,7 @@ A permission check costs **0 queries** with a warm cache. The idle stack uses **
 
 ---
 
-### M5 — Sprints & planning · `v0.6.0`
+### M6 — Sprints & planning · `v0.7.0`
 
 **Goal:** Scrum-style planning.
 
@@ -659,7 +709,7 @@ A permission check costs **0 queries** with a warm cache. The idle stack uses **
 
 ---
 
-### M6 — Rich collaboration & search · `v0.7.0`
+### M7 — Rich collaboration & search · `v0.8.0`
 
 **Goal:** a collaboration experience that feels polished.
 
@@ -698,7 +748,7 @@ A permission check costs **0 queries** with a warm cache. The idle stack uses **
 
 ---
 
-### M7 — Background processing & integrations · `v0.8.0`
+### M8 — Background processing & integrations · `v0.9.0`
 
 **Goal:** durable asynchronous work and integrations with the outside world.
 
@@ -742,7 +792,7 @@ A permission check costs **0 queries** with a warm cache. The idle stack uses **
 
 ---
 
-### M8 — Reporting & dashboards · `v0.9.0`
+### M9 — Reporting & dashboards · `v0.10.0`
 
 **Goal:** insight into how teams deliver.
 
@@ -767,7 +817,7 @@ A permission check costs **0 queries** with a warm cache. The idle stack uses **
 
 ---
 
-### M9 — Hardening & release · `v1.0.0`
+### M10 — Hardening & release · `v1.0.0`
 
 **Goal:** proven, secure, documented and shipped.
 
@@ -860,7 +910,7 @@ Three long-lived branches, all protected by GitHub rulesets. **No direct commits
 | Architecture | NetArchTest | Layer rules |
 | Frontend units and components | Vitest, Testing Library, MSW | Hooks, forms, complex components |
 | End-to-end | Playwright | Critical user journeys |
-| Performance | k6, BenchmarkDotNet, bundle budget script, memory checks, Lighthouse CI (M9) | Targets in §3 |
+| Performance | k6, BenchmarkDotNet, bundle budget script, memory checks, Lighthouse CI (M10) | Targets in §3 |
 
 ### Documentation
 
@@ -893,5 +943,7 @@ Three long-lived branches, all protected by GitHub rulesets. **No direct commits
 |---|---|
 | 2026-09-23 | Initial plan. Project Management platform chosen and named **Cadence**. Database switched from SQL Server to **PostgreSQL 18** for ARM64 support. Deployment is **self-hosted Docker Compose** (Azure dropped). Added **low-RAM performance requirements** (1–2 GB host, 10 concurrent users): Redis and Hangfire removed in favour of in-process caching and a PostgreSQL job queue; MediatR and AutoMapper replaced by source-generated alternatives. |
 | 2026-09-23 | Repository is a **monorepo** at `norman135/cadence` under the **MIT license**. Adopted a three-branch, pull-request-only workflow (`develop` → `staging` → `main`), with beta tags on `staging`, release tags on `main`, and a CI check enforcing the promotion path. |
-| 2026-09-23 | **M0 complete.** Changes from the original plan, each made for a concrete reason: <br>• The EF migration bundle became a one-shot **migrator console app** in the app image, because bundles are per-runtime and complicate cross-compiled multi-arch builds (ADR-0015). <br>• `size-limit` became a **manifest-based bundle budget script** that separates initial from lazy chunks. <br>• Feature boundaries use generated **`no-restricted-imports`** rules instead of eslint-plugin-boundaries, whose v7 API changed. <br>• **TypeScript 6.0** instead of 7, until typescript-eslint supports 7. <br>• The **compiled EF model moved to M2**, since the model is empty until then. <br>• Added **ADR-0014** (committed OpenAPI contract and client) and **ADR-0015** (migrator). <br>• The uploads volume will be added in M6, when attachments need it. |
+| 2026-09-23 | **M0 complete.** Changes from the original plan, each made for a concrete reason: <br>• The EF migration bundle became a one-shot **migrator console app** in the app image, because bundles are per-runtime and complicate cross-compiled multi-arch builds (ADR-0015). <br>• `size-limit` became a **manifest-based bundle budget script** that separates initial from lazy chunks. <br>• Feature boundaries use generated **`no-restricted-imports`** rules instead of eslint-plugin-boundaries, whose v7 API changed. <br>• **TypeScript 6.0** instead of 7, until typescript-eslint supports 7. <br>• The **compiled EF model moved to M3**, since the model is empty until then. <br>• Added **ADR-0014** (committed OpenAPI contract and client) and **ADR-0015** (migrator). <br>• The uploads volume will be added in M7, when attachments need it. |
 | 2026-09-27 | **M1 complete.** Changes from the plan, each made for a concrete reason: <br>• The app shell may import a feature's **route pages directly** (`@/features/x/routes/page`), not only its index, so every page becomes its own lazy chunk. The ESLint boundary rule allows exactly that. <br>• The **bundle budget counts every chunk a route downloads**, including chunks shared with other routes. Counting only a route's own chunk hid most of the cost: the members page is 4.4 KB alone, but 62.9 KB with everything it downloads. <br>• **Sign-out lives in `shared/auth`**, and the **organization switcher in `app/`**. Importing them from a feature index pulled whole features into the initial bundle. <br>• An **OpenAPI transformer declares route parameters** that middleware consumes (`{organizationId}`), because endpoints that never bind them produced a document Orval rejected. <br>• Forms use **`zod/mini`** instead of the classic API, which saved about 16 KB per form page. <br>• Npgsql **GSS encryption is disabled** by default: probing for Kerberos failed on every new connection in the chiseled image. <br>• The **test stack lifts per-IP rate limits**, because every browser and k6 user shares one IP there. <br>• End-to-end tests run **on amd64 only**, because they test behaviour, not the platform. |
+| 2026-09-30 | Added **M2: Brand & design system** before feature work, so every later screen is built once, to a finished design. The design half (identity, tokens, components and screen boards in `design/`, ADR-0016) is done up front; the implementation follows as the milestone. Later milestones move up one number (M2 → M3 … M9 → M10) and one minor version (`v0.3.0` → `v0.4.0` … `v0.9.0` → `v0.10.0`). `v1.0.0` is unchanged. |
+| 2026-09-30 | **M2 complete.** Changes from the plan, each made for a concrete reason: <br>• The theme choice is remembered **per browser**, not per user: it must apply before the first paint, before the user is known, and it needed no schema change. <br>• axe found **contrast failures in the designs themselves**. Subtle gray no longer labels readable text, the organization tile uses dark ink, and three avatar colors are deeper; the boards were re-rendered to match. <br>• The **dark-mode danger button uses dark text**, because white on it is 2.9:1. <br>• **Visual tests run against the dev server with a mocked API**, not the production stack, so screenshots depend only on the UI. They run in a pinned Playwright container, because font rendering differs between systems. <br>• axe runs in the **visual suite rather than the end-to-end tests**, where it covers more pages in both themes. <br>• The **tooltip provider lives in the app shell**, and the **sign-in brand panel loads lazily**, to keep Radix positioning code and decorative markup out of the initial bundle. <br>• The sign-in heading changed to "Welcome back", and the organization home became **My work**. |

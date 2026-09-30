@@ -7,10 +7,14 @@ function uniqueSuffix() {
   return `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
 }
 
+const switcher = (page: Page) => page.getByRole('button', { name: 'Switch organization' }).first();
+
 async function createOrganization(page: Page, name: string) {
   await page.getByLabel('Organization name').fill(name);
   await page.getByRole('button', { name: 'Create organization' }).click();
-  await expect(page.getByRole('heading', { level: 1, name })).toBeVisible();
+  // The new organization opens on My work, and the switcher shows it.
+  await expect(page.getByRole('heading', { level: 2, name: 'Needs you' })).toBeVisible();
+  await expect(switcher(page)).toContainText(name);
 }
 
 test('a new user signs up, confirms their email and sets up two organizations', async ({
@@ -44,28 +48,27 @@ test('a new user signs up, confirms their email and sets up two organizations', 
   await createOrganization(page, first);
   const firstUrl = page.url();
 
-  const switcher = page.getByRole('button', { name: 'Switch organization' }).first();
-  await switcher.click();
+  await switcher(page).click();
   await page.getByRole('menuitem', { name: 'New organization' }).click();
   await createOrganization(page, second);
 
   // Switch back through the organization switcher.
-  await switcher.click();
+  await switcher(page).click();
   await page.getByRole('menuitem', { name: first }).click();
-  await expect(page.getByRole('heading', { level: 1, name: first })).toBeVisible();
+  await expect(switcher(page)).toContainText(first);
   expect(page.url()).toBe(firstUrl);
 
   // A reload restores the session from the refresh cookie.
   await page.reload();
-  await expect(page.getByRole('heading', { level: 1, name: first })).toBeVisible();
+  await expect(switcher(page)).toContainText(first);
 
   // Signing out ends the session; protected pages send the visitor back to sign in.
   await page.getByRole('button', { name: 'Account menu' }).click();
   await page.getByRole('menuitem', { name: 'Sign out' }).click();
-  await expect(page.getByText('Sign in to Cadence')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Welcome back' })).toBeVisible();
 
   await page.goto(firstUrl);
-  await expect(page.getByText('Sign in to Cadence')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Welcome back' })).toBeVisible();
 });
 
 test('signing in before confirming the email is refused', async ({ page }) => {

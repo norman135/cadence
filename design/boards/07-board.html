@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>07 · Board</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Geist+Mono:wght@400..600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="board.css" />
+    <script src="https://cdn.jsdelivr.net/npm/lucide@1.49.0/dist/umd/lucide.min.js"></script>
+    <style>
+      .column {
+        width: 282px;
+      }
+      .k-card .meta-icon {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 12px;
+        color: var(--text-muted);
+      }
+      .k-card .meta-icon svg {
+        width: 13px;
+        height: 13px;
+      }
+      .pts {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        color: var(--text-muted);
+        border: 1px solid var(--border);
+        border-radius: 5px;
+        padding: 0 5px;
+        height: 18px;
+        display: inline-grid;
+        place-items: center;
+      }
+      .k-card.done .k-title {
+        color: var(--text-muted);
+      }
+      .cursor {
+        position: absolute;
+        z-index: 5;
+        pointer-events: none;
+      }
+      .cursor .tag {
+        position: absolute;
+        left: 16px;
+        top: 18px;
+        padding: 3px 8px;
+        border-radius: 6px 999px 999px 999px;
+        font-size: 12px;
+        font-weight: 500;
+        color: white;
+        white-space: nowrap;
+      }
+      .live-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--green-500);
+        box-shadow: 0 0 0 3px rgb(34 163 90 / 0.2);
+      }
+      .flash {
+        box-shadow:
+          0 0 0 1px var(--primary),
+          0 0 0 4px rgb(45 194 174 / 0.15);
+      }
+    </style>
+  </head>
+  <body class="dark-board">
+    <div class="board" data-theme="dark" style="color: var(--text)">
+      <div class="board-head">
+        <img src="../logo/cadence-mark.svg" alt="" />
+        <span class="brand">Cadence</span>
+        <span class="sep"></span>
+        <span>Brand &amp; UI kit</span>
+        <span class="page">07 / 10 · Board</span>
+      </div>
+
+      <h1 class="board-title">Board</h1>
+      <p class="board-lede">
+        The team's shared picture of the sprint, live. Cards are quiet by default (key, title, who)
+        and only speak up when something needs attention. Teammates' cursors and moves appear as
+        they happen, and work-in-progress limits keep a column honest.
+      </p>
+
+      <div class="stage" style="padding: 56px 56px 0; border-bottom-left-radius: 0; border-bottom-right-radius: 0">
+        <div class="app" data-theme="dark" style="height: 880px; border-bottom-left-radius: 0; border-bottom-right-radius: 0">
+          <nav class="sidebar" data-active="board"></nav>
+          <div class="main" style="position: relative">
+            <div class="topbar">
+              <div class="crumbs">
+                <span class="project-dot" style="background: var(--tempo-500)">A</span>
+                <span class="dim">Atlas Mobile</span><i data-lucide="chevron-right"></i><span>Sprint 14</span>
+              </div>
+              <span class="badge info"><i data-lucide="timer" style="width: 13px; height: 13px"></i>6 days left</span>
+              <span class="spacer"></span>
+              <span class="row" style="gap: 8px; font-size: 12px; color: var(--text-muted)"><span class="live-dot"></span>Live</span>
+              <span class="avatars">
+                <span class="avatar presence" data-name="Grace Hopper"></span>
+                <span class="avatar presence" data-name="Alan Turing"></span>
+                <span class="avatar presence" data-name="Katherine Johnson"></span>
+              </span>
+              <button class="btn ghost icon" aria-label="Notifications"><i data-lucide="bell"></i></button>
+              <button class="btn primary sm"><i data-lucide="plus"></i>New issue</button>
+            </div>
+            <div class="toolbar">
+              <div class="tabs">
+                <span class="tab"><i data-lucide="list"></i>List</span>
+                <span class="tab active"><i data-lucide="kanban"></i>Board</span>
+                <span class="tab"><i data-lucide="calendar-range"></i>Timeline</span>
+              </div>
+              <button class="btn secondary sm"><i data-lucide="filter"></i>Filter</button>
+              <span class="badge solid-primary" style="height: 26px">Label: Mobile <i data-lucide="x" style="width: 12px; height: 12px"></i></span>
+              <span class="spacer"></span>
+              <span class="note">Group by <b style="color: var(--text); font-weight: 500">Status</b></span>
+              <button class="btn ghost sm"><i data-lucide="sliders-horizontal"></i>Display</button>
+            </div>
+            <div class="board-columns" id="columns"></div>
+
+            <!-- Grace, live: dragging ATL-145 into In review -->
+            <div class="cursor" style="left: 838px; top: 366px">
+              <div class="k-card dragging" style="width: 272px; position: absolute; left: -250px; top: -96px">
+                <div class="k-top"><span class="priority" data-p="medium"></span><span class="key">ATL-145</span><span class="spacer"></span><span class="avatar sm" data-name="Katherine Johnson"></span></div>
+                <div class="k-title">Retry failed uploads with exponential backoff</div>
+                <div class="k-meta"><span class="label"><i style="background: var(--label-teal)"></i>Backend</span><span class="pts">2</span></div>
+              </div>
+              <svg width="20" height="20" viewBox="0 0 20 20" style="position: relative"><path d="M2 2 L17 8 L10 10 L8 17 Z" fill="#c93f7d" stroke="white" stroke-width="1.5" stroke-linejoin="round" /></svg>
+              <span class="tag" style="background: #c93f7d">Grace Hopper</span>
+            </div>
+
+            <div class="toast" style="position: absolute; right: 20px; bottom: 20px">
+              <span class="avatar" data-name="Alan Turing" style="margin-top: 1px"></span>
+              <div style="flex: 1">
+                <div class="t-title">Alan moved ATL-139 to Done</div>
+                <div class="t-body">Sprint 14 is 58% complete · 21 of 36 points</div>
+              </div>
+              <button class="btn ghost sm" style="margin: -4px -6px 0 0">View</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid" style="grid-template-columns: repeat(3, 1fr); margin-top: 32px; color: var(--text)">
+        <div>
+          <p class="section-label">Card anatomy</p>
+          <p class="note" style="margin: 0">
+            Priority, key and assignee on the first line. Then the title, which gets as much width
+            as it needs. Then meta that only appears when it matters: labels, points, sub-issue
+            progress, a linked pull request, a due date turning amber then red.
+          </p>
+        </div>
+        <div>
+          <p class="section-label">Live</p>
+          <p class="note" style="margin: 0">
+            Presence dots show who has the board open. A teammate's drag shows their cursor and a
+            ghost card. Anything that changes under you gets a one-second Tempo outline, never a
+            full reload. Built on SignalR (M5).
+          </p>
+        </div>
+        <div>
+          <p class="section-label">Limits</p>
+          <p class="note" style="margin: 0">
+            Column headers show count and WIP limit (<span class="mono">3 / 4</span>). A column at
+            its limit tints its header amber. Dropping past the limit is allowed, but it asks for a
+            reason, which appears in the sprint report.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const cards = {
+        backlog: [],
+        todo: [
+          { p: 'urgent', key: 'ATL-156', title: 'Crash when opening a shared link from the lock screen', labels: [['Bug', 'red']], pts: 2, who: 'Dennis Ritchie', due: ['Today', 'danger'] },
+          { p: 'medium', key: 'ATL-149', title: 'Empty states for Inbox and My work', labels: [['Design', 'violet']], pts: 1, who: 'Margaret Hamilton' },
+          { p: 'low', key: 'ATL-158', title: 'Upgrade React Native to 0.82', labels: [['Tech debt', 'amber']], pts: 3 },
+          { p: 'none', key: 'ATL-160', title: 'Spike: background refresh budget on Android', labels: [['Research', 'pink']] },
+        ],
+        progress: [
+          { p: 'high', key: 'ATL-142', title: 'Offline sync drops edits made on the train', labels: [['Backend', 'teal']], pts: 5, who: 'Grace Hopper', sub: '1/3', comments: 4, flash: true },
+          { p: 'medium', key: 'ATL-147', title: 'Biometric sign-in on Android', labels: [['Feature', 'green']], pts: 3, who: 'Alan Turing', pr: '#231' },
+          { p: 'medium', key: 'ATL-151', title: 'Reduce cold start below 1.5 s', labels: [['Performance', 'orange']], pts: 5, who: 'Ada Lovelace', due: ['Oct 14', 'warning'] },
+        ],
+        review: [
+          { p: 'high', key: 'ATL-138', title: 'Push notification preferences screen', labels: [['Frontend', 'blue']], pts: 3, who: 'Margaret Hamilton', pr: '#228 ✓', comments: 2 },
+          { slot: true },
+        ],
+        done: [
+          { done: true, key: 'ATL-139', title: 'Pull-to-refresh on every list', who: 'Alan Turing' },
+          { done: true, key: 'ATL-134', title: 'Deep links for issues and comments', who: 'Katherine Johnson' },
+          { done: true, key: 'ATL-133', title: 'Dark mode follows the system setting', who: 'Ada Lovelace' },
+          { done: true, key: 'ATL-131', title: 'Crash reporting with source maps', who: 'Dennis Ritchie' },
+        ],
+      };
+      const columns = [
+        ['todo', 'Todo', '4'],
+        ['progress', 'In progress', '3', '3 / 4'],
+        ['review', 'In review', '2', '2 / 3'],
+        ['done', 'Done', '9'],
+      ];
+
+      const card = (c) => {
+        if (c.slot) return '<div class="drop-slot"></div>';
+        const meta = [
+          ...(c.labels ?? []).map(([t, color]) => `<span class="label"><i style="background:var(--label-${color})"></i>${t}</span>`),
+          c.pts ? `<span class="pts">${c.pts}</span>` : '',
+          c.sub ? `<span class="meta-icon"><i data-lucide="list-checks"></i>${c.sub}</span>` : '',
+          c.comments ? `<span class="meta-icon"><i data-lucide="message-square"></i>${c.comments}</span>` : '',
+          c.pr ? `<span class="meta-icon" style="color:var(--success)"><i data-lucide="git-pull-request"></i>${c.pr}</span>` : '',
+          c.due ? `<span class="badge ${c.due[1]}" style="height:20px">${c.due[0]}</span>` : '',
+        ].join('');
+        const lead = c.done ? '<span class="status" data-s="done"></span>' : `<span class="priority" data-p="${c.p}"></span>`;
+        const who = c.who
+          ? `<span class="avatar sm" data-name="${c.who}"></span>`
+          : '<span class="avatar sm" style="background:transparent;border:1px dashed var(--border-strong)"></span>';
+        return `<div class="k-card${c.done ? ' done' : ''}${c.flash ? ' flash' : ''}">
+          <div class="k-top">${lead}<span class="key">${c.key}</span><span class="spacer"></span>${who}</div>
+          <div class="k-title">${c.title}</div>
+          ${meta ? `<div class="k-meta">${meta}</div>` : ''}
+        </div>`;
+      };
+
+      document.getElementById('columns').innerHTML = columns
+        .map(([id, name, n, wip]) => `
+          <div class="column">
+            <div class="column-head"><span class="status" data-s="${id}"></span>${name}<span class="n">${n}</span>${wip ? `<span class="wip">${wip}</span>` : '<span class="spacer"></span>'}<i data-lucide="plus" style="width:15px;height:15px;color:var(--text-subtle);margin-left:${wip ? '6px' : '0'}"></i></div>
+            ${cards[id].map(card).join('')}
+          </div>`)
+        .join('');
+    </script>
+    <script src="screens.js"></script>
+    <script src="board.js"></script>
+  </body>
+</html>

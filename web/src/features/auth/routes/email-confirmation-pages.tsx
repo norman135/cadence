@@ -31,7 +31,7 @@ export function CheckEmailPage() {
         <Alert variant="success">A new link is on its way.</Alert>
       ) : (
         <Button
-          variant="outline"
+          variant="secondary"
           disabled={!email || resend.isPending}
           onClick={() => {
             resend.mutate({ data: { email } });

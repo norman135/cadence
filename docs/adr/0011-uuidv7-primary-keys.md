@@ -16,7 +16,7 @@ Random UUIDv4 values meet those needs but insert at random positions in B-tree i
 
 Primary keys are `Guid` values generated as **UUIDv7** (`Guid.CreateVersion7()`, .NET 9+) by the domain when an entity is created. UUIDv7 starts with a millisecond timestamp, so new keys are roughly ordered and append to the end of indexes, like sequential integers.
 
-Human-friendly identifiers such as issue keys (`CAD-142`) are separate, per-project sequence numbers (M2), not primary keys.
+Human-friendly identifiers such as issue keys (`CAD-142`) are separate, per-project sequence numbers (M3), not primary keys.
 
 ## Consequences
 

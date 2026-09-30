@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>01 · Brand</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Geist+Mono:wght@400..600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="board.css" />
+    <script src="https://cdn.jsdelivr.net/npm/lucide@1.49.0/dist/umd/lucide.min.js"></script>
+    <style>
+      .wordmark {
+        font-weight: 600;
+        letter-spacing: -0.05em;
+        line-height: 1;
+      }
+      .lockup {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+      .hero {
+        height: 460px;
+        display: grid;
+        place-items: center;
+        text-align: center;
+      }
+      .hero .lockup img {
+        width: 104px;
+        height: 104px;
+      }
+      .hero .wordmark {
+        font-size: 112px;
+        color: white;
+      }
+      .hero .tag {
+        margin-top: 28px;
+        font-size: 22px;
+        color: rgb(233 236 241 / 0.72);
+        letter-spacing: -0.01em;
+      }
+      .hero .tag b {
+        color: var(--tempo-300);
+        font-weight: 500;
+      }
+      .tile {
+        height: 220px;
+        border-radius: 20px;
+        display: grid;
+        place-items: center;
+        position: relative;
+        border: 1px solid var(--border);
+      }
+      .tile .lockup img {
+        width: 48px;
+        height: 48px;
+      }
+      .tile .wordmark {
+        font-size: 44px;
+      }
+      .tile .cap {
+        position: absolute;
+        left: 20px;
+        bottom: 16px;
+        font-family: var(--font-mono);
+        font-size: 11px;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+      .sizes {
+        display: flex;
+        align-items: flex-end;
+        gap: 28px;
+      }
+      .sizes figure {
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        font-family: var(--font-mono);
+        font-size: 11px;
+        color: var(--text-muted);
+      }
+      .construct {
+        position: relative;
+        width: 300px;
+        height: 300px;
+        margin: 8px auto 0;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+      }
+      .construct::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background-image:
+          linear-gradient(rgb(255 255 255 / 0.22) 1px, transparent 1px),
+          linear-gradient(90deg, rgb(255 255 255 / 0.22) 1px, transparent 1px);
+        background-size: 18.75px 18.75px;
+        border-radius: 8px;
+      }
+      .construct img {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0.92;
+      }
+      .construct .guide {
+        position: absolute;
+        left: 0;
+        right: 0;
+        border-top: 1.5px dashed var(--ember-500);
+        z-index: 1;
+      }
+      .rule {
+        display: flex;
+        gap: 14px;
+        align-items: flex-start;
+      }
+      .rule .box {
+        width: 120px;
+        height: 88px;
+        border-radius: 14px;
+        display: grid;
+        place-items: center;
+        flex-shrink: 0;
+        border: 1px solid var(--border);
+        position: relative;
+      }
+      .rule .verdict {
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        color: white;
+      }
+      .rule .verdict svg {
+        width: 13px;
+        height: 13px;
+        stroke-width: 3;
+      }
+      .voice h4 {
+        margin: 0 0 6px;
+        font-size: 17px;
+        letter-spacing: -0.015em;
+      }
+      .say {
+        margin-top: 12px;
+        font-size: var(--text-sm);
+        display: grid;
+        gap: 6px;
+      }
+      .say div {
+        display: flex;
+        gap: 8px;
+        align-items: flex-start;
+      }
+      .say svg {
+        width: 15px;
+        height: 15px;
+        flex-shrink: 0;
+        margin-top: 2px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="board">
+      <div class="board-head">
+        <img src="../logo/cadence-mark.svg" alt="" />
+        <span class="brand">Cadence</span>
+        <span class="sep"></span>
+        <span>Brand &amp; UI kit</span>
+        <span class="page">01 / 10 · Identity</span>
+      </div>
+
+      <h1 class="board-title">Identity</h1>
+      <p class="board-lede">
+        Cadence is the rhythm a team finds when work flows: plan, build, ship, repeat. The mark is
+        three beats rising, and the last one lands in Ember, the moment work ships.
+      </p>
+
+      <div class="stage hero">
+        <div>
+          <div class="lockup" style="justify-content: center; gap: 26px">
+            <img src="../logo/cadence-mark.svg" alt="Cadence mark" />
+            <span class="wordmark">cadence</span>
+          </div>
+          <div class="tag">Plan, track and ship <b>in rhythm</b>. On a server you own.</div>
+        </div>
+      </div>
+
+      <div class="grid" style="grid-template-columns: repeat(3, 1fr); margin-top: 24px">
+        <div class="tile" style="background: #ffffff">
+          <div class="lockup">
+            <img src="../logo/cadence-mark.svg" alt="" /><span class="wordmark" style="color: var(--ink-900)">cadence</span>
+          </div>
+          <span class="cap" style="color: var(--ink-500)">Primary · on light</span>
+        </div>
+        <div class="tile" style="background: var(--ink-950); border-color: var(--ink-800)">
+          <div class="lockup">
+            <img src="../logo/cadence-mark.svg" alt="" /><span class="wordmark" style="color: #fff">cadence</span>
+          </div>
+          <span class="cap" style="color: var(--ink-400)">Primary · on dark</span>
+        </div>
+        <div class="tile" style="background: var(--tempo-600); border-color: var(--tempo-600)">
+          <div class="lockup" style="color: white">
+            <svg viewBox="0 0 64 64" width="48" height="48">
+              <rect width="64" height="64" rx="16" fill="#ffffff" fill-opacity="0.14" />
+              <rect x="15" y="33" width="8" height="16" rx="4" fill="#fff" fill-opacity="0.6" />
+              <rect x="28" y="23" width="8" height="26" rx="4" fill="#fff" fill-opacity="0.82" />
+              <rect x="41" y="15" width="8" height="34" rx="4" fill="#fff" />
+            </svg>
+            <span class="wordmark">cadence</span>
+          </div>
+          <span class="cap" style="color: var(--tempo-100)">Reversed · on Tempo</span>
+        </div>
+      </div>
+
+      <div class="grid" style="grid-template-columns: 1.1fr 1fr 1fr; margin-top: 24px">
+        <div class="panel">
+          <p class="section-label">Construction</p>
+          <div class="construct">
+            <img src="../logo/cadence-mark.svg" alt="" />
+            <div class="guide" style="top: 76.5%"></div>
+            <div class="guide" style="top: 23.4%; border-color: var(--tempo-400)"></div>
+          </div>
+          <p class="note" style="margin: 16px 0 0">
+            16-unit grid, 64 × 64 viewBox, corner radius 16. Bars are 8 wide with 5-unit gaps and
+            rise 16 → 26 → 34 from a shared baseline. The bars stay optically centred, not
+            mathematically.
+          </p>
+        </div>
+
+        <div class="panel">
+          <p class="section-label">Sizes &amp; app icon</p>
+          <div class="sizes">
+            <figure><img src="../logo/cadence-mark.svg" width="96" height="96" alt="" />96</figure>
+            <figure><img src="../logo/cadence-mark.svg" width="48" height="48" alt="" />48</figure>
+            <figure><img src="../logo/cadence-mark.svg" width="32" height="32" alt="" />32</figure>
+            <figure><img src="../logo/cadence-mark.svg" width="16" height="16" alt="" />16</figure>
+          </div>
+          <div class="sizes" style="margin-top: 28px">
+            <figure><img src="../logo/cadence-mark-mono-dark.svg" width="48" height="48" alt="" />mono</figure>
+            <figure>
+              <span style="display: grid; place-items: center; width: 48px; height: 48px; border-radius: 12px; background: var(--surface-sunken); color: var(--tempo-600)">
+                <svg viewBox="0 0 64 64" width="40" height="40" aria-hidden="true"><rect x="15" y="33" width="8" height="16" rx="4" fill="currentColor" fill-opacity="0.55"/><rect x="28" y="23" width="8" height="26" rx="4" fill="currentColor" fill-opacity="0.8"/><rect x="41" y="15" width="8" height="34" rx="4" fill="currentColor"/></svg>
+              </span>
+              glyph
+            </figure>
+            <figure>
+              <span class="row" style="gap: 8px; height: 48px">
+                <img src="../logo/cadence-mark.svg" width="20" height="20" alt="" />
+                <span class="wordmark" style="font-size: 20px">cadence</span>
+              </span>
+              in-app 20
+            </figure>
+          </div>
+          <p class="note" style="margin: 20px 0 0">
+            Minimum size 16 px (favicon). Below 24 px, the lockup drops the wordmark. Clear space
+            around the mark equals one bar height (16 units).
+          </p>
+        </div>
+
+        <div class="panel">
+          <p class="section-label">Usage</p>
+          <div class="stack" style="gap: 18px">
+            <div class="rule">
+              <div class="box" style="background: var(--ink-50)">
+                <img src="../logo/cadence-mark.svg" width="44" height="44" alt="" />
+                <span class="verdict" style="background: var(--green-500)"><i data-lucide="check"></i></span>
+              </div>
+              <p class="note" style="margin: 0">Use the full-color mark on light or dark neutrals.</p>
+            </div>
+            <div class="rule">
+              <div class="box" style="background: var(--ink-50)">
+                <svg viewBox="0 0 64 64" width="44" height="44">
+                  <rect width="64" height="64" rx="16" fill="#8b5cf6" />
+                  <rect x="15" y="33" width="8" height="16" rx="4" fill="#fff" />
+                  <rect x="28" y="23" width="8" height="26" rx="4" fill="#fff" />
+                  <rect x="41" y="15" width="8" height="34" rx="4" fill="#fde047" />
+                </svg>
+                <span class="verdict" style="background: var(--red-500)"><i data-lucide="x"></i></span>
+              </div>
+              <p class="note" style="margin: 0">Don't recolor the tile or the beat. Tempo and Ember only.</p>
+            </div>
+            <div class="rule">
+              <div class="box" style="background: var(--ink-50)">
+                <svg viewBox="0 0 64 64" width="76" height="34" preserveAspectRatio="none">
+                  <rect width="64" height="64" rx="16" fill="#139f8f" />
+                  <rect x="15" y="33" width="8" height="16" rx="4" fill="#fff" fill-opacity="0.72" />
+                  <rect x="28" y="23" width="8" height="26" rx="4" fill="#fff" />
+                  <rect x="41" y="15" width="8" height="34" rx="4" fill="#ff7b45" />
+                </svg>
+                <span class="verdict" style="background: var(--red-500)"><i data-lucide="x"></i></span>
+              </div>
+              <p class="note" style="margin: 0">Don't stretch, rotate, outline or add effects to the mark.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel" style="margin-top: 24px">
+        <p class="section-label">Voice</p>
+        <div class="grid voice" style="grid-template-columns: repeat(3, 1fr); gap: 40px">
+          <div>
+            <h4>Calm</h4>
+            <p class="note" style="margin: 0">Work tools are loud enough. We state what happened and what to do next, without exclamation marks or alarm.</p>
+            <div class="say">
+              <div><i data-lucide="check" style="color: var(--green-600)"></i>"Moved to In review. Undo"</div>
+              <div><i data-lucide="x" style="color: var(--red-600)"></i>"Awesome!! Your issue was moved!!"</div>
+            </div>
+          </div>
+          <div>
+            <h4>Precise</h4>
+            <p class="note" style="margin: 0">Name the object and the number. Engineers read our UI, so we never round away the facts.</p>
+            <div class="say">
+              <div><i data-lucide="check" style="color: var(--green-600)"></i>"3 issues are blocked by ATL-142"</div>
+              <div><i data-lucide="x" style="color: var(--red-600)"></i>"Some items may need attention"</div>
+            </div>
+          </div>
+          <div>
+            <h4>Human</h4>
+            <p class="note" style="margin: 0">Plain words, sentence case, second person. Errors explain how to recover, never whose fault it was.</p>
+            <div class="say">
+              <div><i data-lucide="check" style="color: var(--green-600)"></i>"That link has expired. Ask Ada for a new one."</div>
+              <div><i data-lucide="x" style="color: var(--red-600)"></i>"Error 410: Token Invalid"</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="board.js"></script>
+  </body>
+</html>

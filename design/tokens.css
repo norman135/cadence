@@ -1,0 +1,199 @@
+/*
+ * Cadence design tokens: the single source of truth for color, type, space, radius, elevation
+ * and motion. The web app adopts these in M2 (web/src/index.css); the design boards in
+ * design/boards use them directly.
+ *
+ * Layers:
+ *   1. Palette   raw scales (--tempo-600). Never used directly in components.
+ *   2. Semantic  what a color is for (--primary, --text-muted), redefined for dark mode.
+ *   3. Domain    work-tracking meaning: workflow status, priority, labels.
+ */
+
+:root {
+  /* ---- 1. Palette ------------------------------------------------------------------------ */
+
+  /* Tempo: the brand color. A deep teal: calm, focused, and unlike the blues and violets of
+     other trackers. 600 carries white text at 5.2:1, 400 carries ink-950 at 8.7:1. */
+  --tempo-50: #eefbf8;
+  --tempo-100: #d0f4ec;
+  --tempo-200: #a2e8da;
+  --tempo-300: #67d5c3;
+  --tempo-400: #2dc2ae;
+  --tempo-500: #139f8f;
+  --tempo-600: #0b7a70;
+  --tempo-700: #0b655d;
+  --tempo-800: #0e514c;
+  --tempo-900: #10433f;
+  --tempo-950: #032926;
+
+  /* Ember: the accent. The "beat" in the logo and highlights in illustrations and charts.
+     Never used for text below 18px (ember-500 is 3.3:1 on white). */
+  --ember-50: #fff4ee;
+  --ember-100: #ffe4d5;
+  --ember-200: #ffc4a6;
+  --ember-300: #ff9c6e;
+  --ember-400: #ff7b45;
+  --ember-500: #f0612e;
+  --ember-600: #d44c1c;
+  --ember-700: #b03c17;
+
+  /* Ink: cool neutrals for text, surfaces and borders. */
+  --ink-0: #ffffff;
+  --ink-25: #fafbfc;
+  --ink-50: #f5f6f8;
+  --ink-100: #eceef2;
+  --ink-200: #dfe2e8;
+  --ink-300: #c6cbd5;
+  --ink-400: #8b93a5;
+  --ink-500: #646c7e;
+  --ink-600: #4a5163;
+  --ink-700: #343a48;
+  --ink-800: #222733;
+  --ink-850: #1b1f29;
+  --ink-900: #151a23;
+  --ink-950: #0b0e14;
+
+  /* Signal colors. */
+  --green-500: #22a35a;
+  --green-600: #17804a;
+  --amber-400: #f0a92b;
+  --amber-500: #e8a317;
+  --red-500: #e5484d;
+  --red-600: #d93a40;
+  --blue-500: #3b82f6;
+  --violet-500: #8b5cf6;
+  --pink-500: #e0508f;
+  --slate-500: #64748b;
+
+  /* ---- 2. Semantic (light) --------------------------------------------------------------- */
+
+  --canvas: var(--ink-50); /* behind everything: the sidebar region */
+  --surface: var(--ink-0); /* main panels, cards */
+  --surface-raised: var(--ink-0); /* menus, popovers, dialogs */
+  --surface-sunken: #f1f3f6; /* board columns, wells */
+  --surface-hover: var(--ink-100);
+  --border: var(--ink-200);
+  --border-strong: var(--ink-300);
+
+  --text: var(--ink-900);
+  --text-muted: var(--ink-500);
+  --text-subtle: var(--ink-400); /* placeholders, icons, disabled: never readable text (3.1:1) */
+
+  --primary: var(--tempo-600);
+  --primary-hover: var(--tempo-700);
+  --primary-fg: var(--ink-0);
+  --primary-soft: var(--tempo-50);
+  --primary-soft-fg: var(--tempo-700);
+  --accent: var(--ember-500);
+  --ring: color-mix(in oklab, var(--tempo-500) 45%, transparent);
+
+  --success: var(--green-600);
+  --success-soft: #e8f7ee;
+  --warning: #b77d0a;
+  --warning-soft: #fdf4e1;
+  --danger: var(--red-600);
+  --danger-soft: #fdecec;
+  --info: #2f6fd6;
+  --info-soft: #eaf1fd;
+
+  /* ---- 3. Domain ------------------------------------------------------------------------- */
+
+  --status-backlog: var(--ink-400);
+  --status-todo: var(--ink-500);
+  --status-progress: var(--amber-500);
+  --status-review: var(--violet-500);
+  --status-done: var(--tempo-500);
+  --status-canceled: var(--ink-400);
+
+  --priority-urgent: var(--red-500);
+  --priority-high: var(--ember-500);
+  --priority-medium: var(--amber-500);
+  --priority-low: var(--ink-400);
+
+  --label-teal: var(--tempo-500);
+  --label-blue: var(--blue-500);
+  --label-violet: var(--violet-500);
+  --label-pink: var(--pink-500);
+  --label-red: var(--red-500);
+  --label-orange: var(--ember-500);
+  --label-amber: var(--amber-500);
+  --label-green: var(--green-500);
+  --label-slate: var(--slate-500);
+
+  /* ---- Type ------------------------------------------------------------------------------ */
+
+  --font-sans: 'Geist', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, 'SFMono-Regular', monospace;
+
+  /* size / line height. The app's base is 14px: work tools are dense. */
+  --text-display: 3rem; /* 48/52, -0.035em, marketing only */
+  --text-h1: 1.875rem; /* 30/36, -0.025em */
+  --text-h2: 1.5rem; /* 24/30, -0.02em */
+  --text-h3: 1.125rem; /* 18/26, -0.01em */
+  --text-lg: 1rem; /* 16/24, long-form text: descriptions, comments */
+  --text-base: 0.875rem; /* 14/20, the UI default */
+  --text-sm: 0.8125rem; /* 13/18, secondary text, table cells */
+  --text-xs: 0.75rem; /* 12/16, captions, badges, metadata */
+
+  /* ---- Space, size, shape ---------------------------------------------------------------- */
+
+  --space: 4px; /* every gap and padding is a multiple */
+  --control-sm: 28px;
+  --control-md: 32px; /* default button and input height */
+  --control-lg: 40px;
+
+  --radius-sm: 6px; /* badges, checkboxes, small buttons */
+  --radius-md: 8px; /* buttons, inputs, menu items */
+  --radius-lg: 12px; /* cards, popovers */
+  --radius-xl: 16px; /* dialogs, app window */
+
+  --shadow-sm: 0 1px 2px rgb(11 14 20 / 0.06);
+  --shadow-md: 0 1px 2px rgb(11 14 20 / 0.06), 0 4px 12px rgb(11 14 20 / 0.08);
+  --shadow-lg: 0 2px 4px rgb(11 14 20 / 0.06), 0 16px 40px rgb(11 14 20 / 0.16);
+
+  /* ---- Motion ---------------------------------------------------------------------------- */
+
+  --ease-out: cubic-bezier(0.2, 0, 0, 1);
+  --duration-fast: 120ms; /* hover, press */
+  --duration-base: 200ms; /* menus, popovers, drag settle */
+  --duration-slow: 320ms; /* dialogs, panels */
+}
+
+/* ---- 2. Semantic (dark) ------------------------------------------------------------------ */
+
+[data-theme='dark'] {
+  --canvas: var(--ink-950);
+  --surface: #10141b;
+  --surface-raised: #171c25;
+  --surface-sunken: #0d1117;
+  --surface-hover: #1c2230;
+  --border: #232935;
+  --border-strong: #2f3645;
+
+  --text: #e9ecf1;
+  --text-muted: var(--ink-400);
+  --text-subtle: var(--ink-500);
+
+  --primary: var(--tempo-400);
+  --primary-hover: var(--tempo-300);
+  --primary-fg: var(--ink-950);
+  --primary-soft: rgb(45 194 174 / 0.12);
+  --primary-soft-fg: var(--tempo-300);
+  --accent: var(--ember-400);
+  --ring: color-mix(in oklab, var(--tempo-400) 50%, transparent);
+
+  --success: #3cc47a;
+  --success-soft: rgb(60 196 122 / 0.12);
+  --warning: var(--amber-400);
+  --warning-soft: rgb(240 169 43 / 0.12);
+  --danger: #f2686c;
+  --danger-soft: rgb(242 104 108 / 0.12);
+  --info: #6aa2fa;
+  --info-soft: rgb(106 162 250 / 0.12);
+
+  --status-todo: var(--ink-300);
+
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.4);
+  --shadow-md: 0 1px 2px rgb(0 0 0 / 0.4), 0 6px 16px rgb(0 0 0 / 0.35);
+  --shadow-lg: 0 2px 6px rgb(0 0 0 / 0.4), 0 24px 56px rgb(0 0 0 / 0.55);
+}
