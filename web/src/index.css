@@ -87,9 +87,10 @@
   /* Signals */
   --success: #17804a;
   --success-soft: #e8f7ee;
-  --warning: #b77d0a;
+  /* Warning and destructive are text colors too: both keep 4.5:1 on their soft fills. */
+  --warning: #946200;
   --warning-soft: #fdf4e1;
-  --destructive: #d93a40;
+  --destructive: #c4343a;
   --destructive-soft: #fdecec;
   --info: #2f6fd6;
   --info-soft: #eaf1fd;
