@@ -5,16 +5,20 @@
  * Project and work management for teams.
  * OpenAPI spec version: 1
  */
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, useMutation, useQuery } from '@tanstack/react-query';
 import type {
   DataTag,
   DefinedInitialDataOptions,
+  DefinedUseInfiniteQueryResult,
   DefinedUseQueryResult,
+  InfiniteData,
   MutationFunction,
   QueryClient,
   QueryFunction,
   QueryKey,
   UndefinedInitialDataOptions,
+  UseInfiniteQueryOptions,
+  UseInfiniteQueryResult,
   UseMutationOptions,
   UseMutationResult,
   UseQueryOptions,
@@ -87,6 +91,18 @@ export const listComments = async (
   );
 };
 
+export const getListCommentsInfiniteQueryKey = (
+  organizationId: string,
+  issueId: string,
+  params?: ListCommentsParams,
+) => {
+  return [
+    'infinite',
+    `/api/v1/organizations/${organizationId}/issues/${issueId}/comments`,
+    ...(params ? [params] : []),
+  ] as const;
+};
+
 export const getListCommentsQueryKey = (
   organizationId: string,
   issueId: string,
@@ -97,6 +113,185 @@ export const getListCommentsQueryKey = (
     ...(params ? [params] : []),
   ] as const;
 };
+
+export const getListCommentsInfiniteQueryOptions = <
+  TData = InfiniteData<Awaited<ReturnType<typeof listComments>>, ListCommentsParams['after']>,
+  TError = ErrorType<unknown>,
+>(
+  organizationId: string,
+  issueId: string,
+  params?: ListCommentsParams,
+  options?: {
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof listComments>>,
+        TError,
+        TData,
+        QueryKey,
+        ListCommentsParams['after']
+      >
+    >;
+    request?: SecondParameter<typeof httpClient>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getListCommentsInfiniteQueryKey(organizationId, issueId, params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof listComments>>,
+    QueryKey,
+    ListCommentsParams['after']
+  > = ({ signal, pageParam }) =>
+    listComments(
+      organizationId,
+      issueId,
+      { ...params, after: pageParam ?? params?.['after'] },
+      { signal, ...requestOptions },
+    );
+
+  return {
+    queryKey,
+    queryFn,
+    enabled:
+      organizationId !== null &&
+      organizationId !== undefined &&
+      issueId !== null &&
+      issueId !== undefined,
+    ...queryOptions,
+  } as UseInfiniteQueryOptions<
+    Awaited<ReturnType<typeof listComments>>,
+    TError,
+    TData,
+    QueryKey,
+    ListCommentsParams['after']
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type ListCommentsInfiniteQueryResult = NonNullable<Awaited<ReturnType<typeof listComments>>>;
+export type ListCommentsInfiniteQueryError = ErrorType<unknown>;
+
+export function useListCommentsInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof listComments>>, ListCommentsParams['after']>,
+  TError = ErrorType<unknown>,
+>(
+  organizationId: string,
+  issueId: string,
+  params: undefined | ListCommentsParams,
+  options: {
+    query: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof listComments>>,
+        TError,
+        TData,
+        QueryKey,
+        ListCommentsParams['after']
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listComments>>,
+          TError,
+          Awaited<ReturnType<typeof listComments>>,
+          QueryKey
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof httpClient>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseInfiniteQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useListCommentsInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof listComments>>, ListCommentsParams['after']>,
+  TError = ErrorType<unknown>,
+>(
+  organizationId: string,
+  issueId: string,
+  params?: ListCommentsParams,
+  options?: {
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof listComments>>,
+        TError,
+        TData,
+        QueryKey,
+        ListCommentsParams['after']
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listComments>>,
+          TError,
+          Awaited<ReturnType<typeof listComments>>,
+          QueryKey
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof httpClient>;
+  },
+  queryClient?: QueryClient,
+): UseInfiniteQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useListCommentsInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof listComments>>, ListCommentsParams['after']>,
+  TError = ErrorType<unknown>,
+>(
+  organizationId: string,
+  issueId: string,
+  params?: ListCommentsParams,
+  options?: {
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof listComments>>,
+        TError,
+        TData,
+        QueryKey,
+        ListCommentsParams['after']
+      >
+    >;
+    request?: SecondParameter<typeof httpClient>;
+  },
+  queryClient?: QueryClient,
+): UseInfiniteQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * @summary List an issue's comments, oldest first
+ */
+
+export function useListCommentsInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof listComments>>, ListCommentsParams['after']>,
+  TError = ErrorType<unknown>,
+>(
+  organizationId: string,
+  issueId: string,
+  params?: ListCommentsParams,
+  options?: {
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof listComments>>,
+        TError,
+        TData,
+        QueryKey,
+        ListCommentsParams['after']
+      >
+    >;
+    request?: SecondParameter<typeof httpClient>;
+  },
+  queryClient?: QueryClient,
+): UseInfiniteQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  const queryOptions = getListCommentsInfiniteQueryOptions(
+    organizationId,
+    issueId,
+    params,
+    options,
+  );
+
+  const query = useInfiniteQuery(queryOptions, queryClient) as UseInfiniteQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
 
 export const getListCommentsQueryOptions = <
   TData = Awaited<ReturnType<typeof listComments>>,

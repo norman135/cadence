@@ -14,6 +14,5 @@ export interface CommentResponse {
   createdAt: string;
   /** @nullable */
   editedAt: string | null;
-  /** @pattern ^-?(?:0|[1-9]\d*)$ */
-  revisionCount: number | string;
+  revisionCount: number;
 }

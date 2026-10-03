@@ -28,19 +28,15 @@ export interface IssueDetail {
   priority: IssuePriority;
   assignee: null | PersonSummary;
   reporter: PersonSummary;
-  /**
-   * @nullable
-   * @pattern ^-?(?:0|[1-9]\d*)$
-   */
-  estimate: number | string | null;
+  /** @nullable */
+  estimate: number | null;
   /** @nullable */
   dueDate: string | null;
   labels: LabelResponse[];
   parent: null | IssueReference;
   subIssues: IssueReference[];
   links: IssueLinkResponse[];
-  /** @pattern ^-?(?:0|[1-9]\d*)$ */
-  commentCount: number | string;
+  commentCount: number;
   createdAt: string;
   updatedAt: string;
   /** @nullable */

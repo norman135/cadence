@@ -21,11 +21,8 @@ export interface CreateIssueCommand {
   assigneeId?: string | null;
   /** @nullable */
   labelIds?: string[] | null;
-  /**
-   * @nullable
-   * @pattern ^-?(?:0|[1-9]\d*)$
-   */
-  estimate?: number | string | null;
+  /** @nullable */
+  estimate?: number | null;
   /** @nullable */
   dueDate?: string | null;
   /** @nullable */

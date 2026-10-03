@@ -14,8 +14,7 @@ export interface ProjectResponse {
   /** @nullable */
   description: string | null;
   role: ProjectRole;
-  /** @pattern ^-?(?:0|[1-9]\d*)$ */
-  openIssueCount: number | string;
+  openIssueCount: number;
   createdAt: string;
   /** @nullable */
   archivedAt: string | null;
