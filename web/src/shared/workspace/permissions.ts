@@ -9,18 +9,29 @@ export type Permission =
   | 'organization.delete'
   | 'members.read'
   | 'members.invite'
-  | 'members.manage';
+  | 'members.manage'
+  | 'projects.create'
+  | 'labels.manage';
 
 const byRole: Record<OrganizationRole, readonly Permission[]> = {
   Guest: [],
-  Member: ['members.read'],
-  Admin: ['organization.update', 'members.read', 'members.invite', 'members.manage'],
+  Member: ['members.read', 'projects.create', 'labels.manage'],
+  Admin: [
+    'organization.update',
+    'members.read',
+    'members.invite',
+    'members.manage',
+    'projects.create',
+    'labels.manage',
+  ],
   Owner: [
     'organization.update',
     'organization.delete',
     'members.read',
     'members.invite',
     'members.manage',
+    'projects.create',
+    'labels.manage',
   ],
 };
 

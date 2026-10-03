@@ -61,6 +61,28 @@ export function DropdownMenuRadioItem({
   );
 }
 
+/** A toggle in a menu, for choosing several options (labels, filters). The menu stays open. */
+export function DropdownMenuCheckboxItem({
+  className,
+  children,
+  ...props
+}: ComponentProps<typeof Primitive.CheckboxItem>) {
+  return (
+    <Primitive.CheckboxItem
+      className={cn(item, 'pr-8', className)}
+      onSelect={(event) => {
+        event.preventDefault();
+      }}
+      {...props}
+    >
+      {children}
+      <Primitive.ItemIndicator className="absolute right-2 flex">
+        <Check className="size-4 text-primary" />
+      </Primitive.ItemIndicator>
+    </Primitive.CheckboxItem>
+  );
+}
+
 export function DropdownMenuSubTrigger({
   className,
   children,
