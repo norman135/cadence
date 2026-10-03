@@ -14,13 +14,19 @@ public static class Permissions
     public const string MembersInvite = "members.invite";
     public const string MembersManage = "members.manage";
 
+    /// <summary>Create projects (the creator becomes the project's admin).</summary>
+    public const string ProjectsCreate = "projects.create";
+
+    /// <summary>Create, rename and delete the organization's issue labels.</summary>
+    public const string LabelsManage = "labels.manage";
+
     private static readonly FrozenDictionary<OrganizationRole, FrozenSet<string>> s_byRole =
         new Dictionary<OrganizationRole, FrozenSet<string>>
         {
             [OrganizationRole.Guest] = FrozenSet<string>.Empty,
-            [OrganizationRole.Member] = new[] { MembersRead }.ToFrozenSet(),
-            [OrganizationRole.Admin] = new[] { OrganizationUpdate, MembersRead, MembersInvite, MembersManage }.ToFrozenSet(),
-            [OrganizationRole.Owner] = new[] { OrganizationUpdate, OrganizationDelete, MembersRead, MembersInvite, MembersManage }.ToFrozenSet(),
+            [OrganizationRole.Member] = new[] { MembersRead, ProjectsCreate, LabelsManage }.ToFrozenSet(),
+            [OrganizationRole.Admin] = new[] { OrganizationUpdate, MembersRead, MembersInvite, MembersManage, ProjectsCreate, LabelsManage }.ToFrozenSet(),
+            [OrganizationRole.Owner] = new[] { OrganizationUpdate, OrganizationDelete, MembersRead, MembersInvite, MembersManage, ProjectsCreate, LabelsManage }.ToFrozenSet(),
         }.ToFrozenDictionary();
 
     /// <summary>The permissions granted to a role.</summary>
