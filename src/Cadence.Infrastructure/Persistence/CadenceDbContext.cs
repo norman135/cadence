@@ -1,7 +1,9 @@
 using Cadence.Application.Common.Abstractions;
 using Cadence.Application.Common.ReadModels;
 using Cadence.Domain.Common;
+using Cadence.Domain.Issues;
 using Cadence.Domain.Organizations;
+using Cadence.Domain.Projects;
 using Cadence.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -32,6 +34,22 @@ public sealed class CadenceDbContext(DbContextOptions<CadenceDbContext> options)
     public DbSet<Membership> Memberships => Set<Membership>();
 
     public DbSet<Invitation> Invitations => Set<Invitation>();
+
+    public DbSet<Project> Projects => Set<Project>();
+
+    public DbSet<ProjectMember> ProjectMembers => Set<ProjectMember>();
+
+    public DbSet<Issue> Issues => Set<Issue>();
+
+    public DbSet<Label> Labels => Set<Label>();
+
+    public DbSet<IssueLabel> IssueLabels => Set<IssueLabel>();
+
+    public DbSet<IssueLink> IssueLinks => Set<IssueLink>();
+
+    public DbSet<Comment> Comments => Set<Comment>();
+
+    public DbSet<CommentRevision> CommentRevisions => Set<CommentRevision>();
 
     IQueryable<UserSummary> ICadenceDbContext.Users => Set<UserSummary>().AsNoTracking();
 

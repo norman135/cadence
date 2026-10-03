@@ -48,6 +48,302 @@ namespace Cadence.Infrastructure.Persistence.Migrations
                     b.ToSqlQuery("SELECT id, email, normalized_email, display_name FROM users");
                 });
 
+            modelBuilder.Entity("Cadence.Domain.Issues.Comment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("AuthorId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("author_id");
+
+                    b.Property<string>("Body")
+                        .IsRequired()
+                        .HasMaxLength(20000)
+                        .HasColumnType("character varying(20000)")
+                        .HasColumnName("body");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTimeOffset?>("EditedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("edited_at");
+
+                    b.Property<Guid>("IssueId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("issue_id");
+
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("organization_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_comments");
+
+                    b.HasIndex("AuthorId")
+                        .HasDatabaseName("ix_comments_author_id");
+
+                    b.HasIndex("IssueId", "Id")
+                        .HasDatabaseName("ix_comments_issue_id_id");
+
+                    b.ToTable("comments", (string)null);
+                });
+
+            modelBuilder.Entity("Cadence.Domain.Issues.CommentRevision", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Body")
+                        .IsRequired()
+                        .HasMaxLength(20000)
+                        .HasColumnType("character varying(20000)")
+                        .HasColumnName("body");
+
+                    b.Property<Guid>("CommentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("comment_id");
+
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("organization_id");
+
+                    b.Property<DateTimeOffset>("ReplacedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("replaced_at");
+
+                    b.Property<DateTimeOffset>("WrittenAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("written_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_comment_revisions");
+
+                    b.HasIndex("CommentId", "Id")
+                        .HasDatabaseName("ix_comment_revisions_comment_id_id");
+
+                    b.ToTable("comment_revisions", (string)null);
+                });
+
+            modelBuilder.Entity("Cadence.Domain.Issues.Issue", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid?>("AssigneeId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("assignee_id");
+
+                    b.Property<int>("CommentCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("comment_count");
+
+                    b.Property<DateTimeOffset?>("CompletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("completed_at");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(50000)
+                        .HasColumnType("character varying(50000)")
+                        .HasColumnName("description");
+
+                    b.Property<DateOnly?>("DueDate")
+                        .HasColumnType("date")
+                        .HasColumnName("due_date");
+
+                    b.Property<int?>("Estimate")
+                        .HasColumnType("integer")
+                        .HasColumnName("estimate");
+
+                    b.Property<int>("Number")
+                        .HasColumnType("integer")
+                        .HasColumnName("number");
+
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("organization_id");
+
+                    b.Property<Guid?>("ParentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("parent_id");
+
+                    b.Property<int>("Priority")
+                        .HasColumnType("integer")
+                        .HasColumnName("priority");
+
+                    b.Property<Guid>("ProjectId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("project_id");
+
+                    b.Property<Guid>("ReporterId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("reporter_id");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer")
+                        .HasColumnName("status");
+
+                    b.Property<int>("SubIssueClosedCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("sub_issue_closed_count");
+
+                    b.Property<int>("SubIssueCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("sub_issue_count");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("title");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("integer")
+                        .HasColumnName("type");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_issues");
+
+                    b.HasIndex("ParentId")
+                        .HasDatabaseName("ix_issues_parent")
+                        .HasFilter("parent_id IS NOT NULL");
+
+                    b.HasIndex("ReporterId")
+                        .HasDatabaseName("ix_issues_reporter_id");
+
+                    b.HasIndex("AssigneeId", "UpdatedAt")
+                        .IsDescending(false, true)
+                        .HasDatabaseName("ix_issues_assignee_open")
+                        .HasFilter("status < 4");
+
+                    b.HasIndex("ProjectId", "Number")
+                        .IsUnique()
+                        .HasDatabaseName("ix_issues_project_id_number");
+
+                    b.HasIndex("OrganizationId", "UpdatedAt", "Id")
+                        .IsDescending(false, true, true)
+                        .HasDatabaseName("ix_issues_organization_id_updated_at_id");
+
+                    b.HasIndex("ProjectId", "UpdatedAt", "Id")
+                        .IsDescending(false, true, true)
+                        .HasDatabaseName("ix_issues_project_id_updated_at_id");
+
+                    b.ToTable("issues", (string)null);
+                });
+
+            modelBuilder.Entity("Cadence.Domain.Issues.IssueLabel", b =>
+                {
+                    b.Property<Guid>("IssueId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("issue_id");
+
+                    b.Property<Guid>("LabelId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("label_id");
+
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("organization_id");
+
+                    b.HasKey("IssueId", "LabelId")
+                        .HasName("pk_issue_labels");
+
+                    b.HasIndex("LabelId", "IssueId")
+                        .HasDatabaseName("ix_issue_labels_label_id_issue_id");
+
+                    b.ToTable("issue_labels", (string)null);
+                });
+
+            modelBuilder.Entity("Cadence.Domain.Issues.IssueLink", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid>("CreatedByUserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by_user_id");
+
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("organization_id");
+
+                    b.Property<Guid>("SourceIssueId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("source_issue_id");
+
+                    b.Property<Guid>("TargetIssueId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("target_issue_id");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("integer")
+                        .HasColumnName("type");
+
+                    b.HasKey("Id")
+                        .HasName("pk_issue_links");
+
+                    b.HasIndex("CreatedByUserId")
+                        .HasDatabaseName("ix_issue_links_created_by_user_id");
+
+                    b.HasIndex("TargetIssueId")
+                        .HasDatabaseName("ix_issue_links_target_issue_id");
+
+                    b.HasIndex("SourceIssueId", "TargetIssueId", "Type")
+                        .IsUnique()
+                        .HasDatabaseName("ix_issue_links_source_issue_id_target_issue_id_type");
+
+                    b.ToTable("issue_links", (string)null);
+                });
+
+            modelBuilder.Entity("Cadence.Domain.Issues.Label", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Color")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)")
+                        .HasColumnName("color");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("name");
+
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("organization_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_labels");
+
+                    b.HasIndex("OrganizationId")
+                        .HasDatabaseName("ix_labels_organization_id");
+
+                    b.ToTable("labels", (string)null);
+                });
+
             modelBuilder.Entity("Cadence.Domain.Organizations.Invitation", b =>
                 {
                     b.Property<Guid>("Id")
@@ -184,6 +480,110 @@ namespace Cadence.Infrastructure.Persistence.Migrations
                         .HasDatabaseName("ix_organizations_slug");
 
                     b.ToTable("organizations", (string)null);
+                });
+
+            modelBuilder.Entity("Cadence.Domain.Projects.Project", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset?>("ArchivedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("archived_at");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid>("CreatedByUserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by_user_id");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)")
+                        .HasColumnName("description");
+
+                    b.Property<string>("Key")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)")
+                        .HasColumnName("key");
+
+                    b.Property<int>("LastIssueNumber")
+                        .HasColumnType("integer")
+                        .HasColumnName("last_issue_number");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)")
+                        .HasColumnName("name");
+
+                    b.Property<int>("OpenIssueCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("open_issue_count");
+
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("organization_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_projects");
+
+                    b.HasIndex("CreatedByUserId")
+                        .HasDatabaseName("ix_projects_created_by_user_id");
+
+                    b.HasIndex("OrganizationId", "Key")
+                        .IsUnique()
+                        .HasDatabaseName("ix_projects_organization_id_key");
+
+                    b.ToTable("projects", (string)null);
+                });
+
+            modelBuilder.Entity("Cadence.Domain.Projects.ProjectMember", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("AddedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("added_at");
+
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("organization_id");
+
+                    b.Property<Guid>("ProjectId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("project_id");
+
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("role");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_project_members");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("ix_project_members_user_id");
+
+                    b.HasIndex("OrganizationId", "UserId")
+                        .HasDatabaseName("ix_project_members_organization_id_user_id");
+
+                    b.HasIndex("ProjectId", "UserId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_project_members_project_id_user_id");
+
+                    b.ToTable("project_members", (string)null);
                 });
 
             modelBuilder.Entity("Cadence.Infrastructure.Identity.ApplicationUser", b =>
@@ -422,6 +822,120 @@ namespace Cadence.Infrastructure.Persistence.Migrations
                     b.ToTable("user_tokens", (string)null);
                 });
 
+            modelBuilder.Entity("Cadence.Domain.Issues.Comment", b =>
+                {
+                    b.HasOne("Cadence.Infrastructure.Identity.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("AuthorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_comments_users_author_id");
+
+                    b.HasOne("Cadence.Domain.Issues.Issue", null)
+                        .WithMany()
+                        .HasForeignKey("IssueId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_comments_issues_issue_id");
+                });
+
+            modelBuilder.Entity("Cadence.Domain.Issues.CommentRevision", b =>
+                {
+                    b.HasOne("Cadence.Domain.Issues.Comment", null)
+                        .WithMany()
+                        .HasForeignKey("CommentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_comment_revisions_comments_comment_id");
+                });
+
+            modelBuilder.Entity("Cadence.Domain.Issues.Issue", b =>
+                {
+                    b.HasOne("Cadence.Infrastructure.Identity.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("AssigneeId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_issues_users_assignee_id");
+
+                    b.HasOne("Cadence.Domain.Organizations.Organization", null)
+                        .WithMany()
+                        .HasForeignKey("OrganizationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_issues_organizations_organization_id");
+
+                    b.HasOne("Cadence.Domain.Issues.Issue", null)
+                        .WithMany()
+                        .HasForeignKey("ParentId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_issues_issues_parent_id");
+
+                    b.HasOne("Cadence.Domain.Projects.Project", null)
+                        .WithMany()
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_issues_projects_project_id");
+
+                    b.HasOne("Cadence.Infrastructure.Identity.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("ReporterId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_issues_users_reporter_id");
+                });
+
+            modelBuilder.Entity("Cadence.Domain.Issues.IssueLabel", b =>
+                {
+                    b.HasOne("Cadence.Domain.Issues.Issue", null)
+                        .WithMany()
+                        .HasForeignKey("IssueId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_issue_labels_issues_issue_id");
+
+                    b.HasOne("Cadence.Domain.Issues.Label", null)
+                        .WithMany()
+                        .HasForeignKey("LabelId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_issue_labels_labels_label_id");
+                });
+
+            modelBuilder.Entity("Cadence.Domain.Issues.IssueLink", b =>
+                {
+                    b.HasOne("Cadence.Infrastructure.Identity.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_issue_links_users_created_by_user_id");
+
+                    b.HasOne("Cadence.Domain.Issues.Issue", null)
+                        .WithMany()
+                        .HasForeignKey("SourceIssueId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_issue_links_issues_source_issue_id");
+
+                    b.HasOne("Cadence.Domain.Issues.Issue", null)
+                        .WithMany()
+                        .HasForeignKey("TargetIssueId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_issue_links_issues_target_issue_id");
+                });
+
+            modelBuilder.Entity("Cadence.Domain.Issues.Label", b =>
+                {
+                    b.HasOne("Cadence.Domain.Organizations.Organization", null)
+                        .WithMany()
+                        .HasForeignKey("OrganizationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_labels_organizations_organization_id");
+                });
+
             modelBuilder.Entity("Cadence.Domain.Organizations.Invitation", b =>
                 {
                     b.HasOne("Cadence.Infrastructure.Identity.ApplicationUser", null)
@@ -454,6 +968,40 @@ namespace Cadence.Infrastructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_memberships_users_user_id");
+                });
+
+            modelBuilder.Entity("Cadence.Domain.Projects.Project", b =>
+                {
+                    b.HasOne("Cadence.Infrastructure.Identity.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_projects_users_created_by_user_id");
+
+                    b.HasOne("Cadence.Domain.Organizations.Organization", null)
+                        .WithMany()
+                        .HasForeignKey("OrganizationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_projects_organizations_organization_id");
+                });
+
+            modelBuilder.Entity("Cadence.Domain.Projects.ProjectMember", b =>
+                {
+                    b.HasOne("Cadence.Domain.Projects.Project", null)
+                        .WithMany()
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_project_members_projects_project_id");
+
+                    b.HasOne("Cadence.Infrastructure.Identity.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_project_members_users_user_id");
                 });
 
             modelBuilder.Entity("Cadence.Infrastructure.Identity.RefreshToken", b =>
