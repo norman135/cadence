@@ -3,10 +3,14 @@ using System.Text.Json.Serialization;
 using Cadence.Api.Endpoints;
 using Cadence.Application.Common.Paging;
 using Cadence.Application.Features.Auth;
+using Cadence.Application.Features.Comments;
 using Cadence.Application.Features.Invitations;
+using Cadence.Application.Features.Issues;
+using Cadence.Application.Features.Labels;
 using Cadence.Application.Features.Me;
 using Cadence.Application.Features.Members;
 using Cadence.Application.Features.Organizations;
+using Cadence.Application.Features.Projects;
 using Cadence.Application.Features.System;
 
 namespace Cadence.Api.Serialization;
@@ -39,4 +43,25 @@ namespace Cadence.Api.Serialization;
 [JsonSerializable(typeof(IReadOnlyList<InvitationResponse>))]
 [JsonSerializable(typeof(InvitationPreviewResponse))]
 [JsonSerializable(typeof(AcceptInvitationResponse))]
+[JsonSerializable(typeof(ProjectResponse))]
+[JsonSerializable(typeof(IReadOnlyList<ProjectResponse>))]
+[JsonSerializable(typeof(CreateProjectCommand))]
+[JsonSerializable(typeof(UpdateProjectRequest))]
+[JsonSerializable(typeof(IReadOnlyList<ProjectMemberResponse>))]
+[JsonSerializable(typeof(AddProjectMemberRequest))]
+[JsonSerializable(typeof(ChangeProjectMemberRoleRequest))]
+[JsonSerializable(typeof(LabelResponse))]
+[JsonSerializable(typeof(IReadOnlyList<LabelResponse>))]
+[JsonSerializable(typeof(CreateLabelCommand))]
+[JsonSerializable(typeof(UpdateLabelRequest))]
+[JsonSerializable(typeof(KeysetPage<IssueListItem>))]
+[JsonSerializable(typeof(CreateIssueCommand))]
+[JsonSerializable(typeof(CreatedIssueResponse))]
+[JsonSerializable(typeof(IssueDetail))]
+[JsonSerializable(typeof(UpdateIssueRequest))]
+[JsonSerializable(typeof(CreateIssueLinkRequest))]
+[JsonSerializable(typeof(CommentRequest))]
+[JsonSerializable(typeof(KeysetPage<CommentResponse>))]
+[JsonSerializable(typeof(CommentResponse))]
+[JsonSerializable(typeof(IReadOnlyList<CommentRevisionResponse>))]
 internal sealed partial class ApiJsonSerializerContext : JsonSerializerContext;
