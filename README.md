@@ -27,7 +27,7 @@ Organize work into projects, move issues through custom workflows, plan sprints,
 ---
 
 > [!NOTE]
-> **Cadence is under active development.** It is built milestone by milestone, in the open, and each milestone ships as a tagged release. **M1 (Identity & tenancy) is complete**: people can sign up, create organizations, invite their team and manage roles, on top of the M0 foundation (architecture, CI/CD, container deployment and performance harness). **M2 (Brand & design system) is complete**: Cadence has its own identity, light and dark themes, and a design system the whole app is built on. Projects and issues arrive in M3. The [roadmap](docs/ROADMAP.md) has the full plan and current progress.
+> **Cadence is under active development.** It is built milestone by milestone, in the open, and each milestone ships as a tagged release. **M1 (Identity & tenancy) is complete**: people can sign up, create organizations, invite their team and manage roles, on top of the M0 foundation (architecture, CI/CD, container deployment and performance harness). **M2 (Brand & design system) is complete**: Cadence has its own identity, light and dark themes, and a design system the whole app is built on. **M3 (Projects & issues) is complete**: teams can track work in projects, with issue keys, filters, sub-issues, links and comments. Workflows and Kanban boards arrive in M4. The [roadmap](docs/ROADMAP.md) has the full plan and current progress.
 
 ## Why Cadence?
 
@@ -150,7 +150,7 @@ Cadence is designed for a **1–2 GB RAM server with about 10 concurrent users**
 | Initial JavaScript bundle | ≤ 180 KB gzipped |
 
 Some of the techniques used:
-- Queries that read without change tracking and project straight into DTOs, plus compiled queries and a compiled model.
+- Queries that read without change tracking and project straight into DTOs, plus compiled queries on the hottest paths.
 - Pagination by cursor (keyset) instead of offsets.
 - Fractional ranking, so moving a card is a single-row update.
 - An in-process cache with stampede protection.
@@ -158,7 +158,7 @@ Some of the techniques used:
 - A job queue that sleeps until PostgreSQL notifies it, instead of polling.
 - Code splitting by route, and virtualized lists.
 
-The full playbook is in the [roadmap](docs/ROADMAP.md#8-performance-engineering-playbook). Measured results will be published for every release in `docs/performance.md`.
+The full playbook is in the [roadmap](docs/ROADMAP.md#8-performance-engineering-playbook). Measured results for every release are in [docs/performance.md](docs/performance.md).
 
 ## Getting started
 
@@ -218,7 +218,7 @@ Load tests, memory checks and benchmarks are described in [docs/performance.md](
 | M0: Foundation | `v0.1.0` | ✅ Done |
 | M1: Identity & tenancy | `v0.2.0` | ✅ Done |
 | M2: Brand & design system | `v0.3.0` | ✅ Done |
-| M3: Projects & issues | `v0.4.0` | Planned |
+| M3: Projects & issues | `v0.4.0` | ✅ Done |
 | M4: Workflows & Kanban board | `v0.5.0` | Planned |
 | M5: Real-time collaboration | `v0.6.0` | Planned |
 | M6: Sprints & planning | `v0.7.0` | Planned |
