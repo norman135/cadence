@@ -203,7 +203,7 @@ function CommentCard({
         {comment.editedAt && (
           <button
             type="button"
-            className="cursor-default text-muted-foreground underline-offset-2 hover:underline"
+            className="text-muted-foreground underline-offset-2 hover:underline"
             onClick={() => {
               setHistoryOpen(true);
             }}

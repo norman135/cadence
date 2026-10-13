@@ -194,7 +194,7 @@ export function AppShell() {
               <button
                 type="button"
                 onClick={openPalette}
-                className="hidden h-[30px] w-72 cursor-default items-center gap-2 rounded-md border bg-sunken px-2.5 text-sm text-muted-foreground outline-none hover:border-input focus-visible:outline-2 focus-visible:outline-ring sm:ml-auto sm:flex"
+                className="hidden h-[30px] w-72 items-center gap-2 rounded-md border bg-sunken px-2.5 text-sm text-muted-foreground outline-none hover:border-input focus-visible:outline-2 focus-visible:outline-ring sm:ml-auto sm:flex"
               >
                 <Search className="size-4" />
                 Search or jump to…
@@ -372,7 +372,7 @@ function UserMenu({ base }: { base: string }) {
     <DropdownMenu>
       <DropdownMenuTrigger
         aria-label="Account menu"
-        className="flex w-full cursor-default items-center gap-2.5 rounded-md p-2 text-left outline-none hover:bg-accent focus-visible:outline-2 focus-visible:outline-ring data-[state=open]:bg-accent"
+        className="flex w-full items-center gap-2.5 rounded-md p-2 text-left outline-none hover:bg-accent focus-visible:outline-2 focus-visible:outline-ring data-[state=open]:bg-accent"
       >
         <Avatar name={me.displayName} />
         <span className="min-w-0 leading-tight">
@@ -438,7 +438,7 @@ function MobileTabBar({ base, onSearch }: { base: string; onSearch: () => void }
         <Users />
         Members
       </NavLink>
-      <button type="button" className={cn(tab, 'cursor-default')} onClick={onSearch}>
+      <button type="button" className={tab} onClick={onSearch}>
         <Search />
         Search
       </button>

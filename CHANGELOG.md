@@ -38,6 +38,10 @@ Teams can now track work: projects hold issues with readable keys, and issues ca
 - The API's OpenAPI document describes integers as plain `integer` and issue sorts as strings; the generated client's types are narrower to match.
 - The light theme's warning and danger colors are darker, so text in them meets WCAG AA.
 
+### Fixed
+
+- Buttons, menu items, tabs, switches, checkboxes and command palette results now show the pointer cursor, like links. Disabled controls keep the arrow.
+
 ### Performance
 
 Over 10,000 issues, the list's p95 is 21.5 ms and an issue's 19.6 ms at 10 users (target 100 ms), with no errors at 50 users. See [docs/performance.md](docs/performance.md#v040-m3-projects--issues).

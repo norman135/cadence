@@ -155,7 +155,7 @@ function LoadedIssue({ issue, inDrawer }: { issue: IssueDetailModel; inDrawer: b
                     <button
                       type="button"
                       aria-label="Remove from parent"
-                      className="cursor-default rounded p-0.5 hover:bg-accent"
+                      className="rounded p-0.5 hover:bg-accent"
                       onClick={() => void change({ clear: ['Parent'] })}
                     >
                       <X className="size-3.5" />
@@ -490,7 +490,7 @@ function EditableDescription({
         onClick={() => {
           setEditing('');
         }}
-        className="cursor-text self-start text-sm text-muted-foreground hover:text-foreground"
+        className="self-start text-sm text-muted-foreground hover:text-foreground"
       >
         Add a description…
       </button>

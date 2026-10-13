@@ -289,7 +289,7 @@ function Item({
       onSelect={onSelect}
       {...(value === undefined ? {} : { value })}
       {...(forceMount ? { forceMount } : {})}
-      className="flex h-[38px] cursor-default items-center gap-2.5 rounded-lg px-2.5 text-sm text-foreground data-[selected=true]:bg-accent data-[selected=true]:shadow-[inset_2px_0_0_var(--primary)] [&_svg]:size-4 [&_svg]:text-muted-foreground"
+      className="flex h-[38px] items-center gap-2.5 rounded-lg px-2.5 text-sm text-foreground data-[selected=true]:bg-accent data-[selected=true]:shadow-[inset_2px_0_0_var(--primary)] [&_svg]:size-4 [&_svg]:text-muted-foreground"
     >
       {icon}
       {children}

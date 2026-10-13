@@ -6,7 +6,7 @@ export function Switch({ className, ...props }: ComponentProps<typeof Primitive.
   return (
     <Primitive.Root
       className={cn(
-        'relative inline-flex h-[18px] w-8 shrink-0 cursor-default rounded-full bg-input transition-colors duration-[120ms] outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:opacity-50 data-[state=checked]:bg-primary',
+        'relative inline-flex h-[18px] w-8 shrink-0 rounded-full bg-input transition-colors duration-[120ms] outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:opacity-50 data-[state=checked]:bg-primary',
         className,
       )}
       {...props}
