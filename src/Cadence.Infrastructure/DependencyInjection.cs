@@ -5,6 +5,7 @@ using Cadence.Infrastructure.Email;
 using Cadence.Infrastructure.Identity;
 using Cadence.Infrastructure.Persistence;
 using Cadence.Infrastructure.Persistence.Interceptors;
+using Cadence.Infrastructure.Ranking;
 using MailKit.Security;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -104,6 +105,8 @@ public static class DependencyInjection
         services.AddScoped<ICadenceDbContext>(static serviceProvider => serviceProvider.GetRequiredService<CadenceDbContext>());
         services.AddScoped<IIssueNumbers, IssueNumbers>();
         services.AddScoped<IIssueMoves, IssueMoves>();
+        services.AddSingleton<RankRebalancer>();
+        services.AddHostedService(provider => provider.GetRequiredService<RankRebalancer>());
 
         return services;
     }
