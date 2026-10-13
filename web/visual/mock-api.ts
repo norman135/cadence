@@ -149,6 +149,7 @@ const issue = (
   type: 'Task',
   title,
   status,
+  statusId: `status-${status}`,
   priority,
   assignee: ada,
   estimate: null,
@@ -252,6 +253,7 @@ const detail: IssueDetail = {
     },
   ],
   completedAt: null,
+  version: 1,
 };
 
 const comments: CommentResponse[] = [

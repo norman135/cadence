@@ -1,4 +1,5 @@
 export * from './auth/auth';
+export * from './board/board';
 export * from './comments/comments';
 export * from './invitations/invitations';
 export * from './issues/issues';
@@ -8,3 +9,4 @@ export * from './members/members';
 export * from './organizations/organizations';
 export * from './projects/projects';
 export * from './system/system';
+export * from './workflows/workflows';

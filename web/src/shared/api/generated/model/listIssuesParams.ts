@@ -13,6 +13,7 @@ import type { IssueType } from './issueType';
 export type ListIssuesParams = {
   projectId?: string[];
   status?: IssueStatus[];
+  statusId?: string[];
   priority?: IssuePriority[];
   type?: IssueType[];
   assigneeId?: string[];

@@ -59,7 +59,15 @@ export const getListIssuesUrl = (organizationId: string, params?: ListIssuesPara
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
-    const explodeParameters = ['projectId', 'status', 'priority', 'type', 'assigneeId', 'labelId'];
+    const explodeParameters = [
+      'projectId',
+      'status',
+      'statusId',
+      'priority',
+      'type',
+      'assigneeId',
+      'labelId',
+    ];
 
     if (Array.isArray(value) && explodeParameters.includes(key)) {
       value.forEach((v) => {

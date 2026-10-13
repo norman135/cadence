@@ -103,6 +103,7 @@ public static class DependencyInjection
         });
         services.AddScoped<ICadenceDbContext>(static serviceProvider => serviceProvider.GetRequiredService<CadenceDbContext>());
         services.AddScoped<IIssueNumbers, IssueNumbers>();
+        services.AddScoped<IIssueMoves, IssueMoves>();
 
         return services;
     }

@@ -4,6 +4,7 @@ using Cadence.Domain.Organizations;
 using Cadence.Domain.Projects;
 using Cadence.Domain.Workflows;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace Cadence.Application.Common.Abstractions;
 
@@ -55,6 +56,9 @@ public interface ICadenceDbContext
     IQueryable<UserSummary> Users { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>Starts a transaction for changes that must land together (several statements).</summary>
+    Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken cancellationToken);
 }
 
 /// <summary>Names of the global query filters, for the rare queries that must look across tenants.</summary>
