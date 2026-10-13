@@ -35,7 +35,7 @@ import {
  */
 
 const trigger =
-  'flex h-7 min-w-0 cursor-default items-center gap-2 rounded-md px-1.5 -mx-1.5 text-[13px] outline-none hover:bg-accent focus-visible:outline-2 focus-visible:outline-ring disabled:pointer-events-none data-[state=open]:bg-accent';
+  'flex h-7 min-w-0 items-center gap-2 rounded-md px-1.5 -mx-1.5 text-[13px] outline-none hover:bg-accent focus-visible:outline-2 focus-visible:outline-ring disabled:pointer-events-none data-[state=open]:bg-accent';
 
 function Picker({
   label,

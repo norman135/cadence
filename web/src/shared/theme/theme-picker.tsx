@@ -46,7 +46,7 @@ export function ThemePicker({ className }: { className?: string }) {
               setPreference(value);
             }}
             className={cn(
-              'inline-flex h-[26px] cursor-default items-center gap-1.5 rounded-md px-2.5 text-[13px] font-medium text-muted-foreground outline-none hover:text-foreground focus-visible:outline-2 focus-visible:outline-ring',
+              'inline-flex h-[26px] items-center gap-1.5 rounded-md px-2.5 text-[13px] font-medium text-muted-foreground outline-none hover:text-foreground focus-visible:outline-2 focus-visible:outline-ring',
               checked && 'bg-card text-foreground shadow-sm dark:bg-muted',
             )}
           >

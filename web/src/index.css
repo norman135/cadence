@@ -257,6 +257,32 @@
     @apply bg-background text-sm text-foreground antialiased;
   }
 
+  /*
+   * Everything clickable shows the pointer. Tailwind's reset gives buttons the default arrow, so
+   * this covers native controls and the ARIA roles Radix and cmdk render. Disabled controls keep
+   * the arrow (Radix marks them data-disabled="", cmdk data-disabled="true").
+   */
+  button:not(:disabled),
+  select:not(:disabled),
+  summary,
+  input:is([type='checkbox'], [type='radio'], [type='color'], [type='file']):not(:disabled),
+  input::-webkit-calendar-picker-indicator,
+  label:has(input:is([type='checkbox'], [type='radio']):not(:disabled)),
+  :is(
+    [role='button'],
+    [role='checkbox'],
+    [role='link'],
+    [role='menuitem'],
+    [role='menuitemcheckbox'],
+    [role='menuitemradio'],
+    [role='option'],
+    [role='radio'],
+    [role='switch'],
+    [role='tab']
+  ):not([aria-disabled='true'], [data-disabled=''], [data-disabled='true']) {
+    cursor: pointer;
+  }
+
   :focus-visible {
     outline-width: 2px;
     outline-offset: 2px;

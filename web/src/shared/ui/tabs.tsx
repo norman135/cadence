@@ -19,7 +19,7 @@ export function TabsTrigger({ className, ...props }: ComponentProps<typeof Primi
   return (
     <Primitive.Trigger
       className={cn(
-        "inline-flex h-[26px] cursor-default items-center gap-1.5 rounded-md px-2.5 text-[13px] font-medium text-muted-foreground transition-colors duration-[120ms] outline-none hover:text-foreground focus-visible:outline-2 focus-visible:outline-ring data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-sm dark:data-[state=active]:bg-muted [&_svg:not([class*='size-'])]:size-3.5",
+        "inline-flex h-[26px] items-center gap-1.5 rounded-md px-2.5 text-[13px] font-medium text-muted-foreground transition-colors duration-[120ms] outline-none hover:text-foreground focus-visible:outline-2 focus-visible:outline-ring data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-sm dark:data-[state=active]:bg-muted [&_svg:not([class*='size-'])]:size-3.5",
         className,
       )}
       {...props}
