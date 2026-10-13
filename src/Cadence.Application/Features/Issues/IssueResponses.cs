@@ -16,6 +16,7 @@ public sealed record IssueListItem(
     IssueType Type,
     string Title,
     IssueStatus Status,
+    Guid StatusId,
     IssuePriority Priority,
     PersonSummary? Assignee,
     int? Estimate,
@@ -46,6 +47,7 @@ public sealed record IssueDetail(
     string Title,
     string? Description,
     IssueStatus Status,
+    Guid StatusId,
     IssuePriority Priority,
     PersonSummary? Assignee,
     PersonSummary Reporter,
@@ -58,7 +60,8 @@ public sealed record IssueDetail(
     int CommentCount,
     DateTimeOffset CreatedAt,
     DateTimeOffset UpdatedAt,
-    DateTimeOffset? CompletedAt);
+    DateTimeOffset? CompletedAt,
+    uint Version);
 
 public static class IssueKeys
 {

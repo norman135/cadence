@@ -91,6 +91,7 @@ internal static class IssueEndpoints
     private static async Task<Ok<KeysetPage<IssueListItem>>> ListIssues(
         Guid[]? projectId,
         IssueStatus[]? status,
+        Guid[]? statusId,
         IssuePriority[]? priority,
         IssueType[]? type,
         Guid[]? assigneeId,
@@ -104,7 +105,7 @@ internal static class IssueEndpoints
         ISender sender,
         CancellationToken cancellationToken) =>
         TypedResults.Ok(await sender.Send(
-            new ListIssuesQuery(projectId, status, priority, type, assigneeId, unassigned, labelId, parentId, q, sort, after, limit),
+            new ListIssuesQuery(projectId, status, statusId, priority, type, assigneeId, unassigned, labelId, parentId, q, sort, after, limit),
             cancellationToken));
 
     private static async Task<Results<Created<CreatedIssueResponse>, ProblemHttpResult>> CreateIssue(
