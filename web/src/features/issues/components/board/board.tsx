@@ -1,5 +1,5 @@
 import {
-  closestCorners,
+  closestCenter,
   DndContext,
   DragOverlay,
   KeyboardSensor,
@@ -7,7 +7,10 @@ import {
   useDroppable,
   useSensor,
   useSensors,
+  pointerWithin,
+  rectIntersection,
   type Announcements,
+  type CollisionDetection,
   type DragEndEvent,
   type DragOverEvent,
   type DragStartEvent,
@@ -34,6 +37,7 @@ import type {
 } from '@/shared/api/generated/model';
 import { cn } from '@/shared/lib/utils';
 import { Avatar } from '@/shared/ui/avatar';
+import { Button } from '@/shared/ui/button';
 import { PriorityIcon, StatusIcon } from '@/shared/ui/work-glyphs';
 import { PRIORITIES, priorityOf, statusOf } from '@/features/issues/lib/options';
 import { BoardCardView } from './board-card';
@@ -161,7 +165,15 @@ export function Board({
   const derived = useMemo(() => itemsOf(board, lanes), [board, lanes]);
   const [dragItems, setDragItems] = useState<Record<string, string[]> | null>(null);
   const [active, setActive] = useState<BoardCard | null>(null);
+  const [origin, setOrigin] = useState<string | null>(null);
+  // Cards rendered per column (or swimlane cell). dnd-kit re-renders every mounted card on each
+  // pointer move, so columns grow on request instead of mounting hundreds of cards at once.
+  const [limits, setLimits] = useState<Record<string, number>>({});
   const items = dragItems ?? derived;
+  const limitOf = useCallback((id: string) => limits[id] ?? PAGE_SIZE, [limits]);
+  const showMore = useCallback((id: string) => {
+    setLimits((current) => ({ ...current, [id]: (current[id] ?? PAGE_SIZE) + PAGE_SIZE }));
+  }, []);
 
   const cards = useMemo(
     () => new Map(board.columns.flatMap((column) => column.cards).map((card) => [card.id, card])),
@@ -170,6 +182,27 @@ export function Board({
   const columns = useMemo(
     () => new Map(board.columns.map((column) => [column.statusId, column])),
     [board],
+  );
+
+  // The drop target in two steps: the column (or swimlane cell) under the pointer, then the
+  // closest card in it. Checking every card on each pointer move (closestCorners) costs a frame on
+  // a 500-card board.
+  const collisions = useCallback<CollisionDetection>(
+    (args) => {
+      const containers = args.droppableContainers.filter(
+        (candidate) => String(candidate.id) in items,
+      );
+      const within = pointerWithin({ ...args, droppableContainers: containers });
+      const [container] = within.length
+        ? within
+        : rectIntersection({ ...args, droppableContainers: containers });
+      if (!container) return [];
+
+      const ids = new Set(items[String(container.id)] ?? []);
+      const cards = args.droppableContainers.filter((candidate) => ids.has(String(candidate.id)));
+      return cards.length ? closestCenter({ ...args, droppableContainers: cards }) : [container];
+    },
+    [items],
   );
 
   const allowedTargets = useMemo(() => {
@@ -224,6 +257,7 @@ export function Board({
 
   const onDragStart = ({ active: picked }: DragStartEvent) => {
     setActive(cards.get(String(picked.id)) ?? null);
+    setOrigin(findContainer(derived, picked.id) ?? null);
     setDragItems(derived);
   };
 
@@ -243,13 +277,16 @@ export function Board({
       const source = (current[from] ?? []).filter((id) => id !== String(picked.id));
       const destination = [...(current[to] ?? [])];
       const overIndex = destination.indexOf(String(over.id));
-      destination.splice(overIndex === -1 ? destination.length : overIndex, 0, String(picked.id));
+      // Over the column itself: the end of what's shown, not after its hidden cards.
+      const index = overIndex === -1 ? Math.min(limitOf(to), destination.length) : overIndex;
+      destination.splice(index, 0, String(picked.id));
       return { ...current, [from]: source, [to]: destination };
     });
   };
 
   const finish = () => {
     setActive(null);
+    setOrigin(null);
     setDragItems(null);
   };
 
@@ -294,6 +331,9 @@ export function Board({
       );
     }
 
+    // A card arriving from another column stays visible at the end of the shown cards.
+    if (container !== origin)
+      setLimits((current) => ({ ...current, [container]: limitOf(container) + 1 }));
     finish();
     void onMove(card, statusId, rank);
   };
@@ -303,7 +343,7 @@ export function Board({
   return (
     <DndContext
       sensors={sensors}
-      collisionDetection={closestCorners}
+      collisionDetection={collisions}
       accessibility={{
         announcements,
         screenReaderInstructions: {
@@ -347,6 +387,8 @@ export function Board({
                       id={id}
                       column={column}
                       cardIds={items[id] ?? []}
+                      limit={limitOf(id)}
+                      onShowMore={showMore}
                       cards={cards}
                       hrefFor={hrefFor}
                       canMove={canMove}
@@ -375,6 +417,7 @@ export function Board({
 }
 
 const COLUMN_WIDTH = 'w-72 shrink-0';
+const PAGE_SIZE = 20;
 
 function ColumnHeader({
   column,
@@ -430,6 +473,8 @@ const ColumnCell = memo(function ColumnCell({
   id,
   column,
   cardIds,
+  limit,
+  onShowMore,
   cards,
   hrefFor,
   canMove,
@@ -439,6 +484,9 @@ const ColumnCell = memo(function ColumnCell({
   id: string;
   column: BoardColumn;
   cardIds: string[];
+  /** How many of the cards to render. */
+  limit: number;
+  onShowMore: (id: string) => void;
   cards: Map<string, BoardCard>;
   hrefFor: (key: string) => string;
   canMove: boolean;
@@ -446,21 +494,44 @@ const ColumnCell = memo(function ColumnCell({
   /** Where the rest of a partly shown column is listed; not shown in swimlanes. */
   moreHref: string | undefined;
 }) {
-  const { setNodeRef, isOver } = useDroppable({ id, disabled: !canMove });
+  const visible = useMemo(() => cardIds.slice(0, limit), [cardIds, limit]);
+  const hidden = cardIds.length - visible.length;
+
+  // This component doesn't read the drag state, so it doesn't re-render while a card moves; the
+  // list wrapper and the cards do.
   return (
-    <SortableContext id={id} items={cardIds} strategy={verticalListSortingStrategy}>
-      <div
-        ref={setNodeRef}
-        aria-label={`${column.name} cards`}
-        role="list"
-        className={cn(
-          COLUMN_WIDTH,
-          'flex min-h-24 flex-col gap-2 rounded-lg bg-sunken/60 p-1.5 transition-[opacity,background-color]',
-          isOver && 'bg-primary-soft/40',
-          dimmed && 'opacity-40',
-        )}
+    <SortableContext id={id} items={visible} strategy={verticalListSortingStrategy}>
+      <DroppableList
+        id={id}
+        label={`${column.name} cards`}
+        disabled={!canMove}
+        dimmed={dimmed}
+        footer={
+          <>
+            {hidden > 0 && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-muted-foreground"
+                onClick={() => {
+                  onShowMore(id);
+                }}
+              >
+                Show {Math.min(PAGE_SIZE, hidden)} more
+              </Button>
+            )}
+            {moreHref && column.hasMore && hidden === 0 && (
+              <Link
+                to={moreHref}
+                className="px-2 py-1.5 text-xs text-muted-foreground hover:text-foreground"
+              >
+                Showing {column.cards.length} of {column.total}. See all in the list
+              </Link>
+            )}
+          </>
+        }
       >
-        {cardIds.map((cardId) => {
+        {visible.map((cardId) => {
           const card = cards.get(cardId);
           return card ? (
             <SortableCard
@@ -472,18 +543,45 @@ const ColumnCell = memo(function ColumnCell({
             />
           ) : null;
         })}
-        {moreHref && column.hasMore && (
-          <Link
-            to={moreHref}
-            className="px-2 py-1.5 text-xs text-muted-foreground hover:text-foreground"
-          >
-            Showing {column.cards.length} of {column.total}. See all in the list
-          </Link>
-        )}
-      </div>
+      </DroppableList>
     </SortableContext>
   );
 });
+
+function DroppableList({
+  id,
+  label,
+  disabled,
+  dimmed,
+  footer,
+  children,
+}: {
+  id: string;
+  label: string;
+  disabled: boolean;
+  dimmed: boolean;
+  /** Controls below the cards, outside the list. */
+  footer: ReactNode;
+  children: ReactNode;
+}) {
+  const { setNodeRef, isOver } = useDroppable({ id, disabled });
+  return (
+    <div
+      ref={setNodeRef}
+      className={cn(
+        COLUMN_WIDTH,
+        'flex min-h-24 flex-col gap-2 rounded-lg bg-sunken/60 p-1.5 transition-[opacity,background-color]',
+        isOver && 'bg-primary-soft/40',
+        dimmed && 'opacity-40',
+      )}
+    >
+      <div role="list" aria-label={label} className="flex flex-col gap-2">
+        {children}
+      </div>
+      {footer}
+    </div>
+  );
+}
 
 function SortableCard({
   card,
@@ -516,7 +614,11 @@ function SortableCard({
       ref={setNodeRef}
       role="listitem"
       style={{ transform: CSS.Translate.toString(transform), transition }}
-      className={cn(isDragging && 'opacity-40')}
+      // Off-screen cards skip layout and paint until scrolled into view.
+      className={cn(
+        '[contain-intrinsic-size:auto_96px] [content-visibility:auto]',
+        isDragging && 'opacity-40',
+      )}
     >
       <BoardCardView
         card={card}
