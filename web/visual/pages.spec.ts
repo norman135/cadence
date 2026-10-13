@@ -30,6 +30,20 @@ const pages: { name: string; path: string; signedIn: boolean; ready: string; set
       settled: 'text=Haptics on drag and drop',
     },
     {
+      name: 'board',
+      path: `/${organization.slug}/projects/ATL/board`,
+      signedIn: true,
+      ready: 'Atlas Mobile',
+      settled: 'text=Haptics on drag and drop',
+    },
+    {
+      name: 'workflow',
+      path: `/${organization.slug}/projects/ATL/settings`,
+      signedIn: true,
+      ready: 'Workflow',
+      settled: 'text=Restrict transitions',
+    },
+    {
       name: 'issue',
       path: `/${organization.slug}/issues/ATL-142`,
       signedIn: true,
@@ -61,7 +75,7 @@ async function open(page: Page, path: string, signedIn: boolean, ready: string, 
   if (!signedIn && (page.viewportSize()?.width ?? 0) >= 1024) {
     await expect(page.getByText('Self-hosted: your data stays on your server')).toBeVisible();
   }
-  if (settled) await expect(page.locator(settled).first()).toBeVisible();
+  if (settled) await expect(page.locator(settled).first()).toBeVisible({ timeout: 20_000 });
   await page.evaluate(() => document.fonts.ready);
 }
 
