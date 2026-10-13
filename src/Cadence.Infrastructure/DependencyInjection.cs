@@ -56,6 +56,7 @@ public static class DependencyInjection
         });
         services.AddSingleton<IMembershipCache, MembershipCache>();
         services.AddSingleton<IProjectAccessCache, ProjectAccessCache>();
+        services.AddSingleton<IWorkflowCache, WorkflowCache>();
 
         return services;
     }

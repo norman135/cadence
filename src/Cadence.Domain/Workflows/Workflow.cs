@@ -78,6 +78,36 @@ public sealed class Workflow : AggregateRoot<Guid>, ITenantScoped
         return workflow;
     }
 
+    /// <summary>
+    /// Rebuilds a stored workflow from its parts, for callers that cache workflows as plain data and
+    /// need the rules (<see cref="CanMove"/>) without loading the aggregate.
+    /// </summary>
+    public static Workflow Restore(
+        Guid id,
+        Guid organizationId,
+        Guid projectId,
+        bool restrictTransitions,
+        IEnumerable<(Guid Id, string Name, IssueStatus Category, int Position, int? WipLimit, bool IsDefault)> statuses,
+        IEnumerable<(Guid Id, Guid FromStatusId, Guid ToStatusId, bool RequireAssignee, TransitionActor AllowedBy)> transitions)
+    {
+        ArgumentNullException.ThrowIfNull(statuses);
+        ArgumentNullException.ThrowIfNull(transitions);
+
+        var workflow = new Workflow(id, organizationId, projectId) { RestrictTransitions = restrictTransitions };
+        foreach (var status in statuses)
+        {
+            workflow._statuses.Add(new WorkflowStatus(status.Id, workflow, status.Name, status.Category, status.Position, status.WipLimit, status.IsDefault));
+        }
+
+        foreach (var transition in transitions)
+        {
+            workflow._transitions.Add(new WorkflowTransition(
+                transition.Id, workflow, transition.FromStatusId, transition.ToStatusId, transition.RequireAssignee, transition.AllowedBy));
+        }
+
+        return workflow;
+    }
+
     public WorkflowStatus? FindStatus(Guid statusId) => _statuses.Find(status => status.Id == statusId);
 
     /// <summary>The default status's counterpart for a category: the first status in it, if any.</summary>

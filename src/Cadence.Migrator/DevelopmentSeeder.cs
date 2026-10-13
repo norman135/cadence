@@ -2,6 +2,7 @@ using System.Globalization;
 using Cadence.Domain.Issues;
 using Cadence.Domain.Organizations;
 using Cadence.Domain.Projects;
+using Cadence.Domain.Workflows;
 using Cadence.Infrastructure.Identity;
 using Cadence.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Identity;
@@ -109,6 +110,8 @@ internal static partial class DevelopmentSeeder
             .Select(spec => Project.Create(organization.Id, spec.Key, spec.Name, $"Everything about {spec.Name}.", users[0].Id, now.AddDays(-190)).Value)
             .ToList();
         db.Projects.AddRange(projects);
+        var workflows = projects.ToDictionary(project => project.Id, Workflow.CreateDefault);
+        db.Workflows.AddRange(workflows.Values);
         foreach (var project in projects)
         {
             foreach (var user in users)
@@ -134,7 +137,8 @@ internal static partial class DevelopmentSeeder
             {
                 var project = PickProject(random, projects);
                 var number = ++numbers[project.Id];
-                var issue = CreateIssue(db, random, project, number, users, labels, epics[project.Id], now);
+                // Issues get evenly spaced ranks in creation order, as the migration and rebalancing do.
+                var issue = CreateIssue(db, random, project, workflows[project.Id], number, users, labels, epics[project.Id], now);
                 if (issue.Type == IssueType.Epic)
                 {
                     epics[project.Id].Add(issue.Id);
@@ -198,6 +202,7 @@ internal static partial class DevelopmentSeeder
         CadenceDbContext db,
         Random random,
         Project project,
+        Workflow workflow,
         int number,
         List<ApplicationUser> users,
         List<Label> labels,
@@ -213,7 +218,17 @@ internal static partial class DevelopmentSeeder
             CultureInfo.InvariantCulture,
             $"{s_verbs[random.Next(s_verbs.Length)]} {s_subjects[random.Next(s_subjects.Length)]} {s_contexts[random.Next(s_contexts.Length)]}");
 
-        var issue = Issue.Create(project, number, type, title, "Seeded for development and performance testing.", status, priority, users[random.Next(users.Count)].Id, createdAt).Value;
+        var issue = Issue.Create(
+            project,
+            number,
+            type,
+            title,
+            "Seeded for development and performance testing.",
+            workflow.FirstIn(status)!,
+            Rank.AtPosition(number - 1),
+            priority,
+            users[random.Next(users.Count)].Id,
+            createdAt).Value;
         if (random.NextDouble() < 0.8)
         {
             issue.AssignTo(users[random.Next(users.Count)].Id, createdAt);
