@@ -113,36 +113,54 @@ public sealed class GetBoardQueryHandler(ICadenceDbContext db, ProjectGate gate,
                             .OrderBy(issue => issue.Rank)
                             .ThenBy(issue => issue.Id)
                             .Take(take)
-                            .Select(issue => new BoardCard(
-                                issue.Id,
-                                project.Key + "-" + issue.Number,
-                                issue.Type,
-                                issue.Title,
-                                issue.StatusId,
-                                issue.Priority,
-                                issue.Rank,
-                                issue.Version,
-                                issue.AssigneeId == null
-                                    ? null
-                                    : new PersonSummary(
-                                        issue.AssigneeId.Value,
-                                        db.Users.Where(user => user.Id == issue.AssigneeId).Select(user => user.DisplayName).First()),
-                                db.IssueLabels
-                                    .Where(issueLabel => issueLabel.IssueId == issue.Id)
-                                    .Join(db.Labels, issueLabel => issueLabel.LabelId, label => label.Id, (_, label) => label)
-                                    .OrderBy(label => label.Name)
-                                    .Select(label => new LabelResponse(label.Id, label.Name, label.Color))
-                                    .ToList(),
-                                issue.Estimate,
-                                issue.DueDate,
-                                issue.SubIssueCount,
-                                issue.SubIssueClosedCount,
-                                issue.CommentCount,
+                            .Select(issue => new CardRow(
+                                new BoardCard(
+                                    issue.Id,
+                                    project.Key + "-" + issue.Number,
+                                    issue.Type,
+                                    issue.Title,
+                                    issue.StatusId,
+                                    issue.Priority,
+                                    issue.Rank,
+                                    issue.Version,
+                                    issue.AssigneeId == null
+                                        ? null
+                                        : new PersonSummary(
+                                            issue.AssigneeId.Value,
+                                            db.Users.Where(user => user.Id == issue.AssigneeId).Select(user => user.DisplayName).First()),
+                                    db.IssueLabels
+                                        .Where(issueLabel => issueLabel.IssueId == issue.Id)
+                                        .Join(db.Labels, issueLabel => issueLabel.LabelId, label => label.Id, (_, label) => label)
+                                        .OrderBy(label => label.Name)
+                                        .Select(label => new LabelResponse(label.Id, label.Name, label.Color))
+                                        .ToList(),
+                                    issue.Estimate,
+                                    issue.DueDate,
+                                    issue.SubIssueCount,
+                                    issue.SubIssueClosedCount,
+                                    issue.CommentCount,
+                                    null),
+
+                                issue.ParentId,
+
+                                // The epic is the parent or the grandparent. Scalar subqueries keep these
+                                // primary-key lookups; asking for whole rows makes EF number every epic of
+                                // the organization instead.
+                                db.Issues.Where(parent => parent.Id == issue.ParentId).Select(parent => (IssueType?)parent.Type).FirstOrDefault(),
+                                db.Issues.Where(parent => parent.Id == issue.ParentId).Select(parent => parent.Number).FirstOrDefault(),
+                                db.Issues.Where(parent => parent.Id == issue.ParentId).Select(parent => parent.Title).FirstOrDefault(),
+                                db.Issues.Where(parent => parent.Id == issue.ParentId).Select(parent => parent.ParentId).FirstOrDefault(),
                                 db.Issues
-                                    .Where(epic => epic.Type == IssueType.Epic
-                                        && (epic.Id == issue.ParentId
-                                            || db.Issues.Any(middle => middle.Id == issue.ParentId && middle.ParentId == epic.Id)))
-                                    .Select(epic => new EpicSummary(epic.Id, project.Key + "-" + epic.Number, epic.Title))
+                                    .Where(grandparent => grandparent.Id == db.Issues.Where(parent => parent.Id == issue.ParentId).Select(parent => parent.ParentId).FirstOrDefault())
+                                    .Select(grandparent => (IssueType?)grandparent.Type)
+                                    .FirstOrDefault(),
+                                db.Issues
+                                    .Where(grandparent => grandparent.Id == db.Issues.Where(parent => parent.Id == issue.ParentId).Select(parent => parent.ParentId).FirstOrDefault())
+                                    .Select(grandparent => grandparent.Number)
+                                    .FirstOrDefault(),
+                                db.Issues
+                                    .Where(grandparent => grandparent.Id == db.Issues.Where(parent => parent.Id == issue.ParentId).Select(parent => parent.ParentId).FirstOrDefault())
+                                    .Select(grandparent => grandparent.Title)
                                     .FirstOrDefault()))
                             .ToList(),
                     })
@@ -168,9 +186,29 @@ public sealed class GetBoardQueryHandler(ICadenceDbContext db, ProjectGate gate,
                     column.WipLimit,
                     column.Total,
                     column.Cards.Count > ColumnLimit,
-                    column.Cards.Count > ColumnLimit ? column.Cards[ColumnLimit].Rank : null,
-                    column.Cards.Count > ColumnLimit ? column.Cards.Take(ColumnLimit).ToList() : column.Cards)),
+                    column.Cards.Count > ColumnLimit ? column.Cards[ColumnLimit].Card.Rank : null,
+                    [.. column.Cards.Take(ColumnLimit).Select(row => row.Card with { Epic = row.Epic(board.Key) })])),
             ]);
+    }
+
+    /// <summary>A card as read, with its parent and grandparent, one of which may be its epic.</summary>
+    private sealed record CardRow(
+        BoardCard Card,
+        Guid? ParentId,
+        IssueType? ParentType,
+        int ParentNumber,
+        string? ParentTitle,
+        Guid? GrandparentId,
+        IssueType? GrandparentType,
+        int GrandparentNumber,
+        string? GrandparentTitle)
+    {
+        public EpicSummary? Epic(string projectKey) =>
+            ParentType == IssueType.Epic && ParentId is { } parentId
+                ? new EpicSummary(parentId, IssueKeys.Format(projectKey, ParentNumber), ParentTitle ?? string.Empty)
+                : GrandparentType == IssueType.Epic && GrandparentId is { } grandparentId
+                    ? new EpicSummary(grandparentId, IssueKeys.Format(projectKey, GrandparentNumber), GrandparentTitle ?? string.Empty)
+                    : null;
     }
 
     private IQueryable<Issue> Filter(IQueryable<Issue> issues, GetBoardQuery query)

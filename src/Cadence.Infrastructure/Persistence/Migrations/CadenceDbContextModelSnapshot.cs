@@ -245,9 +245,6 @@ namespace Cadence.Infrastructure.Persistence.Migrations
                     b.HasIndex("ReporterId")
                         .HasDatabaseName("ix_issues_reporter_id");
 
-                    b.HasIndex("StatusId")
-                        .HasDatabaseName("ix_issues_status_id");
-
                     b.HasIndex("AssigneeId", "UpdatedAt")
                         .IsDescending(false, true)
                         .HasDatabaseName("ix_issues_assignee_open")
@@ -267,6 +264,9 @@ namespace Cadence.Infrastructure.Persistence.Migrations
                     b.HasIndex("ProjectId", "UpdatedAt", "Id")
                         .IsDescending(false, true, true)
                         .HasDatabaseName("ix_issues_project_id_updated_at_id");
+
+                    b.HasIndex("StatusId", "Rank", "Id")
+                        .HasDatabaseName("ix_issues_status_id_rank_id");
 
                     b.ToTable("issues", (string)null);
                 });
