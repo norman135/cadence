@@ -6,4 +6,11 @@
  * OpenAPI spec version: 1
  */
 
-export type IssueSort = number;
+export type IssueSort = (typeof IssueSort)[keyof typeof IssueSort] | null;
+
+export const IssueSort = {
+  Updated: 'Updated',
+  Created: 'Created',
+  Priority: 'Priority',
+  DueDate: 'DueDate',
+} as const;

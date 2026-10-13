@@ -23,11 +23,8 @@ export interface UpdateIssueRequest {
   priority?: null | IssuePriority;
   /** @nullable */
   assigneeId?: string | null;
-  /**
-   * @nullable
-   * @pattern ^-?(?:0|[1-9]\d*)$
-   */
-  estimate?: number | string | null;
+  /** @nullable */
+  estimate?: number | null;
   /** @nullable */
   dueDate?: string | null;
   /** @nullable */

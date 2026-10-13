@@ -22,8 +22,5 @@ export type ListIssuesParams = {
   q?: string;
   sort?: IssueSort;
   after?: string;
-  /**
-   * @pattern ^-?(?:0|[1-9]\d*)$
-   */
-  limit?: number | string;
+  limit?: number;
 };

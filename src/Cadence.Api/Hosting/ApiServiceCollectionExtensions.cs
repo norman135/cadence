@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Text.Json.Serialization;
 using Asp.Versioning;
 using Cadence.Api.Serialization;
 using Cadence.Application.Common.Abstractions;
@@ -27,7 +28,12 @@ internal static class ApiServiceCollectionExtensions
         // Source-generated serialization for API contracts; the reflection resolver remains as a fallback
         // for framework types such as ProblemDetails.
         services.ConfigureHttpJsonOptions(options =>
-            options.SerializerOptions.TypeInfoResolverChain.Insert(0, ApiJsonSerializerContext.Default));
+        {
+            options.SerializerOptions.TypeInfoResolverChain.Insert(0, ApiJsonSerializerContext.Default);
+            // Numbers are numbers. The web defaults also accept "5" for 5, which OpenAPI then
+            // describes as "integer or string", and generated clients have to handle both.
+            options.SerializerOptions.NumberHandling = JsonNumberHandling.Strict;
+        });
 
         services.AddProblemDetails(options => options.CustomizeProblemDetails = context =>
         {

@@ -20,20 +20,14 @@ export interface IssueListItem {
   status: IssueStatus;
   priority: IssuePriority;
   assignee: null | PersonSummary;
-  /**
-   * @nullable
-   * @pattern ^-?(?:0|[1-9]\d*)$
-   */
-  estimate: number | string | null;
+  /** @nullable */
+  estimate: number | null;
   /** @nullable */
   dueDate: string | null;
   labels: LabelResponse[];
-  /** @pattern ^-?(?:0|[1-9]\d*)$ */
-  subIssueCount: number | string;
-  /** @pattern ^-?(?:0|[1-9]\d*)$ */
-  subIssueClosedCount: number | string;
-  /** @pattern ^-?(?:0|[1-9]\d*)$ */
-  commentCount: number | string;
+  subIssueCount: number;
+  subIssueClosedCount: number;
+  commentCount: number;
   createdAt: string;
   updatedAt: string;
 }

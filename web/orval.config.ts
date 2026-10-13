@@ -25,6 +25,11 @@ export default defineConfig({
         fetch: {
           includeHttpResponseReturnType: false,
         },
+        // Keyset-paged lists also get infinite-query hooks; the page param is the `after` cursor.
+        operations: {
+          ListIssues: { query: { useInfinite: true, useInfiniteQueryParam: 'after' } },
+          ListComments: { query: { useInfinite: true, useInfiniteQueryParam: 'after' } },
+        },
       },
     },
   },

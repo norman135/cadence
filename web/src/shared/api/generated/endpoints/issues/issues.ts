@@ -5,16 +5,20 @@
  * Project and work management for teams.
  * OpenAPI spec version: 1
  */
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, useMutation, useQuery } from '@tanstack/react-query';
 import type {
   DataTag,
   DefinedInitialDataOptions,
+  DefinedUseInfiniteQueryResult,
   DefinedUseQueryResult,
+  InfiniteData,
   MutationFunction,
   QueryClient,
   QueryFunction,
   QueryKey,
   UndefinedInitialDataOptions,
+  UseInfiniteQueryOptions,
+  UseInfiniteQueryResult,
   UseMutationOptions,
   UseMutationResult,
   UseQueryOptions,
@@ -90,9 +94,183 @@ export const listIssues = async (
   });
 };
 
+export const getListIssuesInfiniteQueryKey = (
+  organizationId: string,
+  params?: ListIssuesParams,
+) => {
+  return [
+    'infinite',
+    `/api/v1/organizations/${organizationId}/issues`,
+    ...(params ? [params] : []),
+  ] as const;
+};
+
 export const getListIssuesQueryKey = (organizationId: string, params?: ListIssuesParams) => {
   return [`/api/v1/organizations/${organizationId}/issues`, ...(params ? [params] : [])] as const;
 };
+
+export const getListIssuesInfiniteQueryOptions = <
+  TData = InfiniteData<Awaited<ReturnType<typeof listIssues>>, ListIssuesParams['after']>,
+  TError = ErrorType<unknown>,
+>(
+  organizationId: string,
+  params?: ListIssuesParams,
+  options?: {
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof listIssues>>,
+        TError,
+        TData,
+        QueryKey,
+        ListIssuesParams['after']
+      >
+    >;
+    request?: SecondParameter<typeof httpClient>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getListIssuesInfiniteQueryKey(organizationId, params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof listIssues>>,
+    QueryKey,
+    ListIssuesParams['after']
+  > = ({ signal, pageParam }) =>
+    listIssues(
+      organizationId,
+      { ...params, after: pageParam ?? params?.['after'] },
+      { signal, ...requestOptions },
+    );
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: organizationId !== null && organizationId !== undefined,
+    ...queryOptions,
+  } as UseInfiniteQueryOptions<
+    Awaited<ReturnType<typeof listIssues>>,
+    TError,
+    TData,
+    QueryKey,
+    ListIssuesParams['after']
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type ListIssuesInfiniteQueryResult = NonNullable<Awaited<ReturnType<typeof listIssues>>>;
+export type ListIssuesInfiniteQueryError = ErrorType<unknown>;
+
+export function useListIssuesInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof listIssues>>, ListIssuesParams['after']>,
+  TError = ErrorType<unknown>,
+>(
+  organizationId: string,
+  params: undefined | ListIssuesParams,
+  options: {
+    query: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof listIssues>>,
+        TError,
+        TData,
+        QueryKey,
+        ListIssuesParams['after']
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listIssues>>,
+          TError,
+          Awaited<ReturnType<typeof listIssues>>,
+          QueryKey
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof httpClient>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseInfiniteQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useListIssuesInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof listIssues>>, ListIssuesParams['after']>,
+  TError = ErrorType<unknown>,
+>(
+  organizationId: string,
+  params?: ListIssuesParams,
+  options?: {
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof listIssues>>,
+        TError,
+        TData,
+        QueryKey,
+        ListIssuesParams['after']
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listIssues>>,
+          TError,
+          Awaited<ReturnType<typeof listIssues>>,
+          QueryKey
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof httpClient>;
+  },
+  queryClient?: QueryClient,
+): UseInfiniteQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useListIssuesInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof listIssues>>, ListIssuesParams['after']>,
+  TError = ErrorType<unknown>,
+>(
+  organizationId: string,
+  params?: ListIssuesParams,
+  options?: {
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof listIssues>>,
+        TError,
+        TData,
+        QueryKey,
+        ListIssuesParams['after']
+      >
+    >;
+    request?: SecondParameter<typeof httpClient>;
+  },
+  queryClient?: QueryClient,
+): UseInfiniteQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * @summary List issues you can see, filtered and sorted, one page at a time
+ */
+
+export function useListIssuesInfinite<
+  TData = InfiniteData<Awaited<ReturnType<typeof listIssues>>, ListIssuesParams['after']>,
+  TError = ErrorType<unknown>,
+>(
+  organizationId: string,
+  params?: ListIssuesParams,
+  options?: {
+    query?: Partial<
+      UseInfiniteQueryOptions<
+        Awaited<ReturnType<typeof listIssues>>,
+        TError,
+        TData,
+        QueryKey,
+        ListIssuesParams['after']
+      >
+    >;
+    request?: SecondParameter<typeof httpClient>;
+  },
+  queryClient?: QueryClient,
+): UseInfiniteQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  const queryOptions = getListIssuesInfiniteQueryOptions(organizationId, params, options);
+
+  const query = useInfiniteQuery(queryOptions, queryClient) as UseInfiniteQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
 
 export const getListIssuesQueryOptions = <
   TData = Awaited<ReturnType<typeof listIssues>>,

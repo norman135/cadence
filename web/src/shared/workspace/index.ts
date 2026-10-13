@@ -5,3 +5,10 @@ export {
   useCurrentUser,
 } from './current';
 export { can, ROLES, type Permission } from './permissions';
+export {
+  useCurrentProject,
+  useLabels,
+  useProjectPeople,
+  useProjects,
+  useRefreshIssues,
+} from './projects';

@@ -55,6 +55,8 @@ namespace Cadence.Api.Serialization;
 [JsonSerializable(typeof(CreateLabelCommand))]
 [JsonSerializable(typeof(UpdateLabelRequest))]
 [JsonSerializable(typeof(KeysetPage<IssueListItem>))]
+// Query-only enums are listed too, so OpenAPI describes them as strings like the others.
+[JsonSerializable(typeof(IssueSort))]
 [JsonSerializable(typeof(CreateIssueCommand))]
 [JsonSerializable(typeof(CreatedIssueResponse))]
 [JsonSerializable(typeof(IssueDetail))]
