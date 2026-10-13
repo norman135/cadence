@@ -60,6 +60,7 @@
   --amber-500: #e8a317;
   --red-500: #e5484d;
   --red-600: #d93a40;
+  --red-700: #c4343a;
   --blue-500: #3b82f6;
   --violet-500: #8b5cf6;
   --pink-500: #e0508f;
@@ -89,9 +90,10 @@
 
   --success: var(--green-600);
   --success-soft: #e8f7ee;
-  --warning: #b77d0a;
+  /* Warning and danger are text colors too: both keep 4.5:1 on their soft fills (WCAG AA). */
+  --warning: #946200;
   --warning-soft: #fdf4e1;
-  --danger: var(--red-600);
+  --danger: var(--red-700);
   --danger-soft: #fdecec;
   --info: #2f6fd6;
   --info-soft: #eaf1fd;

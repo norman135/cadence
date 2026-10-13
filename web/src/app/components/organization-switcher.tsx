@@ -31,7 +31,7 @@ export function OrganizationSwitcher() {
     <DropdownMenu>
       <DropdownMenuTrigger
         aria-label="Switch organization"
-        className="flex h-9 min-w-0 flex-1 cursor-default items-center gap-2.5 rounded-md px-2 font-semibold tracking-[-0.01em] outline-none hover:bg-accent focus-visible:outline-2 focus-visible:outline-ring data-[state=open]:bg-accent"
+        className="flex h-9 min-w-0 flex-1 items-center gap-2.5 rounded-md px-2 font-semibold tracking-[-0.01em] outline-none hover:bg-accent focus-visible:outline-2 focus-visible:outline-ring data-[state=open]:bg-accent"
       >
         {current && <OrganizationTile name={current.name} />}
         <span className="truncate">{current?.name ?? 'Select organization'}</span>

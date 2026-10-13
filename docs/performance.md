@@ -4,6 +4,40 @@ Cadence targets a **1–2 GB RAM server with about 10 concurrent users**, and mu
 
 ## Results
 
+### v0.4.0 (M3: Projects & issues)
+
+M3 adds the work-tracking domain: projects, issues, labels, links and comments, with the list and detail views. It is the first release measured with **authenticated traffic over real data**. The development seeder creates an organization with 3 projects, 9 labels, 6 people and 10,000 issues (39 s), and a new k6 scenario (`perf/k6/issues.js`) signs in and works through it. Each iteration opens a filtered or sorted list, sometimes the next page, then an issue from it.
+
+**Environment:** the same as v0.2.0, with the seeded data.
+
+| Metric | Target | Measured | Change from v0.3.0 | |
+|---|---|---|---|---|
+| Issue list p95, 10 users, 10,000 issues | ≤ 100 ms | **21.5 ms** | new | ✅ |
+| Issue detail p95, 10 users | ≤ 100 ms | **19.6 ms** | new | ✅ |
+| Issue list p95, 50 users | ≤ 300 ms | **38.9 ms** | new | ✅ |
+| Issue detail p95, 50 users | ≤ 300 ms | **32.9 ms** | new | ✅ |
+| Error rate, 10 and 50 users | 0% | **0%** | — | ✅ |
+| DB queries per issue list request | ≤ 2 | **2** (asserted by an integration test) | new | ✅ |
+| Whole stack at idle (seeded) | ≤ 450 MB | **120 MiB** (app 66, PostgreSQL 38, Caddy 16) | +17 MiB | ✅ |
+| App container memory under 10-user load | ≤ 200 MB | **151 MiB** (stack 281 MiB) | +73 MiB | ✅ |
+| App container memory after 50-user load | — | **128 MiB** (stack 265 MiB) | — | ✅ |
+| Initial JavaScript (gzip) | ≤ 180 KB | **129.6 KB** | +2.7 KB | ✅ |
+| Initial CSS (gzip) | ≤ 30 KB | **10.2 KB** | +1.2 KB | ✅ |
+| Largest lazy route (gzip, all chunks it downloads) | ≤ 80 KB | **64.2 KB** (members page); issue page 59.3, issue list 56.8 | +0.8 KB | ✅ |
+| EF Core model build (once per process) | — | **97 ms, 7.7 MB** allocated | new | — |
+
+**Query plans.** Every list sort is served by an index that ends in `id`, so a keyset page reads only the rows it returns:
+- the default sort (recently updated, whole organization) is an index-only scan of `ix_issues_organization_id_updated_at_id`, 0.38 ms
+- My work (open issues assigned to me) uses the partial index `ix_issues_assignee_open`, 1.85 ms
+
+Organization owners and admins see every project, so their queries carry no project filter. Members' queries filter on the project ids from the cached project roles.
+
+**Where the memory went.** The app grew from 78 to 151 MiB under load. That is EF Core's query and model caches for the new query shapes, the project role cache, and pages of 50 issues serialized per request. After the 50-user run it settles at 128 MiB, so it doesn't grow with users. Both stay well under the container's 320 MiB limit.
+
+**Bundles.** The issue view, marked and DOMPurify load only when an issue opens, so the list pages download 57 KB rather than 99 KB. The Markdown renderer is fetched on first use and shows the plain text until it arrives.
+
+**Compiled model.** `dotnet ef dbcontext optimize` rejects named query filters, which tenant isolation relies on. Building the model costs 97 ms once per process, so the compiled model isn't adopted ([ADR-0017](adr/0017-projects-issues-and-access.md)).
+
 ### v0.3.0 (M2: Brand & design system)
 
 M2 changes the frontend only: the design tokens, self-hosted fonts, a theme script, a rebuilt app shell and the restyled components. The server is unchanged, so its numbers move only within run-to-run noise.
@@ -115,6 +149,10 @@ docker compose -f docker-compose.yml -f docker-compose.build.yml -f docker-compo
 docker run --rm --network host -v "$PWD/../perf/k6:/scripts:ro" grafana/k6 run -e VUS=10 /scripts/baseline.js
 docker run --rm --network host -v "$PWD/../perf/k6:/scripts:ro" grafana/k6 run -e VUS=50 /scripts/baseline.js
 ../perf/measure-memory.sh 450
+
+# 4. Issues (M3 and later): seed 10,000 issues, then sign in and work through them
+docker compose run --rm migrate seed --issues 10000 --password <password>
+docker run --rm --network host -v "$PWD/../perf/k6:/scripts:ro" grafana/k6 run -e SEED_PASSWORD=<password> -e VUS=10 /scripts/issues.js
 ```
 
 ### Bundle budgets

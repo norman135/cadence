@@ -1,5 +1,7 @@
 using Cadence.Application.Common.ReadModels;
+using Cadence.Domain.Issues;
 using Cadence.Domain.Organizations;
+using Cadence.Domain.Projects;
 using Microsoft.EntityFrameworkCore;
 
 namespace Cadence.Application.Common.Abstractions;
@@ -17,6 +19,30 @@ public interface ICadenceDbContext
 
     /// <summary>Filtered to the current organization.</summary>
     DbSet<Invitation> Invitations { get; }
+
+    /// <summary>Filtered to the current organization. Check project access before returning anything.</summary>
+    DbSet<Project> Projects { get; }
+
+    /// <summary>Filtered to the current organization.</summary>
+    DbSet<ProjectMember> ProjectMembers { get; }
+
+    /// <summary>Filtered to the current organization. Check project access before returning anything.</summary>
+    DbSet<Issue> Issues { get; }
+
+    /// <summary>Filtered to the current organization.</summary>
+    DbSet<Label> Labels { get; }
+
+    /// <summary>Filtered to the current organization.</summary>
+    DbSet<IssueLabel> IssueLabels { get; }
+
+    /// <summary>Filtered to the current organization.</summary>
+    DbSet<IssueLink> IssueLinks { get; }
+
+    /// <summary>Filtered to the current organization.</summary>
+    DbSet<Comment> Comments { get; }
+
+    /// <summary>Filtered to the current organization.</summary>
+    DbSet<CommentRevision> CommentRevisions { get; }
 
     /// <summary>Read-only view of user accounts, for joining names and emails into responses.</summary>
     IQueryable<UserSummary> Users { get; }
