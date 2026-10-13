@@ -18,16 +18,8 @@ import {
   DropdownMenuTrigger,
 } from '@/shared/ui/dropdown-menu';
 import { PriorityIcon, StatusIcon } from '@/shared/ui/work-glyphs';
-import { useLabels, useProjectPeople } from '@/shared/workspace';
-import {
-  ESTIMATES,
-  LABEL_COLORS,
-  PRIORITIES,
-  STATUSES,
-  TYPES,
-  priorityOf,
-  statusOf,
-} from '../lib/options';
+import { useLabels, useProjectPeople, useWorkflow } from '@/shared/workspace';
+import { ESTIMATES, LABEL_COLORS, PRIORITIES, TYPES, priorityOf, statusOf } from '../lib/options';
 
 /*
  * One-click pickers for issue properties (design board 08's side panel). Each renders its current
@@ -67,42 +59,77 @@ function Picker({
   );
 }
 
+/**
+ * The project's workflow statuses, in board order. When the workflow restricts transitions,
+ * statuses the issue can't move to from `transitionsFrom` are shown but disabled.
+ */
 export function StatusPicker({
+  projectId,
   value,
+  category,
+  transitionsFrom,
   onChange,
   disabled,
   compact,
 }: {
-  value: IssueStatus;
-  onChange: (value: IssueStatus) => void;
+  projectId: string;
+  /** The status id; null picks the workflow's default. */
+  value: string | null;
+  /** Shown until the workflow loads. */
+  category?: IssueStatus;
+  transitionsFrom?: string;
+  onChange: (statusId: string) => void;
   disabled?: boolean;
   compact?: boolean;
 }) {
-  const current = statusOf(value);
+  const { data: workflow } = useWorkflow(projectId);
+  const statuses = workflow?.statuses ?? [];
+  const current =
+    statuses.find((status) => status.id === value) ??
+    (value === null ? statuses.find((status) => status.isDefault) : undefined);
+  const glyph = statusOf(current?.category ?? category ?? 'Todo').glyph;
+  const allowed = (statusId: string) =>
+    !workflow?.restrictTransitions ||
+    !transitionsFrom ||
+    statusId === transitionsFrom ||
+    workflow.transitions.some(
+      (transition) =>
+        transition.fromStatusId === transitionsFrom && transition.toStatusId === statusId,
+    );
+
   return (
     <Picker
       label="Status"
       disabled={disabled}
       value={
         <>
-          <StatusIcon category={current.glyph} />
-          {!compact && <span className="truncate">{current.label}</span>}
+          <StatusIcon category={glyph} />
+          {!compact && (
+            <span className="truncate">
+              {current?.name ?? (category ? statusOf(category).label : 'Status')}
+            </span>
+          )}
         </>
       }
     >
       <DropdownMenuRadioGroup
-        value={value}
+        value={current?.id ?? ''}
         onValueChange={(next) => {
-          onChange(next as IssueStatus);
+          onChange(next);
         }}
       >
-        {STATUSES.map((status) => (
-          <DropdownMenuRadioItem key={status.value} value={status.value}>
-            <StatusIcon category={status.glyph} />
-            {status.label}
+        {statuses.map((status) => (
+          <DropdownMenuRadioItem key={status.id} value={status.id} disabled={!allowed(status.id)}>
+            <StatusIcon category={statusOf(status.category).glyph} />
+            {status.name}
           </DropdownMenuRadioItem>
         ))}
       </DropdownMenuRadioGroup>
+      {workflow?.restrictTransitions && transitionsFrom && (
+        <p className="max-w-56 px-2 py-1.5 text-xs text-muted-foreground">
+          This workflow limits which statuses an issue can move to.
+        </p>
+      )}
     </Picker>
   );
 }

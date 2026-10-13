@@ -2,12 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { toast } from 'sonner';
 import { useCreateIssue } from '@/shared/api/generated/endpoints';
-import type {
-  IssuePriority,
-  IssueStatus,
-  IssueType,
-  LabelResponse,
-} from '@/shared/api/generated/model';
+import type { IssuePriority, IssueType, LabelResponse } from '@/shared/api/generated/model';
 import { errorMessage } from '@/shared/api/api-error';
 import { Alert } from '@/shared/ui/alert';
 import { Button } from '@/shared/ui/button';
@@ -37,11 +32,14 @@ export default function CreateIssueDialog({
   open,
   onOpenChange,
   projectId: fixedProjectId,
+  statusId: initialStatusId,
   parent,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   projectId?: string | undefined;
+  /** Start in this status (a board column's "+"); otherwise the workflow's default. */
+  statusId?: string | undefined;
   parent?: { id: string; key: string } | undefined;
 }) {
   const { organization } = useCurrentOrganization();
@@ -57,7 +55,7 @@ export default function CreateIssueDialog({
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [type, setType] = useState<IssueType>('Task');
-  const [status, setStatus] = useState<IssueStatus>('Todo');
+  const [statusId, setStatusId] = useState<string | null>(initialStatusId ?? null);
   const [priority, setPriority] = useState<IssuePriority>('None');
   const [assigneeId, setAssigneeId] = useState<string | null>(null);
   const [labelIds, setLabelIds] = useState<string[]>([]);
@@ -82,7 +80,7 @@ export default function CreateIssueDialog({
           title,
           description: description || null,
           type,
-          status,
+          statusId,
           priority,
           assigneeId,
           labelIds,
@@ -129,6 +127,7 @@ export default function CreateIssueDialog({
               value={projectId}
               onChange={(event) => {
                 setProjectId(event.target.value);
+                setStatusId(null);
                 setAssigneeId(null);
               }}
               className="self-start"
@@ -162,7 +161,7 @@ export default function CreateIssueDialog({
             className="w-full resize-y bg-transparent text-sm leading-6 outline-none placeholder:text-subtle-foreground"
           />
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1 border-t pt-3">
-            <StatusPicker value={status} onChange={setStatus} />
+            <StatusPicker projectId={projectId} value={statusId} onChange={setStatusId} />
             <PriorityPicker value={priority} onChange={setPriority} />
             <TypePicker value={type} onChange={setType} />
             {projectId && (

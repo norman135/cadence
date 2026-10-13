@@ -4,6 +4,7 @@ import {
   getGetIssueQueryKey,
   getListIssuesInfiniteQueryKey,
   getListProjectsQueryKey,
+  useGetWorkflow,
   useListLabels,
   useListProjectMembers,
   useListProjects,
@@ -48,8 +49,20 @@ export function useProjectPeople(projectId: string | undefined) {
   });
 }
 
+/** A project's workflow: its statuses in board order, and which moves are allowed. Rarely changes. */
+export function useWorkflow(projectId: string | undefined) {
+  const { organization } = useCurrentOrganization();
+  return useGetWorkflow(organization?.id ?? '', projectId ?? '', {
+    query: { enabled: !!organization && !!projectId, staleTime: 5 * 60_000 },
+  });
+}
+
+/** Board queries are keyed by their URL, which ends in /board, plus the quick filters. */
+export const isBoardQuery = (queryKey: readonly unknown[]) =>
+  typeof queryKey[0] === 'string' && queryKey[0].endsWith('/board');
+
 /**
- * After an issue changes: refetch issue lists, the issue itself and project counts. Lists share a
+ * After an issue changes: refetch issue lists, boards, the issue itself and project counts. Lists share a
  * key prefix, so one call covers every filter combination.
  */
 export function useRefreshIssues() {
@@ -62,6 +75,7 @@ export function useRefreshIssues() {
     await Promise.all([
       queryClient.invalidateQueries({ queryKey: ['infinite', listPath] }),
       queryClient.invalidateQueries({ queryKey: getListProjectsQueryKey(organization.id) }),
+      queryClient.invalidateQueries({ predicate: (query) => isBoardQuery(query.queryKey) }),
       issueKey
         ? queryClient.invalidateQueries({
             queryKey: getGetIssueQueryKey(organization.id, issueKey),
