@@ -22,6 +22,7 @@ export interface AccessTokenPayload {
 export const REFRESH_MARGIN_MS = 60_000;
 
 const listeners = new Set<() => void>();
+const MAX_TIMER_MS = 2_147_483_647;
 let state: SessionState = { status: 'unknown', accessToken: null, expiresAt: null };
 let refreshTimer: ReturnType<typeof setTimeout> | undefined;
 let onExpiring: (() => void) | undefined;
@@ -45,9 +46,11 @@ export const session = {
     emit({ status: 'authenticated', accessToken: token.accessToken, expiresAt });
 
     clearTimeout(refreshTimer);
+    // Timers longer than about 24.8 days (2^31 - 1 ms) overflow and fire at once, so a far-off
+    // expiry (a test fixture, a long-lived token) would refresh in a loop.
     refreshTimer = setTimeout(
       () => onExpiring?.(),
-      Math.max(0, expiresAt - Date.now() - REFRESH_MARGIN_MS),
+      Math.min(MAX_TIMER_MS, Math.max(0, expiresAt - Date.now() - REFRESH_MARGIN_MS)),
     );
   },
 
