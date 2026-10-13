@@ -98,6 +98,20 @@ Everything a team owns belongs to an **organization**. Details are in [ADR-0007]
 
 Membership changes invalidate the cache immediately, so a removed member loses access on their next request.
 
+### Projects and issues
+
+Work lives in **projects**, and each project's **issues** have readable keys such as `ATL-142`. Details and trade-offs are in [ADR-0017](adr/0017-projects-issues-and-access.md).
+
+- **Access** combines the organization role with project membership. Organization owners and admins are implicit admins of every project; everyone else needs a project role (Viewer, Member or Admin). `ProjectAccessCache` keeps each user's project roles in HybridCache, invalidated alongside memberships, and `ProjectGate` answers "my role here" and "which projects can I see" without querying the database. Inaccessible projects and issues return `404`.
+- **Keys**: a project key (2–10 letters or digits) is unique per organization and never changes. Issue numbers come from `UPDATE projects … RETURNING last_issue_number` in the creating transaction, so concurrent creates get consecutive numbers. The web app routes by key (`/acme/issues/ATL-142`); the API reads one issue by key at `/issues/by-key/{key}` and uses ids everywhere else.
+- **Hierarchy and links**: issues nest at most three levels (parent, child, grandchild), with cycles refused. Links are *blocks*, *relates to* and *duplicates*; links into projects the caller can't see are left out of responses.
+- **Counters** (open issues per project; sub-issues, closed sub-issues and comments per issue) are recomputed with one `ExecuteUpdate` after each change, so lists need no joins and counts can't drift.
+- **Lists** filter on any combination of project, status, priority, type, assignee, labels and text, and page with keyset cursors for every sort. Each sort has an index ending in `id`; a partial index serves open issues per assignee (My work). The page, with project keys, assignee names and labels, is one SQL statement; the endpoint's budget is two queries, which leaves room for a cold project-role cache.
+- **Comments** can be edited only by their author, and each edit keeps the replaced text as a revision.
+- **Labels** belong to the organization, so they work across projects.
+
+The six statuses (Backlog, Todo, In progress, In review, Done, Canceled) are fixed categories for now. M4's custom workflows will map onto them.
+
 ### Email
 
 Handlers queue messages on a bounded in-process channel, and `EmailDispatcher` (a background service) sends them over SMTP with MailKit, so requests never wait for the mail server. Without an SMTP host, emails are logged and dropped. Links point at `Cadence:PublicUrl`. The queue is in memory for now; M8 moves it onto a durable outbox.
@@ -109,14 +123,14 @@ Handlers queue messages on a bounded in-process channel, and `EmailDispatcher` (
 ```
 web/src/
   app/        shell: providers, router, layouts, error boundary
-  features/   one folder per feature (auth, organizations, settings, home), each with a public index.ts
+  features/   one folder per feature (auth, organizations, projects, issues, settings, home), each with a public index.ts
   shared/     api (client + generated hooks), auth (session), workspace (current organization),
               theme (light / dark / system), ui (the component kit), forms, lib
   test/       Vitest setup, MSW server, render helpers
 ```
 
 ESLint enforces the boundaries:
-- `app` imports features only through their public index, or a single route page so each page gets its own chunk
+- `app` imports features only through their public index, or a single route page or dialog so each gets its own chunk
 - features import only themselves and `shared`
 - `shared` imports only `shared`
 
@@ -127,6 +141,7 @@ The rules are generated per feature folder, so new features are covered automati
 - **Session**: the access token lives only in memory (`shared/auth`). On load, and shortly before the token expires, the client exchanges the refresh cookie for a new token. Parallel refreshes are deduplicated in the tab and serialized across tabs with the Web Locks API, and a `401` triggers one refresh and a retry.
 - **Forms**: react-hook-form with `zod/mini` schemas that mirror the server rules. Server validation errors are mapped back onto the fields.
 - **Rendering**: the React Compiler memoizes components automatically.
+- **Issue views**: lists are virtualized against the window (TanStack Virtual) and load the next keyset page as the last rows appear. Filters, sort and the open issue (`?issue=ATL-142`, shown in a drawer) live in the URL, and the chosen columns are remembered per browser. Markdown is rendered by marked and sanitized by DOMPurify; both, and the issue view itself, load on first use.
 - **Design system** ([ADR-0016](adr/0016-brand-and-design-system.md)): the tokens in `design/tokens.css` are mirrored in `src/index.css` and exposed to Tailwind CSS v4 by semantic name (`bg-card`, `text-muted-foreground`, `bg-status-done`…). Components never use palette colors. `shared/ui` holds the kit (Radix primitives styled to design board 05), and `/style-guide` shows every component in both themes in development builds.
 - **Themes**: `<html data-theme="light|dark">`. A seven-line inline script applies the saved choice before the first paint, and `shared/theme` keeps it in sync with the OS and other tabs. The choice (system, light, dark) is stored per browser.
 - **Fonts**: Geist and Geist Mono from `@fontsource-variable`, served from the app's own origin. Only the Latin files download for English text (51 KB). The Latin Geist file is preloaded, and metric-matched fallbacks keep the layout from shifting while it loads.

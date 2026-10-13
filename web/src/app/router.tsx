@@ -1,5 +1,5 @@
 import { Suspense } from 'react';
-import { createBrowserRouter } from 'react-router';
+import { createBrowserRouter, type Params } from 'react-router';
 import { AuthLayout } from './layouts/auth-layout';
 import { RootLayout } from './layouts/root-layout';
 import { RedirectIfAuthenticated, RequireAuth } from './routes/guards';
@@ -105,9 +105,36 @@ export const router = createBrowserRouter([
                 index: true,
                 handle: { title: 'My work' },
                 lazy: async () => ({
-                  Component: (
-                    await import('@/features/organizations/routes/organization-home-page')
-                  ).OrganizationHomePage,
+                  Component: (await import('@/features/issues/routes/my-work-page')).MyWorkPage,
+                }),
+              },
+              {
+                path: 'issues',
+                handle: { title: 'All issues' },
+                lazy: async () => ({
+                  Component: (await import('@/features/issues/routes/issues-page')).IssuesPage,
+                }),
+              },
+              {
+                path: 'issues/:issueKey',
+                handle: { title: (params: Params) => params.issueKey?.toUpperCase() },
+                lazy: async () => ({
+                  Component: (await import('@/features/issues/routes/issue-page')).IssuePage,
+                }),
+              },
+              {
+                path: 'projects/:projectKey',
+                handle: { title: (params: Params) => params.projectKey?.toUpperCase() },
+                lazy: async () => ({
+                  Component: (await import('@/features/issues/routes/issues-page')).IssuesPage,
+                }),
+              },
+              {
+                path: 'projects/:projectKey/settings',
+                handle: { title: 'Project settings' },
+                lazy: async () => ({
+                  Component: (await import('@/features/projects/routes/project-settings-page'))
+                    .ProjectSettingsPage,
                 }),
               },
               {

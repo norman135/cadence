@@ -86,12 +86,12 @@ Run what CI runs (`.github/workflows/ci.yml`) and make sure all of it passes:
 
 ## Frontend conventions
 
-- **Structure.** `src/app` is the shell, `src/features/<name>` holds one folder per feature with a public `index.ts`, and `src/shared` holds reusable code. ESLint enforces the boundaries: features never import other features or the app shell, and `shared` never imports features.
+- **Structure.** `src/app` is the shell, `src/features/<name>` holds one folder per feature with a public `index.ts`, and `src/shared` holds reusable code. ESLint enforces the boundaries: features never import other features or the app shell, `shared` never imports features, and the app imports a feature only through its `index.ts` or a single `routes/*` or `dialogs/*` file (each becomes its own lazy chunk).
 - **API access** goes only through the generated hooks in `src/shared/api/generated`. Never edit generated files; regenerate them. Never call `fetch` directly; use `httpClient`, which turns problem details into `ApiError`.
 - **Styling** uses Tailwind with the semantic tokens from `src/index.css` (`bg-card`, `text-muted-foreground`, …), never raw palette colors. Reuse the components in `src/shared/ui`. New screens follow the boards in `design/`; if a design needs something the system lacks, extend `design/tokens.css` and the boards first.
-- **Themes and color**: pages must work in light and dark; check them at `/style-guide` and in both themes of the visual suite. `text-subtle-foreground` is for placeholders, icons and disabled states only; readable text uses `text-muted-foreground` or stronger (WCAG AA).
+- **Themes and color**: pages must work in light and dark; check them at `/style-guide` and in both themes of the visual suite. `text-subtle-foreground` is for placeholders, icons and disabled states only; readable text uses `text-muted-foreground` or stronger (WCAG AA). Clickable elements get the pointer cursor from a base rule in `src/index.css` (buttons, links and the interactive ARIA roles); don't override it with `cursor-default`.
 - **Forms** use react-hook-form with `zod/mini` schemas (`z.string().check(z.minLength(1, '…'))`), not the classic `zod` API, which costs about 16 KB more per route. Apply server field errors with `applyServerErrors`.
-- **Performance.** Route pages are lazy-loaded. Heavy libraries must load only on the routes that use them. `npm run budget` enforces 180 KB of initial JS and 80 KB per lazy chunk (gzip).
+- **Performance.** Route pages are lazy-loaded. Heavy libraries must load only on the routes that use them, or on first use (the Markdown renderer and the issue view are dynamic imports). `npm run budget` enforces 180 KB of initial JS and 80 KB per lazy chunk (gzip).
 - **Tests** use Vitest, Testing Library and MSW. Mock HTTP with `server.use(...)`; unhandled requests fail the test. Query elements by role, label or text.
 
 ## Git and pull requests

@@ -87,9 +87,10 @@
   /* Signals */
   --success: #17804a;
   --success-soft: #e8f7ee;
-  --warning: #b77d0a;
+  /* Warning and destructive are text colors too: both keep 4.5:1 on their soft fills. */
+  --warning: #946200;
   --warning-soft: #fdf4e1;
-  --destructive: #d93a40;
+  --destructive: #c4343a;
   --destructive-soft: #fdecec;
   --info: #2f6fd6;
   --info-soft: #eaf1fd;
@@ -254,6 +255,32 @@
 
   body {
     @apply bg-background text-sm text-foreground antialiased;
+  }
+
+  /*
+   * Everything clickable shows the pointer. Tailwind's reset gives buttons the default arrow, so
+   * this covers native controls and the ARIA roles Radix and cmdk render. Disabled controls keep
+   * the arrow (Radix marks them data-disabled="", cmdk data-disabled="true").
+   */
+  button:not(:disabled),
+  select:not(:disabled),
+  summary,
+  input:is([type='checkbox'], [type='radio'], [type='color'], [type='file']):not(:disabled),
+  input::-webkit-calendar-picker-indicator,
+  label:has(input:is([type='checkbox'], [type='radio']):not(:disabled)),
+  :is(
+    [role='button'],
+    [role='checkbox'],
+    [role='link'],
+    [role='menuitem'],
+    [role='menuitemcheckbox'],
+    [role='menuitemradio'],
+    [role='option'],
+    [role='radio'],
+    [role='switch'],
+    [role='tab']
+  ):not([aria-disabled='true'], [data-disabled=''], [data-disabled='true']) {
+    cursor: pointer;
   }
 
   :focus-visible {

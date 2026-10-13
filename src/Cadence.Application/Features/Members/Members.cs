@@ -83,7 +83,8 @@ public sealed class ChangeMemberRoleCommandHandler(ICadenceDbContext db, ITenant
 
 /// <summary>
 /// Removes a member. Members may always remove themselves (leave); removing someone else requires the
-/// <see cref="Permissions.MembersManage"/> permission. The last owner can do neither.
+/// <see cref="Permissions.MembersManage"/> permission. The last owner can do neither. Their project
+/// memberships go too, so they lose access to every project at once.
 /// </summary>
 public sealed record RemoveMemberCommand(Guid UserId) : ICommand<Result>;
 
@@ -91,7 +92,8 @@ public sealed class RemoveMemberCommandHandler(
     ICadenceDbContext db,
     ITenantContext tenant,
     ICurrentUser currentUser,
-    IMembershipCache cache)
+    IMembershipCache cache,
+    IProjectAccessCache projectAccess)
     : ICommandHandler<RemoveMemberCommand, Result>
 {
     public async ValueTask<Result> Handle(RemoveMemberCommand command, CancellationToken cancellationToken)
@@ -117,7 +119,10 @@ public sealed class RemoveMemberCommandHandler(
 
         db.Memberships.Remove(membership);
         await db.SaveChangesAsync(cancellationToken);
+        await db.ProjectMembers.Where(member => member.UserId == command.UserId).ExecuteDeleteAsync(cancellationToken);
+
         await cache.InvalidateAsync(tenant.OrganizationId, command.UserId, cancellationToken);
+        await projectAccess.InvalidateUserAsync(tenant.OrganizationId, command.UserId, cancellationToken);
         return Result.Success();
     }
 }

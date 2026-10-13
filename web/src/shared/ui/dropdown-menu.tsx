@@ -13,7 +13,7 @@ const content =
   'z-50 min-w-52 animate-pop-in overflow-hidden rounded-lg border bg-popover p-1.5 text-popover-foreground shadow-lg';
 
 const item =
-  "relative flex h-8 cursor-default items-center gap-2.5 rounded-md px-2 text-sm outline-none select-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 [&_svg:not([class*='text-'])]:text-muted-foreground";
+  "relative flex h-8 items-center gap-2.5 rounded-md px-2 text-sm outline-none select-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 [&_svg:not([class*='text-'])]:text-muted-foreground";
 
 export function DropdownMenuContent({
   className,
@@ -58,6 +58,28 @@ export function DropdownMenuRadioItem({
         <Check className="size-4 text-primary" />
       </Primitive.ItemIndicator>
     </Primitive.RadioItem>
+  );
+}
+
+/** A toggle in a menu, for choosing several options (labels, filters). The menu stays open. */
+export function DropdownMenuCheckboxItem({
+  className,
+  children,
+  ...props
+}: ComponentProps<typeof Primitive.CheckboxItem>) {
+  return (
+    <Primitive.CheckboxItem
+      className={cn(item, 'pr-8', className)}
+      onSelect={(event) => {
+        event.preventDefault();
+      }}
+      {...props}
+    >
+      {children}
+      <Primitive.ItemIndicator className="absolute right-2 flex">
+        <Check className="size-4 text-primary" />
+      </Primitive.ItemIndicator>
+    </Primitive.CheckboxItem>
   );
 }
 

@@ -224,6 +224,7 @@ Each decision gets a full ADR in `docs/adr/` when it is implemented.
 | 0014 | Commit the OpenAPI document and the generated frontend client; CI fails on drift *(added in M0)* |
 | 0015 | Apply migrations in a one-shot migrator process that shares the app image *(added in M0)* |
 | 0016 | Brand and design system: Tempo, Ember and Ink tokens, self-hosted Geist, Lucide icons; the design boards and `design/tokens.css` are the source of truth *(added in M2)* |
+| 0017 | Projects, issues and access: project roles on top of organization roles, immutable project keys with a row-locked issue counter, recomputed counters, keyset lists for every sort; no compiled EF model *(added in M3)* |
 
 ---
 
@@ -237,7 +238,7 @@ Performance is designed in from the start, not fixed at the end. Each milestone'
 - **ReadyToRun** compilation for faster startup and less JIT memory. Tiered PGO stays on.
 - **The GC respects container limits:** .NET honors cgroup memory limits. `GCHeapHardLimitPercent` and `GCConserveMemory` are tuned, and Workstation GC is compared with Server GC + DATAS under load. The winner is recorded in ADR-0012.
 - **Every service in Compose has a `mem_limit`**, including in development, so memory regressions fail loudly instead of hiding.
-- **Compiled EF Core model** (`dotnet ef dbcontext optimize`) to cut startup time and model-building memory.
+- ~~**Compiled EF Core model**~~ (`dotnet ef dbcontext optimize`): not adopted, because it rejects named query filters; model building costs 97 ms once per process ([ADR-0017](adr/0017-projects-issues-and-access.md)).
 
 ### 8.2 Data access (EF Core + PostgreSQL)
 
@@ -577,33 +578,33 @@ Full details are in [performance.md](performance.md#v030-m2-brand--design-system
 
 ---
 
-### M3 — Projects & issues · `v0.4.0`
+### M3 — Projects & issues · `v0.4.0` ✅
 
 **Goal:** the core work-tracking domain.
 
 **Projects**
-- [ ] Create, edit, archive
-- [ ] Project key unique within the organization
-- [ ] Project members and roles
+- [x] Create, edit, archive
+- [x] Project key unique within the organization
+- [x] Project members and roles
 
 **Issues**
-- [ ] Fields: type, title, description (Markdown for now; rich text arrives in M7), priority, assignee, reporter, labels, estimate, due date
-- [ ] Parent issues and sub-tasks, with depth rules
-- [ ] Issue links: blocks / relates to / duplicates
-- [ ] Readable keys (`CAD-123`) from a per-project sequence that stays safe under concurrent creates
-- [ ] Comments, with edit history
+- [x] Fields: type, title, description (Markdown for now; rich text arrives in M7), priority, assignee, reporter, labels, estimate, due date
+- [x] Parent issues and sub-tasks, with depth rules
+- [x] Issue links: blocks / relates to / duplicates
+- [x] Readable keys (`CAD-123`) from a per-project sequence that stays safe under concurrent creates
+- [x] Comments, with edit history
 
 **Issue views**
-- [ ] List view:
+- [x] List view:
   - server-side filtering and sorting
   - keyset pagination
   - column chooser
   - filters synced to the URL
-- [ ] Issue detail page and drawer with inline editing
+- [x] Issue detail page and drawer with inline editing
 
 **Also**
-- [ ] Development data seeder that generates 10,000 issues for performance testing
-- [ ] Compiled EF Core model (`dotnet ef dbcontext optimize`) regenerated with each migration, with a CI check that it is current. Moved from M0.
+- [x] Development data seeder that generates 10,000 issues for performance testing
+- [ ] ~~Compiled EF Core model~~, not adopted: `dotnet ef dbcontext optimize` rejects the named query filters that tenant isolation uses, and building the model costs 97 ms once per process ([ADR-0017](adr/0017-projects-issues-and-access.md)). A benchmark tracks the cost as the model grows.
 
 **Performance focus:**
 - The list endpoint makes **≤ 2 queries**.
@@ -613,6 +614,16 @@ Full details are in [performance.md](performance.md#v030-m2-brand--design-system
 - The issue list is virtualized.
 
 **Done when:** listing and filtering over 10,000 issues has **p95 ≤ 100 ms**, and the query-budget tests pass.
+
+**Result:** both criteria are met.
+- Over 10,000 seeded issues, list p95 is **21.5 ms** and issue detail p95 **19.6 ms** at 10 users, and 38.9 ms and 32.9 ms at 50 users, with no errors.
+- The list endpoint makes 2 queries, and every endpoint's integration test asserts its query budget (185 backend tests).
+- Every list sort is served by an index; the default sort is an index-only scan (0.38 ms).
+- Memory: the idle stack uses 120 MiB, and the app peaks at 151 MiB under load.
+- Bundles: initial JS is 129.6 KB, and the issue pages download 57–59 KB each, because the issue view and the Markdown renderer load on demand.
+- The visual suite covers the issue list and issue page in both themes, and a new end-to-end journey goes from a new project to a comment.
+
+Full details are in [performance.md](performance.md#v040-m3-projects--issues).
 
 ---
 
@@ -947,3 +958,4 @@ Three long-lived branches, all protected by GitHub rulesets. **No direct commits
 | 2026-09-27 | **M1 complete.** Changes from the plan, each made for a concrete reason: <br>• The app shell may import a feature's **route pages directly** (`@/features/x/routes/page`), not only its index, so every page becomes its own lazy chunk. The ESLint boundary rule allows exactly that. <br>• The **bundle budget counts every chunk a route downloads**, including chunks shared with other routes. Counting only a route's own chunk hid most of the cost: the members page is 4.4 KB alone, but 62.9 KB with everything it downloads. <br>• **Sign-out lives in `shared/auth`**, and the **organization switcher in `app/`**. Importing them from a feature index pulled whole features into the initial bundle. <br>• An **OpenAPI transformer declares route parameters** that middleware consumes (`{organizationId}`), because endpoints that never bind them produced a document Orval rejected. <br>• Forms use **`zod/mini`** instead of the classic API, which saved about 16 KB per form page. <br>• Npgsql **GSS encryption is disabled** by default: probing for Kerberos failed on every new connection in the chiseled image. <br>• The **test stack lifts per-IP rate limits**, because every browser and k6 user shares one IP there. <br>• End-to-end tests run **on amd64 only**, because they test behaviour, not the platform. |
 | 2026-09-30 | Added **M2: Brand & design system** before feature work, so every later screen is built once, to a finished design. The design half (identity, tokens, components and screen boards in `design/`, ADR-0016) is done up front; the implementation follows as the milestone. Later milestones move up one number (M2 → M3 … M9 → M10) and one minor version (`v0.3.0` → `v0.4.0` … `v0.9.0` → `v0.10.0`). `v1.0.0` is unchanged. |
 | 2026-09-30 | **M2 complete.** Changes from the plan, each made for a concrete reason: <br>• The theme choice is remembered **per browser**, not per user: it must apply before the first paint, before the user is known, and it needed no schema change. <br>• axe found **contrast failures in the designs themselves**. Subtle gray no longer labels readable text, the organization tile uses dark ink, and three avatar colors are deeper; the boards were re-rendered to match. <br>• The **dark-mode danger button uses dark text**, because white on it is 2.9:1. <br>• **Visual tests run against the dev server with a mocked API**, not the production stack, so screenshots depend only on the UI. They run in a pinned Playwright container, because font rendering differs between systems. <br>• axe runs in the **visual suite rather than the end-to-end tests**, where it covers more pages in both themes. <br>• The **tooltip provider lives in the app shell**, and the **sign-in brand panel loads lazily**, to keep Radix positioning code and decorative markup out of the initial bundle. <br>• The sign-in heading changed to "Welcome back", and the organization home became **My work**. |
+| 2026-10-03 | **M3 complete.** Changes from the plan, each made for a concrete reason: <br>• The **compiled EF Core model is not adopted**: `dotnet ef dbcontext optimize` rejects named query filters, which tenant isolation depends on, and a benchmark puts model building at 97 ms and 7.7 MB once per process (ADR-0017). <br>• **Statuses are six fixed categories** until M4, which will map custom workflow states onto them. <br>• **Labels belong to the organization**, not a project, so one label works across projects. <br>• **Project keys are immutable**, because they are copied into commits and other tools; projects can still be renamed. <br>• Issues are fetched by key at **`/issues/by-key/{key}`**, because `/issues/{key}` and `/issues/{id}` are the same OpenAPI template. <br>• The API uses **strict JSON number handling**, so OpenAPI describes integers as `integer` rather than `integer \| string`. <br>• **My work moved to the issues feature**, and the app shell may import a feature's `dialogs/` entry points as well as its `routes/`, so dialogs load as their own chunks. <br>• The issue view and the **Markdown renderer load on demand**; otherwise the issue list pages exceeded the 80 KB route budget (99 KB). <br>• Axe found the **light warning and danger colors** too faint for text (3.2:1 and 4.0:1), once due dates showed them. Both tokens darkened, and the boards were re-rendered. <br>• Added **ADR-0017** (projects, issues and access). |

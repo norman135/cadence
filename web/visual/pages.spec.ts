@@ -10,25 +10,47 @@ import { mockApi, organization } from './mock-api';
  * same container image as CI.
  */
 
-const pages = [
-  { name: 'sign-in', path: '/login', signedIn: false, ready: 'Welcome back' },
-  { name: 'register', path: '/register', signedIn: false, ready: 'Create your account' },
-  { name: 'my-work', path: `/${organization.slug}`, signedIn: true, ready: 'Needs you' },
-  {
-    name: 'members',
-    path: `/${organization.slug}/settings/members`,
-    signedIn: true,
-    ready: 'Team',
-  },
-  {
-    name: 'profile',
-    path: `/${organization.slug}/settings/profile`,
-    signedIn: true,
-    ready: 'Appearance',
-  },
-];
+/** `settled` names something that appears once lazy content (lists, Markdown) has loaded. */
+const pages: { name: string; path: string; signedIn: boolean; ready: string; settled?: string }[] =
+  [
+    { name: 'sign-in', path: '/login', signedIn: false, ready: 'Welcome back' },
+    { name: 'register', path: '/register', signedIn: false, ready: 'Create your account' },
+    {
+      name: 'my-work',
+      path: `/${organization.slug}`,
+      signedIn: true,
+      ready: 'Needs you',
+      settled: 'text=Offline edits are lost when the app is killed',
+    },
+    {
+      name: 'issues',
+      path: `/${organization.slug}/projects/ATL`,
+      signedIn: true,
+      ready: 'Atlas Mobile',
+      settled: 'text=Haptics on drag and drop',
+    },
+    {
+      name: 'issue',
+      path: `/${organization.slug}/issues/ATL-142`,
+      signedIn: true,
+      ready: 'Comments',
+      settled: 'strong >> text=force-quit',
+    },
+    {
+      name: 'members',
+      path: `/${organization.slug}/settings/members`,
+      signedIn: true,
+      ready: 'Team',
+    },
+    {
+      name: 'profile',
+      path: `/${organization.slug}/settings/profile`,
+      signedIn: true,
+      ready: 'Appearance',
+    },
+  ];
 
-async function open(page: Page, path: string, signedIn: boolean, ready: string) {
+async function open(page: Page, path: string, signedIn: boolean, ready: string, settled?: string) {
   // A fixed morning, so dates and greetings don't change the screenshot.
   await page.clock.setFixedTime(new Date('2026-09-30T09:30:00'));
   await mockApi(page, { signedIn });
@@ -39,8 +61,11 @@ async function open(page: Page, path: string, signedIn: boolean, ready: string) 
   if (!signedIn && (page.viewportSize()?.width ?? 0) >= 1024) {
     await expect(page.getByText('Self-hosted: your data stays on your server')).toBeVisible();
   }
+  if (settled) await expect(page.locator(settled).first()).toBeVisible();
   await page.evaluate(() => document.fonts.ready);
 }
+
+const mySettled = 'text=Offline edits are lost when the app is killed';
 
 async function expectAccessible(page: Page) {
   const results = await new AxeBuilder({ page })
@@ -60,16 +85,16 @@ for (const scheme of ['light', 'dark'] as const) {
   test.describe(`${scheme} theme`, () => {
     test.use({ colorScheme: scheme });
 
-    for (const { name, path, signedIn, ready } of pages) {
+    for (const { name, path, signedIn, ready, settled } of pages) {
       test(name, async ({ page }) => {
-        await open(page, path, signedIn, ready);
+        await open(page, path, signedIn, ready, settled);
         await expect(page).toHaveScreenshot(`${name}-${scheme}.png`, { fullPage: true });
         await expectAccessible(page);
       });
     }
 
     test('command palette', async ({ page }) => {
-      await open(page, `/${organization.slug}`, true, 'Needs you');
+      await open(page, `/${organization.slug}`, true, 'Needs you', mySettled);
       await page.keyboard.press('Control+k');
       await expect(page.getByPlaceholder('Search or type a command…')).toBeFocused();
       await expect(page).toHaveScreenshot(`command-palette-${scheme}.png`);
@@ -82,12 +107,12 @@ test.describe('phone', () => {
   test.use({ viewport: { width: 390, height: 844 } });
 
   test('my work with the tab bar', async ({ page }) => {
-    await open(page, `/${organization.slug}`, true, 'Needs you');
+    await open(page, `/${organization.slug}`, true, 'Needs you', mySettled);
     await expect(page).toHaveScreenshot('my-work-phone.png', { fullPage: true });
   });
 
   test('navigation drawer', async ({ page }) => {
-    await open(page, `/${organization.slug}`, true, 'Needs you');
+    await open(page, `/${organization.slug}`, true, 'Needs you', mySettled);
     await page.getByRole('button', { name: 'Open navigation' }).click();
     await expect(page.getByRole('dialog', { name: 'Navigation' })).toBeVisible();
     await expect(page).toHaveScreenshot('navigation-drawer-phone.png');

@@ -2,6 +2,50 @@
 
 All notable changes to Cadence are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses [Semantic Versioning](https://semver.org/). Each release corresponds to a milestone in the [roadmap](docs/ROADMAP.md).
 
+## [0.4.0] - M3: Projects & issues
+
+Teams can now track work: projects hold issues with readable keys, and issues can be filtered, discussed, nested and linked.
+
+### Added
+
+- **Projects**:
+  - create, rename, describe, archive and restore projects
+  - a key per project (`ATL`), suggested from the name, unique in the organization and fixed once created
+  - project members with Viewer, Member and Admin roles; organization owners and admins can always reach every project ([ADR-0017](docs/adr/0017-projects-issues-and-access.md))
+- **Issues**:
+  - readable keys (`ATL-142`) that stay consecutive under concurrent creates
+  - type, title, Markdown description, status, priority, assignee, reporter, labels, estimate and due date
+  - sub-issues up to three levels deep, and links: blocks, relates to and duplicates
+  - comments in Markdown, with edit history
+  - labels shared across the organization's projects
+- **Web app**, built to design boards 06 and 08:
+  - a fast issue list: virtualized, loads more as you scroll, with filters, search, sort and columns, all kept in the URL
+  - the issue view, as a page or a drawer over the list, with inline editing and one-click property pickers
+  - My work fills in with your open issues, most urgent first
+  - projects in the sidebar with open counts, a New issue button (or press `c`), and project settings
+  - the command palette finds issues by title or key, and opens projects
+  - browser tabs are titled after the page ("ATL-142 · Acme")
+- **Performance tooling**:
+  - a development seeder (`Cadence.Migrator seed --issues 10000`) that builds a realistic organization
+  - a k6 scenario that signs in and works through lists and issues
+  - a benchmark of EF Core model building
+- **Quality**:
+  - backend: 185 tests, including keyset paging in every sort, 20 concurrent creates and a two-query budget on the list
+  - frontend: 45 tests, visual baselines for the issue list and issue page in both themes, and an end-to-end journey from a new project to a comment
+
+### Changed
+
+- The API's OpenAPI document describes integers as plain `integer` and issue sorts as strings; the generated client's types are narrower to match.
+- The light theme's warning and danger colors are darker, so text in them meets WCAG AA.
+
+### Fixed
+
+- Buttons, menu items, tabs, switches, checkboxes and command palette results now show the pointer cursor, like links. Disabled controls keep the arrow.
+
+### Performance
+
+Over 10,000 issues, the list's p95 is 21.5 ms and an issue's 19.6 ms at 10 users (target 100 ms), with no errors at 50 users. See [docs/performance.md](docs/performance.md#v040-m3-projects--issues).
+
 ## [0.3.0] - M2: Brand & design system
 
 Cadence gets its own identity, and the whole app is rebuilt to its design system, in light and dark.
