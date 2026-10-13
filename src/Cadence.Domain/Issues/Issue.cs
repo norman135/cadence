@@ -264,6 +264,9 @@ public sealed class Issue : AggregateRoot<Guid>, ITenantScoped
         return Touch(now);
     }
 
+    /// <summary>Records that the labels changed; they are stored outside the aggregate.</summary>
+    public void LabelsChanged(DateTimeOffset now) => UpdatedAt = now;
+
     private Result Touch(DateTimeOffset now)
     {
         UpdatedAt = now;
