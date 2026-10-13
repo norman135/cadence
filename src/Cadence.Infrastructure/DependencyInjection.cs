@@ -55,6 +55,7 @@ public static class DependencyInjection
             };
         });
         services.AddSingleton<IMembershipCache, MembershipCache>();
+        services.AddSingleton<IProjectAccessCache, ProjectAccessCache>();
 
         return services;
     }
@@ -100,6 +101,7 @@ public static class DependencyInjection
             return db;
         });
         services.AddScoped<ICadenceDbContext>(static serviceProvider => serviceProvider.GetRequiredService<CadenceDbContext>());
+        services.AddScoped<IIssueNumbers, IssueNumbers>();
 
         return services;
     }

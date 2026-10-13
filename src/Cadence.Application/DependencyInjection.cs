@@ -1,3 +1,4 @@
+using Cadence.Application.Common.Access;
 using Cadence.Application.Common.Behaviors;
 using FluentValidation;
 using Mediator;
@@ -26,6 +27,7 @@ public static class DependencyInjection
 
         services.AddValidatorsFromAssembly(typeof(DependencyInjection).Assembly, includeInternalTypes: true);
         services.TryAddSingleton(TimeProvider.System);
+        services.AddScoped<ProjectGate>();
 
         return services;
     }
