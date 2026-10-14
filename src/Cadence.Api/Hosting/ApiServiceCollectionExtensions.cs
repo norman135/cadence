@@ -41,6 +41,7 @@ internal static class ApiServiceCollectionExtensions
             context.ProblemDetails.Extensions.TryAdd("traceId", Activity.Current?.Id ?? context.HttpContext.TraceIdentifier);
         });
         services.AddExceptionHandler<ValidationExceptionHandler>();
+        services.AddExceptionHandler<ConcurrencyExceptionHandler>();
 
         services.AddApiVersioning(options =>
             {

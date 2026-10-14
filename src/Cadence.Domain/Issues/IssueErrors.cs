@@ -14,6 +14,12 @@ public static class IssueErrors
     public static readonly Error DescriptionTooLong =
         Error.Validation("issues.description_too_long", "Issue descriptions must be 50,000 characters or fewer.");
 
+    public static readonly Error InvalidRank =
+        Error.Validation("issues.invalid_rank", "That position in the order isn't valid.");
+
+    public static readonly Error Conflict =
+        Error.Conflict("issues.changed", "Someone else changed this issue in the meantime. Refresh and try again.");
+
     public static readonly Error InvalidEstimate =
         Error.Validation("issues.invalid_estimate", "Estimates must be between 0 and 100 points.");
 

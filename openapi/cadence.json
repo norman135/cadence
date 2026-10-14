@@ -2404,6 +2404,13 @@
               }
             ]
           },
+          "statusId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
           "status": {
             "oneOf": [
               {
@@ -3407,6 +3414,13 @@
                 "$ref": "#/components/schemas/IssueType"
               }
             ]
+          },
+          "statusId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
           },
           "status": {
             "oneOf": [

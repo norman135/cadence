@@ -11,8 +11,8 @@ public enum IssueType
 }
 
 /// <summary>
-/// Where an issue is in its life. These six categories are fixed for now; per-project workflows (M4)
-/// add named states, each mapped to one of these categories.
+/// The category of an issue's status: where it is in its life. The categories are fixed; each
+/// project's workflow defines named statuses, each mapped to one of them.
 /// </summary>
 public enum IssueStatus
 {

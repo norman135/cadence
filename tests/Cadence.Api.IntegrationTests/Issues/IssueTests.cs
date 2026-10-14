@@ -78,7 +78,7 @@ public sealed class IssueTests(CadenceApiFactory factory)
         var (owner, organizationId, projectId) = await ProjectAsync();
         var created = await _client.CreateIssueAsync(owner, organizationId, projectId, "Title", new { estimate = 3, description = "Notes" });
 
-        var updated = await _client.UpdateIssueAsync(owner, organizationId, created.Id, new { status = "Done", clear = s_clearEstimate });
+        var updated = await _client.UpdateIssueAsync(owner, organizationId, created.Id, new { statusId = await factory.StatusIdAsync(projectId, IssueStatus.Done), clear = s_clearEstimate });
         Assert.Equal(HttpStatusCode.NoContent, updated.StatusCode);
 
         var issue = await _client.GetIssueAsync(owner, organizationId, created.Key);
@@ -113,7 +113,7 @@ public sealed class IssueTests(CadenceApiFactory factory)
         var cycle = await _client.UpdateIssueAsync(owner, organizationId, story.Id, new { parentId = task.Id });
         await cycle.AssertProblemAsync(HttpStatusCode.BadRequest, "issues.parent_cycle");
 
-        await _client.UpdateIssueAsync(owner, organizationId, task.Id, new { status = "Done" });
+        await _client.UpdateIssueAsync(owner, organizationId, task.Id, new { statusId = await factory.StatusIdAsync(projectId, IssueStatus.Done) });
 
         var parent = await _client.GetIssueAsync(owner, organizationId, story.Key);
         Assert.Equal(epic.Id, parent.Parent!.Id);
@@ -196,8 +196,8 @@ public sealed class IssueTests(CadenceApiFactory factory)
 
         await _client.CreateIssueAsync(owner, organizationId, projectId, "Low and late", new { priority = "Low", dueDate = "2026-12-01" });
         await _client.CreateIssueAsync(owner, organizationId, projectId, "Urgent crash", new { priority = "Urgent", labelIds = new[] { bug.Id }, assigneeId = ownerId });
-        await _client.CreateIssueAsync(owner, organizationId, projectId, "Medium soon", new { priority = "Medium", dueDate = "2026-10-05", status = "InProgress" });
-        await _client.CreateIssueAsync(owner, organizationId, projectId, "Finished", new { priority = "High", status = "Done" });
+        await _client.CreateIssueAsync(owner, organizationId, projectId, "Medium soon", new { priority = "Medium", dueDate = "2026-10-05", statusId = await factory.StatusIdAsync(projectId, IssueStatus.InProgress) });
+        await _client.CreateIssueAsync(owner, organizationId, projectId, "Finished", new { priority = "High", statusId = await factory.StatusIdAsync(projectId, IssueStatus.Done) });
 
         var byPriority = await _client.ListIssuesAsync(owner, organizationId, "?sort=Priority");
         Assert.Equal(["Urgent crash", "Finished", "Medium soon", "Low and late"], byPriority.Items.Select(issue => issue.Title));
@@ -275,7 +275,7 @@ public sealed class IssueTests(CadenceApiFactory factory)
         var first = await _client.CreateIssueAsync(owner, organizationId, projectId);
         await _client.CreateIssueAsync(owner, organizationId, projectId);
 
-        await _client.UpdateIssueAsync(owner, organizationId, first.Id, new { status = "Canceled" });
+        await _client.UpdateIssueAsync(owner, organizationId, first.Id, new { statusId = await factory.StatusIdAsync(projectId, IssueStatus.Canceled) });
 
         var project = await (await _client.SendAsync(owner.Authorized(HttpMethod.Get, $"{OrganizationUrl(organizationId)}/projects/{projectId}"), TestContext.Current.CancellationToken))
             .Content.ReadJsonAsync<Application.Features.Projects.ProjectResponse>(TestContext.Current.CancellationToken);

@@ -15,6 +15,8 @@ export interface CreateIssueCommand {
   /** @nullable */
   description?: string | null;
   type?: null | IssueType;
+  /** @nullable */
+  statusId?: string | null;
   status?: null | IssueStatus;
   priority?: null | IssuePriority;
   /** @nullable */

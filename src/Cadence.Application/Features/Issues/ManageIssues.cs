@@ -4,6 +4,7 @@ using Cadence.Application.Features.Projects;
 using Cadence.Domain.Common;
 using Cadence.Domain.Issues;
 using Cadence.Domain.Projects;
+using Cadence.Domain.Workflows;
 using FluentValidation;
 using Mediator;
 using Microsoft.EntityFrameworkCore;
@@ -28,6 +29,7 @@ public sealed record CreateIssueCommand(
     string Title,
     string? Description = null,
     IssueType? Type = null,
+    Guid? StatusId = null,
     IssueStatus? Status = null,
     IssuePriority? Priority = null,
     Guid? AssigneeId = null,
@@ -52,11 +54,17 @@ public sealed class CreateIssueCommandValidator : AbstractValidator<CreateIssueC
     }
 }
 
+/// <summary>
+/// Creates an issue in the project's default status (or the one asked for: creating isn't a
+/// transition), at the end of the project's order.
+/// </summary>
 public sealed class CreateIssueCommandHandler(
     ICadenceDbContext db,
     ProjectGate gate,
+    ITenantContext tenant,
     ICurrentUser currentUser,
     IIssueNumbers numbers,
+    IWorkflowCache workflows,
     TimeProvider timeProvider)
     : ICommandHandler<CreateIssueCommand, Result<CreatedIssueResponse>>
 {
@@ -103,6 +111,17 @@ public sealed class CreateIssueCommandHandler(
             ancestry = await IssueTree.AncestryAsync(db, parent, cancellationToken);
         }
 
+        var workflow = (await workflows.GetAsync(tenant.OrganizationId, project.Id, cancellationToken))?.ToDomain(tenant.OrganizationId);
+        var status = IssueChanges.ResolveStatus(workflow, command.StatusId, command.Status) ?? workflow?.DefaultStatus;
+        if (status is null)
+        {
+            return WorkflowErrors.UnknownStatus;
+        }
+
+        // New issues go to the end of the project's order. Two concurrent creates may get the same
+        // key; ties order by id, and the next move between them separates them.
+        var last = await db.Issues.Where(issue => issue.ProjectId == project.Id).MaxAsync(issue => (string?)issue.Rank, cancellationToken);
+
         var now = timeProvider.GetUtcNow();
         var number = await numbers.NextAsync(project.Id, cancellationToken);
         var created = Issue.Create(
@@ -111,7 +130,8 @@ public sealed class CreateIssueCommandHandler(
             command.Type ?? IssueType.Task,
             command.Title,
             command.Description,
-            command.Status ?? IssueStatus.Todo,
+            status,
+            Rank.Between(last, null),
             command.Priority ?? IssuePriority.None,
             currentUser.RequiredUserId,
             now);
@@ -156,6 +176,7 @@ public sealed record UpdateIssueCommand(
     string? Title = null,
     string? Description = null,
     IssueType? Type = null,
+    Guid? StatusId = null,
     IssueStatus? Status = null,
     IssuePriority? Priority = null,
     Guid? AssigneeId = null,
@@ -182,7 +203,13 @@ public sealed class UpdateIssueCommandValidator : AbstractValidator<UpdateIssueC
     }
 }
 
-public sealed class UpdateIssueCommandHandler(ICadenceDbContext db, ProjectGate gate, TimeProvider timeProvider)
+public sealed class UpdateIssueCommandHandler(
+    ICadenceDbContext db,
+    ProjectGate gate,
+    ITenantContext tenant,
+    ICurrentUser currentUser,
+    IWorkflowCache workflows,
+    TimeProvider timeProvider)
     : ICommandHandler<UpdateIssueCommand, Result>
 {
     public async ValueTask<Result> Handle(UpdateIssueCommand command, CancellationToken cancellationToken)
@@ -193,7 +220,7 @@ public sealed class UpdateIssueCommandHandler(ICadenceDbContext db, ProjectGate 
             return loaded.Error;
         }
 
-        var (issue, _) = loaded.Value;
+        var (issue, role) = loaded.Value;
         var clear = command.Clear?.ToHashSet() ?? [];
         var now = timeProvider.GetUtcNow();
         var previousParent = issue.ParentId;
@@ -221,11 +248,6 @@ public sealed class UpdateIssueCommandHandler(ICadenceDbContext db, ProjectGate 
             steps.Add(() => Task.FromResult(issue.ChangeType(type, now)));
         }
 
-        if (command.Status is { } status)
-        {
-            steps.Add(() => Task.FromResult(issue.MoveTo(status, now)));
-        }
-
         if (command.Priority is { } priority)
         {
             steps.Add(() => Task.FromResult(issue.Prioritize(priority, now)));
@@ -244,6 +266,27 @@ public sealed class UpdateIssueCommandHandler(ICadenceDbContext db, ProjectGate 
         if (command.DueDate is not null || clear.Contains(IssueField.DueDate))
         {
             steps.Add(() => Task.FromResult(issue.DueOn(clear.Contains(IssueField.DueDate) ? null : command.DueDate, now)));
+        }
+
+        // After the assignee, so the transition rules see the assignee this update sets.
+        if (command.StatusId is not null || command.Status is not null)
+        {
+            steps.Add(async () =>
+            {
+                var workflow = (await workflows.GetAsync(tenant.OrganizationId, issue.ProjectId, cancellationToken))?.ToDomain(tenant.OrganizationId);
+                if (IssueChanges.ResolveStatus(workflow, command.StatusId, command.Status) is not { } status)
+                {
+                    return WorkflowErrors.UnknownStatus;
+                }
+
+                if (status.Id == issue.StatusId)
+                {
+                    return Result.Success();
+                }
+
+                var allowed = workflow!.CanMove(issue.StatusId, status.Id, issue.AssigneeId, currentUser.RequiredUserId, role);
+                return allowed.IsFailure ? allowed : issue.MoveTo(status, now);
+            });
         }
 
         if (clear.Contains(IssueField.Parent))
@@ -338,6 +381,15 @@ public sealed class DeleteIssueCommandHandler(ICadenceDbContext db, ProjectGate 
 
 internal static class IssueChanges
 {
+    /// <summary>
+    /// The status a request names: by id, or by category (the first status of that category in the
+    /// workflow, for clients that think in categories). Null when neither is given or it doesn't exist.
+    /// </summary>
+    public static WorkflowStatus? ResolveStatus(Workflow? workflow, Guid? statusId, IssueStatus? category) =>
+        statusId is { } id ? workflow?.FindStatus(id)
+        : category is { } named ? workflow?.FirstIn(named)
+        : null;
+
     /// <summary>The assignee must have access to the project, and every label must exist.</summary>
     public static async Task<Result> CheckReferencesAsync(
         ICadenceDbContext db,

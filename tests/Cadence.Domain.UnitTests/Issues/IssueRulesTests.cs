@@ -1,5 +1,6 @@
 using Cadence.Domain.Issues;
 using Cadence.Domain.Projects;
+using Cadence.Domain.Workflows;
 
 namespace Cadence.Domain.UnitTests.Issues;
 
@@ -8,16 +9,23 @@ public sealed class IssueRulesTests
     private static readonly DateTimeOffset s_now = new(2026, 10, 3, 12, 0, 0, TimeSpan.Zero);
     private static readonly Guid s_user = Guid.CreateVersion7();
     private static readonly Project s_project = Project.Create(Guid.CreateVersion7(), "ATL", "Atlas", null, s_user, s_now).Value;
+    private static readonly Workflow s_workflow = Workflow.CreateDefault(s_project);
 
-    private static Issue NewIssue(IssueType type = IssueType.Task, Project? project = null, IssueStatus status = IssueStatus.Todo) =>
-        Issue.Create(project ?? s_project, 1, type, "Offline sync drops edits", null, status, IssuePriority.Medium, s_user, s_now).Value;
+    private static WorkflowStatus StatusIn(Workflow workflow, IssueStatus category) => workflow.FirstIn(category)!;
+
+    private static Issue NewIssue(IssueType type = IssueType.Task, Project? project = null)
+    {
+        var target = project ?? s_project;
+        var workflow = project is null ? s_workflow : Workflow.CreateDefault(project);
+        return Issue.Create(target, 1, type, "Offline sync drops edits", null, workflow.DefaultStatus, "a0", IssuePriority.Medium, s_user, s_now).Value;
+    }
 
     [Theory]
     [InlineData("", false)]
     [InlineData("   ", false)]
     [InlineData("x", true)]
     public void Titles_are_required(string title, bool valid) =>
-        Assert.Equal(valid, Issue.Create(s_project, 1, IssueType.Task, title, null, IssueStatus.Todo, IssuePriority.None, s_user, s_now).IsSuccess);
+        Assert.Equal(valid, Issue.Create(s_project, 1, IssueType.Task, title, null, s_workflow.DefaultStatus, "a0", IssuePriority.None, s_user, s_now).IsSuccess);
 
     [Fact]
     public void Titles_are_at_most_two_hundred_characters()
@@ -33,7 +41,7 @@ public sealed class IssueRulesTests
         var archived = Project.Create(Guid.CreateVersion7(), "OLD", "Old", null, s_user, s_now).Value;
         archived.Archive(s_now);
 
-        var result = Issue.Create(archived, 1, IssueType.Task, "Title", null, IssueStatus.Todo, IssuePriority.None, s_user, s_now);
+        var result = Issue.Create(archived, 1, IssueType.Task, "Title", null, Workflow.CreateDefault(archived).DefaultStatus, "a0", IssuePriority.None, s_user, s_now);
 
         Assert.Equal("projects.archived", result.Error.Code);
     }
@@ -44,17 +52,42 @@ public sealed class IssueRulesTests
         var issue = NewIssue();
         var later = s_now.AddHours(3);
 
-        issue.MoveTo(IssueStatus.Done, later);
+        issue.MoveTo(StatusIn(s_workflow, IssueStatus.Done), later);
         Assert.Equal(later, issue.CompletedAt);
 
         // Moving between closed states keeps the original completion time.
-        issue.MoveTo(IssueStatus.Canceled, later.AddHours(1));
+        issue.MoveTo(StatusIn(s_workflow, IssueStatus.Canceled), later.AddHours(1));
         Assert.Equal(later, issue.CompletedAt);
 
-        issue.MoveTo(IssueStatus.InProgress, later.AddHours(2));
+        var inProgress = StatusIn(s_workflow, IssueStatus.InProgress);
+        issue.MoveTo(inProgress, later.AddHours(2));
         Assert.Null(issue.CompletedAt);
         Assert.Equal(later.AddHours(2), issue.UpdatedAt);
+        Assert.Equal(inProgress.Id, issue.StatusId);
+        Assert.Equal(IssueStatus.InProgress, issue.Status);
     }
+
+    [Fact]
+    public void Issues_only_take_statuses_of_their_own_project()
+    {
+        var other = Project.Create(Guid.CreateVersion7(), "WEB", "Website", null, s_user, s_now).Value;
+        var foreign = Workflow.CreateDefault(other).DefaultStatus;
+
+        Assert.Equal("workflows.unknown_status", NewIssue().MoveTo(foreign, s_now).Error.Code);
+        Assert.Equal(
+            "workflows.unknown_status",
+            Issue.Create(s_project, 1, IssueType.Task, "Title", null, foreign, "a0", IssuePriority.None, s_user, s_now).Error.Code);
+    }
+
+    [Theory]
+    [InlineData("a0", true)]
+    [InlineData("a0V", true)]
+    [InlineData("a00", false)]
+    [InlineData("", false)]
+    [InlineData("a", false)]
+    [InlineData("a0-", false)]
+    public void Ranks_must_be_valid_keys(string rank, bool valid) =>
+        Assert.Equal(valid, NewIssue().Rerank(rank, s_now).IsSuccess);
 
     [Theory]
     [InlineData(-1, false)]
