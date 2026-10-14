@@ -11,6 +11,7 @@ Each significant decision is recorded as a short, immutable ADR: the context, th
 | [0005](0005-no-reflection-on-hot-paths.md) | Minimal APIs and source generators instead of reflection | Accepted |
 | [0006](0006-jwt-access-tokens-and-rotating-refresh-tokens.md) | Short-lived JWT access tokens with rotating refresh tokens | Accepted |
 | [0007](0007-tenant-isolation.md) | Tenant isolation with query filters and cached memberships | Accepted |
+| [0010](0010-fractional-indexing-for-ordering.md) | Fractional indexing for board ordering, and moves as one guarded UPDATE | Accepted |
 | [0011](0011-uuidv7-primary-keys.md) | UUIDv7 primary keys | Accepted |
 | [0014](0014-committed-openapi-contract-and-generated-client.md) | Commit the OpenAPI document and the generated client | Accepted |
 | [0015](0015-one-shot-migrator.md) | Apply migrations in a one-shot migrator process | Accepted |
