@@ -627,29 +627,29 @@ Full details are in [performance.md](performance.md#v040-m3-projects--issues).
 
 ---
 
-### M4 — Workflows & Kanban board · `v0.5.0`
+### M4 — Workflows & Kanban board · `v0.5.0` ✅
 
 **Goal:** configurable workflows and a fast drag-and-drop board.
 
 **Workflows**
-- [ ] Workflow definitions per project:
+- [x] Workflow definitions per project:
   - statuses, each with a category (To Do / In Progress / Done)
   - allowed transitions
   - transition rules
   - a default template
-- [ ] Workflow editor UI
+- [x] Workflow editor UI
 
 **Board**
-- [ ] Kanban board:
+- [x] Kanban board:
   - drag within and between columns (dnd-kit)
   - swimlanes by assignee, priority or epic
   - quick filters
   - WIP limits
-- [ ] Fractional-index ranks, plus a background job that rebalances them when they grow too long
-- [ ] Optimistic moves with rollback. A conflict (an `xmin` mismatch) returns 409, then the client refetches and shows a toast.
+- [x] Fractional-index ranks, plus a background job that rebalances them when they grow too long
+- [x] Optimistic moves with rollback. A conflict (an `xmin` mismatch) returns 409, then the client refetches and shows a toast.
 
 **Also**
-- [ ] ADR-0010
+- [x] ADR-0010
 
 **Performance focus:**
 - Moving a card is **one `UPDATE`**.
@@ -658,6 +658,15 @@ Full details are in [performance.md](performance.md#v040-m3-projects--issues).
 - A 500-card board drags at 60 fps.
 
 **Done when:** moving a card persists with **p95 ≤ 50 ms**, and conflict handling is covered by tests.
+
+**Result:** both criteria are met.
+- Over 10,000 seeded issues, a card move persists with p95 **16 ms** at 10 users and 78 ms at 50, with no errors. The board loads with p95 84 ms at 10 users and 322 ms at 50.
+- A move is one `UPDATE` with warm caches, and the board is one query; integration tests assert both budgets. Stale versions (409), every transition rule and role, and archived projects are covered by tests, and the client's rollback by a unit test.
+- Dragging a card on a 500-card board runs at **59 fps** (frames are capped at 60), and 43 fps with the CPU throttled 4x.
+- The board's first version took 6.6 s to load over 10,000 issues and dragged at 49 fps; what changed is in performance.md.
+- Bundles: initial JS is 130.2 KB, the board page 61.5 KB and the board itself 75.3 KB.
+
+Full details are in [performance.md](performance.md#v050-m4-workflows--kanban-board).
 
 ---
 
@@ -959,3 +968,4 @@ Three long-lived branches, all protected by GitHub rulesets. **No direct commits
 | 2026-09-30 | Added **M2: Brand & design system** before feature work, so every later screen is built once, to a finished design. The design half (identity, tokens, components and screen boards in `design/`, ADR-0016) is done up front; the implementation follows as the milestone. Later milestones move up one number (M2 → M3 … M9 → M10) and one minor version (`v0.3.0` → `v0.4.0` … `v0.9.0` → `v0.10.0`). `v1.0.0` is unchanged. |
 | 2026-09-30 | **M2 complete.** Changes from the plan, each made for a concrete reason: <br>• The theme choice is remembered **per browser**, not per user: it must apply before the first paint, before the user is known, and it needed no schema change. <br>• axe found **contrast failures in the designs themselves**. Subtle gray no longer labels readable text, the organization tile uses dark ink, and three avatar colors are deeper; the boards were re-rendered to match. <br>• The **dark-mode danger button uses dark text**, because white on it is 2.9:1. <br>• **Visual tests run against the dev server with a mocked API**, not the production stack, so screenshots depend only on the UI. They run in a pinned Playwright container, because font rendering differs between systems. <br>• axe runs in the **visual suite rather than the end-to-end tests**, where it covers more pages in both themes. <br>• The **tooltip provider lives in the app shell**, and the **sign-in brand panel loads lazily**, to keep Radix positioning code and decorative markup out of the initial bundle. <br>• The sign-in heading changed to "Welcome back", and the organization home became **My work**. |
 | 2026-10-03 | **M3 complete.** Changes from the plan, each made for a concrete reason: <br>• The **compiled EF Core model is not adopted**: `dotnet ef dbcontext optimize` rejects named query filters, which tenant isolation depends on, and a benchmark puts model building at 97 ms and 7.7 MB once per process (ADR-0017). <br>• **Statuses are six fixed categories** until M4, which will map custom workflow states onto them. <br>• **Labels belong to the organization**, not a project, so one label works across projects. <br>• **Project keys are immutable**, because they are copied into commits and other tools; projects can still be renamed. <br>• Issues are fetched by key at **`/issues/by-key/{key}`**, because `/issues/{key}` and `/issues/{id}` are the same OpenAPI template. <br>• The API uses **strict JSON number handling**, so OpenAPI describes integers as `integer` rather than `integer \| string`. <br>• **My work moved to the issues feature**, and the app shell may import a feature's `dialogs/` entry points as well as its `routes/`, so dialogs load as their own chunks. <br>• The issue view and the **Markdown renderer load on demand**; otherwise the issue list pages exceeded the 80 KB route budget (99 KB). <br>• Axe found the **light warning and danger colors** too faint for text (3.2:1 and 4.0:1), once due dates showed them. Both tokens darkened, and the boards were re-rendered. <br>• Added **ADR-0017** (projects, issues and access). |
+| 2026-10-14 | **M4 complete.** Changes from the plan, each made for a concrete reason: <br>• Statuses map onto the **six existing categories**, not three (To Do / In Progress / Done), so M3's filters, partial indexes, counters and glyphs keep working unchanged. Issues store both their status and its category. <br>• **Transition rules** are per transition: whether an assignee is required, and who may make the move (anyone, the assignee or admins, admins only). Reordering within a status is never a transition. <br>• Updates and creates take a **status id**, but still accept a category, which picks the first status in it, so the contract change stayed additive. <br>• **Dropping past a WIP limit warns** instead of asking for a reason; the reason belongs with the sprint report in M6. <br>• The board returns at most **100 cards per column** with the rank of the first hidden one, and done and canceled columns show the last 14 days. On screen, columns render **20 cards at a time**: dnd-kit re-renders every mounted card on each pointer move, and this is what holds 60 fps on a 500-card board. <br>• **No compiled queries**: a move is a raw `UPDATE … RETURNING` whose WHERE clause holds every precondition, and workflows come from an immutable HybridCache snapshot, so neither path needed one. <br>• The foreign key from issues to statuses is **deferrable**, so the workflow editor deletes statuses and moves their issues in one transaction. <br>• The board and dnd-kit load as **their own chunk**, requested as soon as the page's code runs, to keep the route within 80 KB. <br>• Added **ADR-0010** (fractional indexing and guarded moves). |
