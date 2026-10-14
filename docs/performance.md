@@ -4,6 +4,45 @@ Cadence targets a **1–2 GB RAM server with about 10 concurrent users**, and mu
 
 ## Results
 
+### v0.5.0 (M4: Workflows & Kanban board)
+
+M4 adds per-project workflows and the Kanban board. Its gate is a card move persisting with p95 ≤ 50 ms. A new k6 scenario (`perf/k6/board.js`) loads a seeded project's board, sometimes with a quick filter, then moves a card, half the time to another column and half the time within its own. A drag-performance script (`web/scripts/measure-board-fps.mjs`) drags a card across a mocked 500-card board in a production build and records every frame.
+
+**Environment:** the same as v0.2.0, with 10,000 seeded issues (5,000 in the largest project).
+
+| Metric | Target | Measured | |
+|---|---|---|---|
+| Card move p95, 10 users | ≤ 50 ms | **16 ms** | ✅ |
+| Card move p95, 50 users | ≤ 150 ms | **78 ms** | ✅ |
+| Board load p95, 10 users | ≤ 200 ms | **84 ms** | ✅ |
+| Board load p95, 50 users | ≤ 500 ms | **322 ms** | ✅ |
+| Error rate, 10 and 50 users | 0% | **0%** (1,123 and 5,169 requests; concurrent moves of the same card answer 409 by design) | ✅ |
+| Statements per move (warm caches) | 1 | **1** (asserted by an integration test) | ✅ |
+| Statements per board load | 1 | **1** (asserted by an integration test) | ✅ |
+| Drag frame rate, 500-card board | 60 fps | **59 fps**, 3 of 332 frames dropped; 43 fps at 4x CPU throttling | ✅ |
+| Whole stack at idle | ≤ 450 MB | **133 MiB** (app 76, PostgreSQL 40, Caddy 18) | ✅ |
+| App memory after the 10- and 50-user board runs | ≤ 200 MB | **112 MiB** and **158 MiB** | ✅ |
+| Initial JavaScript (gzip) | ≤ 180 KB | **130.2 KB** (+0.6 KB) | ✅ |
+| Board route (gzip, all chunks it downloads) | ≤ 80 KB | **61.5 KB** page, **75.3 KB** board | ✅ |
+
+**Board load.** The first version took 6.6 s at p95 with 10 users. Two causes:
+- each card's epic was found with an `OR`/`EXISTS` over every epic in the organization, which EF also turned into a window function over all of them per column
+- each column's cards were read through the status index and then sorted
+
+The epic now comes from scalar subqueries on the parent and grandparent, which are primary-key lookups. A `(status_id, rank, id)` index lets a column read its first cards in order. The board query now runs in 17 ms for a 600-card board on an idle server.
+
+**Drag frame rate.** The first version dragged a 500-card board at 49 fps (11 at 4x throttling), and script time dominated, because dnd-kit re-renders every mounted card on each pointer move. Measured one change at a time:
+
+| Change | 1x CPU | 4x CPU |
+|---|---|---|
+| First version | 49 fps | 11 fps |
+| Drop target found per column, then per card | 50 fps | 13 fps |
+| `content-visibility: auto` on cards | 52 fps | 27 fps |
+| Drop zones isolated, 30 cards per column | 58 fps | 34 fps |
+| 20 cards per column ("Show 20 more") | **59 fps** | **43 fps** |
+
+**Moves.** A move is one `UPDATE … RETURNING xmin` whose WHERE clause holds the status and version the client saw, the assignee when a rule depends on it, and a check that the project isn't archived ([ADR-0010](adr/0010-fractional-indexing-for-ordering.md)). It averages 0.5 ms in PostgreSQL under load.
+
 ### v0.4.0 (M3: Projects & issues)
 
 M3 adds the work-tracking domain: projects, issues, labels, links and comments, with the list and detail views. It is the first release measured with **authenticated traffic over real data**. The development seeder creates an organization with 3 projects, 9 labels, 6 people and 10,000 issues (39 s), and a new k6 scenario (`perf/k6/issues.js`) signs in and works through it. Each iteration opens a filtered or sorted list, sometimes the next page, then an issue from it.
@@ -153,6 +192,14 @@ docker run --rm --network host -v "$PWD/../perf/k6:/scripts:ro" grafana/k6 run -
 # 4. Issues (M3 and later): seed 10,000 issues, then sign in and work through them
 docker compose run --rm migrate seed --issues 10000 --password <password>
 docker run --rm --network host -v "$PWD/../perf/k6:/scripts:ro" grafana/k6 run -e SEED_PASSWORD=<password> -e VUS=10 /scripts/issues.js
+docker run --rm --network host -v "$PWD/../perf/k6:/scripts:ro" grafana/k6 run -e SEED_PASSWORD=<password> -e VUS=10 /scripts/board.js
+# In Git Bash on Windows, set MSYS_NO_PATHCONV=1 so /scripts isn't rewritten into a Windows path.
+```
+
+Drag smoothness on a 500-card board, against a production build with a mocked API:
+
+```bash
+cd web && npm run build && node scripts/measure-board-fps.mjs
 ```
 
 ### Bundle budgets

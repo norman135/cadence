@@ -110,7 +110,15 @@ Work lives in **projects**, and each project's **issues** have readable keys suc
 - **Comments** can be edited only by their author, and each edit keeps the replaced text as a revision.
 - **Labels** belong to the organization, so they work across projects.
 
-The six statuses (Backlog, Todo, In progress, In review, Done, Canceled) are fixed categories for now. M4's custom workflows will map onto them.
+### Workflows and the board
+
+Each project has a **workflow**: its statuses in board order, each mapped to one of six fixed categories (Backlog, Todo, In progress, In review, Done, Canceled). An issue stores its status and that status's category, so filters, counters and reports work across projects with different workflows.
+
+- A workflow may **restrict transitions** to an explicit list. Each allowed move can require an assignee and limit who makes it (anyone, the assignee or admins, admins only). Workflows are cached in HybridCache as immutable snapshots, so checking a move costs no query.
+- The **workflow editor** replaces the whole workflow at once. Statuses are saved, the issues of removed statuses are moved and recategorized issues updated, all in one transaction; the foreign key from issues to statuses is deferrable for this.
+- Issues have a project-wide **rank**, a fractional-index key ([ADR-0010](adr/0010-fractional-indexing-for-ordering.md)). New issues go to the end. A background service rewrites a project's ranks when any key grows past 12 characters.
+- The **board** is one query: each column with its total and first 100 cards by rank, using a `(status_id, rank, id)` index, and each card with its assignee, labels and epic. Done and canceled columns show the last 14 days.
+- A **move** is one `UPDATE … RETURNING xmin` guarded by the status, version and (when a rule needs it) assignee the client saw. A mismatch answers 409 and the client reloads the board. Issues carry PostgreSQL's `xmin` as a row version, and any other lost update also answers 409.
 
 ### Email
 
@@ -142,6 +150,7 @@ The rules are generated per feature folder, so new features are covered automati
 - **Forms**: react-hook-form with `zod/mini` schemas that mirror the server rules. Server validation errors are mapped back onto the fields.
 - **Rendering**: the React Compiler memoizes components automatically.
 - **Issue views**: lists are virtualized against the window (TanStack Virtual) and load the next keyset page as the last rows appear. Filters, sort and the open issue (`?issue=ATL-142`, shown in a drawer) live in the URL, and the chosen columns are remembered per browser. Markdown is rendered by marked and sanitized by DOMPurify; both, and the issue view itself, load on first use.
+- **Board**: dnd-kit, in its own chunk. The title link of each card is the drag handle, so the keyboard works without nested controls. Moves are optimistic: the client computes the new rank between the visible neighbours (`shared/lib/rank.ts`, the same algorithm as the server) and rolls back on refusal. Columns render 20 cards at a time to keep dragging at 60 fps, and swimlanes and quick filters live in the URL.
 - **Design system** ([ADR-0016](adr/0016-brand-and-design-system.md)): the tokens in `design/tokens.css` are mirrored in `src/index.css` and exposed to Tailwind CSS v4 by semantic name (`bg-card`, `text-muted-foreground`, `bg-status-done`…). Components never use palette colors. `shared/ui` holds the kit (Radix primitives styled to design board 05), and `/style-guide` shows every component in both themes in development builds.
 - **Themes**: `<html data-theme="light|dark">`. A seven-line inline script applies the saved choice before the first paint, and `shared/theme` keeps it in sync with the OS and other tabs. The choice (system, light, dark) is stored per browser.
 - **Fonts**: Geist and Geist Mono from `@fontsource-variable`, served from the app's own origin. Only the Latin files download for English text (51 KB). The Latin Geist file is preloaded, and metric-matched fallbacks keep the layout from shifting while it loads.
