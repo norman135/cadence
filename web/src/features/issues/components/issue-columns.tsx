@@ -110,6 +110,7 @@ export const COLUMNS: readonly Column[] = [
         <Avatar name={issue.assignee.displayName} className="size-5 text-[9px]" />
       ) : (
         <span
+          role="img"
           aria-label="Unassigned"
           className="inline-block size-5 rounded-full border border-dashed border-input"
         />

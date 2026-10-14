@@ -1,6 +1,7 @@
 import {
   CircleDot,
   House,
+  Kanban,
   Menu,
   Monitor,
   Moon,
@@ -13,7 +14,15 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { lazy, Suspense, useEffect, useState, type ReactNode } from 'react';
-import { Link, NavLink, Outlet, useLocation, useMatches, type Params } from 'react-router';
+import {
+  Link,
+  NavLink,
+  Outlet,
+  useLocation,
+  useMatch,
+  useMatches,
+  type Params,
+} from 'react-router';
 import { OrganizationSwitcher } from '../components/organization-switcher';
 import { ProjectTile } from '../components/project-tile';
 import { NotFoundPage } from '../routes/not-found-page';
@@ -244,6 +253,9 @@ function Sidebar({
   onNewProject: (() => void) | undefined;
 }) {
   const { data: projects } = useProjects();
+  const openProject = useMatch(
+    '/:orgSlug/projects/:projectKey/*',
+  )?.params.projectKey?.toUpperCase();
 
   return (
     <div className="flex h-full w-full flex-col gap-0.5 px-2.5 py-3">
@@ -285,16 +297,33 @@ function Sidebar({
         {projects?.length === 0 && (
           <p className="px-2 py-1 text-[13px] text-muted-foreground">No projects yet</p>
         )}
-        {projects?.map((project) => (
-          <SidebarLink
-            key={project.id}
-            to={`${base}/projects/${project.key}`}
-            icon={<ProjectTile projectKey={project.key} />}
-            count={project.openIssueCount}
-          >
-            {project.name}
-          </SidebarLink>
-        ))}
+        {projects?.map((project) => {
+          const projectPath = `${base}/projects/${project.key}`;
+          const open = openProject === project.key;
+          return (
+            <div key={project.id} className="flex flex-col gap-0.5">
+              <SidebarLink
+                to={projectPath}
+                icon={<ProjectTile projectKey={project.key} />}
+                count={project.openIssueCount}
+                highlight={!open}
+              >
+                {project.name}
+              </SidebarLink>
+              {/* The open project shows its views (design board 07). */}
+              {open && (
+                <>
+                  <SidebarLink to={projectPath} end icon={CircleDot} nested>
+                    Issues
+                  </SidebarLink>
+                  <SidebarLink to={`${projectPath}/board`} icon={Kanban} nested>
+                    Board
+                  </SidebarLink>
+                </>
+              )}
+            </div>
+          );
+        })}
       </nav>
 
       <p className="mt-4 mb-1 px-2 text-xs font-medium text-muted-foreground">Team</p>
@@ -319,12 +348,18 @@ function SidebarLink({
   end,
   icon,
   count,
+  highlight = true,
+  nested,
   children,
 }: {
   to: string;
   end?: boolean;
   icon: LucideIcon | ReactNode;
   count?: number;
+  /** Whether the link shows as current when its route is open (a project whose views show doesn't). */
+  highlight?: boolean;
+  /** Indented under a project. */
+  nested?: boolean;
   children: ReactNode;
 }) {
   const Icon =
@@ -338,7 +373,8 @@ function SidebarLink({
       className={({ isActive }) =>
         cn(
           'flex h-[30px] items-center gap-2.5 rounded-md px-2 font-medium outline-none focus-visible:outline-2 focus-visible:outline-ring',
-          isActive
+          nested && 'pl-7',
+          isActive && highlight
             ? 'bg-background text-foreground shadow-sm dark:bg-muted dark:shadow-none'
             : 'text-muted-foreground hover:bg-accent/70 hover:text-foreground',
         )

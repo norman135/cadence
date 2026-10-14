@@ -284,9 +284,12 @@ function Properties({
       <dt>Status</dt>
       <dd>
         <StatusPicker
-          value={issue.status}
+          projectId={issue.projectId}
+          value={issue.statusId}
+          category={issue.status}
+          transitionsFrom={issue.statusId}
           disabled={disabled}
-          onChange={(status) => void onChange({ status })}
+          onChange={(statusId) => void onChange({ statusId })}
         />
       </dd>
       <dt>Priority</dt>

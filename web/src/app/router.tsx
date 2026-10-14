@@ -130,6 +130,15 @@ export const router = createBrowserRouter([
                 }),
               },
               {
+                path: 'projects/:projectKey/board',
+                handle: {
+                  title: (params: Params) => `${params.projectKey?.toUpperCase() ?? ''} board`,
+                },
+                lazy: async () => ({
+                  Component: (await import('@/features/issues/routes/board-page')).BoardPage,
+                }),
+              },
+              {
                 path: 'projects/:projectKey/settings',
                 handle: { title: 'Project settings' },
                 lazy: async () => ({
