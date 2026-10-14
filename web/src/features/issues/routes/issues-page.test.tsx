@@ -37,6 +37,7 @@ const issue = (number: number, title: string): IssueListItem => ({
   type: 'Task',
   title,
   status: 'Todo',
+  statusId: 's-todo',
   priority: 'High',
   assignee: { id: 'u1', displayName: 'Ada' },
   estimate: null,

@@ -1,6 +1,7 @@
 using Cadence.Domain.Issues;
 using Cadence.Domain.Organizations;
 using Cadence.Domain.Projects;
+using Cadence.Domain.Workflows;
 using Cadence.Infrastructure.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -26,6 +27,12 @@ internal sealed class IssueConfiguration : IEntityTypeConfiguration<Issue>
         builder.Property(issue => issue.Description).HasMaxLength(Issue.MaxDescriptionLength);
         builder.Ignore(issue => issue.DomainEvents);
 
+        // Rank keys compare byte by byte (ADR-0010), so the column uses the "C" collation.
+        builder.Property(issue => issue.Rank).HasMaxLength(Rank.MaxLength).UseCollation("C").IsRequired();
+
+        // PostgreSQL's xmin system column: a free row version for optimistic concurrency.
+        builder.Property(issue => issue.Version).IsRowVersion();
+
         // ATL-142 resolves to (project, number), and numbers never repeat in a project.
         builder.HasIndex(issue => new { issue.ProjectId, issue.Number }).IsUnique();
 
@@ -42,6 +49,15 @@ internal sealed class IssueConfiguration : IEntityTypeConfiguration<Issue>
             .HasDatabaseName("ix_issues_assignee_open")
             .HasFilter(OpenFilter);
 
+        // A project's order, and each board column's: a column reads its first cards by rank.
+        builder.HasIndex(issue => new { issue.ProjectId, issue.Rank });
+        builder.HasIndex(issue => new { issue.StatusId, issue.Rank, issue.Id });
+
+        // Projects whose keys have grown long, for the rebalancing job. Almost always empty.
+        builder.HasIndex(issue => issue.ProjectId)
+            .HasDatabaseName("ix_issues_long_ranks")
+            .HasFilter($"length(rank) > {Rank.RebalanceLength}");
+
         // Sub-issues of a parent. Most issues have no parent, so only those that do are indexed.
         builder.HasIndex(issue => issue.ParentId)
             .HasDatabaseName("ix_issues_parent")
@@ -51,6 +67,10 @@ internal sealed class IssueConfiguration : IEntityTypeConfiguration<Issue>
         builder.HasOne<Project>().WithMany().HasForeignKey(issue => issue.ProjectId).OnDelete(DeleteBehavior.Cascade);
         // Deleting a parent promotes its sub-issues to the top level instead of deleting them.
         builder.HasOne<Issue>().WithMany().HasForeignKey(issue => issue.ParentId).OnDelete(DeleteBehavior.SetNull);
+        // A status with issues can't be deleted. NO ACTION (not RESTRICT) lets the migration make the
+        // check deferred, so the workflow editor can delete statuses and move their issues in one
+        // transaction.
+        builder.HasOne<WorkflowStatus>().WithMany().HasForeignKey(issue => issue.StatusId).OnDelete(DeleteBehavior.NoAction);
         builder.HasOne<ApplicationUser>().WithMany().HasForeignKey(issue => issue.AssigneeId).OnDelete(DeleteBehavior.SetNull);
         builder.HasOne<ApplicationUser>().WithMany().HasForeignKey(issue => issue.ReporterId).OnDelete(DeleteBehavior.Restrict);
     }

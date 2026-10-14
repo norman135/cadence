@@ -4,9 +4,11 @@ using Cadence.Domain.Common;
 using Cadence.Domain.Issues;
 using Cadence.Domain.Organizations;
 using Cadence.Domain.Projects;
+using Cadence.Domain.Workflows;
 using Cadence.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace Cadence.Infrastructure.Persistence;
 
@@ -50,6 +52,13 @@ public sealed class CadenceDbContext(DbContextOptions<CadenceDbContext> options)
     public DbSet<Comment> Comments => Set<Comment>();
 
     public DbSet<CommentRevision> CommentRevisions => Set<CommentRevision>();
+
+    public DbSet<Workflow> Workflows => Set<Workflow>();
+
+    public DbSet<WorkflowStatus> WorkflowStatuses => Set<WorkflowStatus>();
+
+    public Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken cancellationToken) =>
+        Database.BeginTransactionAsync(cancellationToken);
 
     IQueryable<UserSummary> ICadenceDbContext.Users => Set<UserSummary>().AsNoTracking();
 

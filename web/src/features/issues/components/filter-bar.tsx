@@ -1,5 +1,5 @@
 import { ArrowDownUp, Columns3, Filter, Search, X } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { useListMembers } from '@/shared/api/generated/endpoints';
 import { Avatar } from '@/shared/ui/avatar';
 import { Button } from '@/shared/ui/button';
@@ -54,14 +54,21 @@ export function FilterBar({
   projectId,
   columns,
   onColumnsChange,
+  variant = 'list',
+  actions,
 }: {
   filters: IssueFilters;
   update: (change: Partial<IssueFilters>) => void;
   active: number;
   projectId: string | undefined;
-  columns: readonly ColumnId[];
-  onColumnsChange: (columns: ColumnId[]) => void;
+  columns?: readonly ColumnId[];
+  onColumnsChange?: (columns: ColumnId[]) => void;
+  /** The board has a column per status and its own order, so it hides status, sort and columns. */
+  variant?: 'list' | 'board';
+  /** Controls shown at the end of the bar, such as the board's grouping. */
+  actions?: ReactNode;
 }) {
+  const isList = variant === 'list';
   const [search, setSearch] = useState(filters.q);
   const { data: labels } = useLabels();
   const people = usePeople(projectId);
@@ -104,23 +111,25 @@ export function FilterBar({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start">
-          <DropdownMenuSub>
-            <DropdownMenuSubTrigger>Status</DropdownMenuSubTrigger>
-            <DropdownMenuSubContent>
-              {STATUSES.map((status) => (
-                <DropdownMenuCheckboxItem
-                  key={status.value}
-                  checked={filters.status.includes(status.value)}
-                  onCheckedChange={() => {
-                    update({ status: toggle(filters.status, status.value) });
-                  }}
-                >
-                  <StatusIcon category={status.glyph} />
-                  {status.label}
-                </DropdownMenuCheckboxItem>
-              ))}
-            </DropdownMenuSubContent>
-          </DropdownMenuSub>
+          {isList && (
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger>Status</DropdownMenuSubTrigger>
+              <DropdownMenuSubContent>
+                {STATUSES.map((status) => (
+                  <DropdownMenuCheckboxItem
+                    key={status.value}
+                    checked={filters.status.includes(status.value)}
+                    onCheckedChange={() => {
+                      update({ status: toggle(filters.status, status.value) });
+                    }}
+                  >
+                    <StatusIcon category={status.glyph} />
+                    {status.label}
+                  </DropdownMenuCheckboxItem>
+                ))}
+              </DropdownMenuSubContent>
+            </DropdownMenuSub>
+          )}
           <DropdownMenuSub>
             <DropdownMenuSubTrigger>Priority</DropdownMenuSubTrigger>
             <DropdownMenuSubContent>
@@ -218,52 +227,58 @@ export function FilterBar({
 
       <span className="flex-1" />
 
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="sm">
-            <ArrowDownUp />
-            {SORTS.find((sort) => sort.value === filters.sort)?.label}
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuLabel>Sort by</DropdownMenuLabel>
-          <DropdownMenuRadioGroup
-            value={filters.sort}
-            onValueChange={(value) => {
-              update({ sort: value as IssueFilters['sort'] });
-            }}
-          >
-            {SORTS.map((sort) => (
-              <DropdownMenuRadioItem key={sort.value} value={sort.value}>
-                {sort.label}
-              </DropdownMenuRadioItem>
-            ))}
-          </DropdownMenuRadioGroup>
-        </DropdownMenuContent>
-      </DropdownMenu>
+      {actions}
 
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="sm" aria-label="Columns">
-            <Columns3 />
-            <span className="max-sm:hidden">Columns</span>
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuLabel>Show columns</DropdownMenuLabel>
-          {COLUMNS.filter((column) => !column.required).map((column) => (
-            <DropdownMenuCheckboxItem
-              key={column.id}
-              checked={columns.includes(column.id)}
-              onCheckedChange={() => {
-                onColumnsChange(toggle(columns, column.id));
+      {isList && (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="sm">
+              <ArrowDownUp />
+              {SORTS.find((sort) => sort.value === filters.sort)?.label}
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuLabel>Sort by</DropdownMenuLabel>
+            <DropdownMenuRadioGroup
+              value={filters.sort}
+              onValueChange={(value) => {
+                update({ sort: value as IssueFilters['sort'] });
               }}
             >
-              {column.label}
-            </DropdownMenuCheckboxItem>
-          ))}
-        </DropdownMenuContent>
-      </DropdownMenu>
+              {SORTS.map((sort) => (
+                <DropdownMenuRadioItem key={sort.value} value={sort.value}>
+                  {sort.label}
+                </DropdownMenuRadioItem>
+              ))}
+            </DropdownMenuRadioGroup>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )}
+
+      {columns && onColumnsChange && (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="sm" aria-label="Columns">
+              <Columns3 />
+              <span className="max-sm:hidden">Columns</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuLabel>Show columns</DropdownMenuLabel>
+            {COLUMNS.filter((column) => !column.required).map((column) => (
+              <DropdownMenuCheckboxItem
+                key={column.id}
+                checked={columns.includes(column.id)}
+                onCheckedChange={() => {
+                  onColumnsChange(toggle(columns, column.id));
+                }}
+              >
+                {column.label}
+              </DropdownMenuCheckboxItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )}
     </div>
   );
 }

@@ -2,7 +2,9 @@ using Cadence.Application.Common.ReadModels;
 using Cadence.Domain.Issues;
 using Cadence.Domain.Organizations;
 using Cadence.Domain.Projects;
+using Cadence.Domain.Workflows;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace Cadence.Application.Common.Abstractions;
 
@@ -44,10 +46,19 @@ public interface ICadenceDbContext
     /// <summary>Filtered to the current organization.</summary>
     DbSet<CommentRevision> CommentRevisions { get; }
 
+    /// <summary>Filtered to the current organization. Load with Include for the statuses and transitions.</summary>
+    DbSet<Workflow> Workflows { get; }
+
+    /// <summary>Filtered to the current organization; read-only use (the workflow saves them).</summary>
+    DbSet<WorkflowStatus> WorkflowStatuses { get; }
+
     /// <summary>Read-only view of user accounts, for joining names and emails into responses.</summary>
     IQueryable<UserSummary> Users { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>Starts a transaction for changes that must land together (several statements).</summary>
+    Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken cancellationToken);
 }
 
 /// <summary>Names of the global query filters, for the rare queries that must look across tenants.</summary>

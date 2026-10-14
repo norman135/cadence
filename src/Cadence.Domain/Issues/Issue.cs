@@ -1,5 +1,6 @@
 using Cadence.Domain.Common;
 using Cadence.Domain.Projects;
+using Cadence.Domain.Workflows;
 
 namespace Cadence.Domain.Issues;
 
@@ -25,7 +26,8 @@ public sealed class Issue : AggregateRoot<Guid>, ITenantScoped
         IssueType type,
         string title,
         string? description,
-        IssueStatus status,
+        WorkflowStatus status,
+        string rank,
         IssuePriority priority,
         Guid reporterId,
         DateTimeOffset now)
@@ -37,18 +39,21 @@ public sealed class Issue : AggregateRoot<Guid>, ITenantScoped
         Type = type;
         Title = title;
         Description = description;
-        Status = status;
+        StatusId = status.Id;
+        Status = status.Category;
+        Rank = rank;
         Priority = priority;
         ReporterId = reporterId;
         CreatedAt = now;
         UpdatedAt = now;
-        CompletedAt = status.IsClosed() ? now : null;
+        CompletedAt = status.Category.IsClosed() ? now : null;
     }
 
     /// <summary>Used by EF Core.</summary>
     private Issue()
     {
         Title = string.Empty;
+        Rank = string.Empty;
     }
 
     public Guid OrganizationId { get; private init; }
@@ -65,7 +70,17 @@ public sealed class Issue : AggregateRoot<Guid>, ITenantScoped
     /// <summary>Markdown.</summary>
     public string? Description { get; private set; }
 
+    /// <summary>The issue's status in its project's workflow.</summary>
+    public Guid StatusId { get; private set; }
+
+    /// <summary>The category of <see cref="StatusId"/>, stored with the issue for filters and indexes.</summary>
     public IssueStatus Status { get; private set; }
+
+    /// <summary>The issue's place in its project's order (board columns, backlog). See <see cref="Issues.Rank"/>.</summary>
+    public string Rank { get; private set; }
+
+    /// <summary>PostgreSQL's row version (<c>xmin</c>): it changes on every update, for optimistic concurrency.</summary>
+    public uint Version { get; private set; }
 
     public IssuePriority Priority { get; private set; }
 
@@ -101,12 +116,14 @@ public sealed class Issue : AggregateRoot<Guid>, ITenantScoped
         IssueType type,
         string title,
         string? description,
-        IssueStatus status,
+        WorkflowStatus status,
+        string rank,
         IssuePriority priority,
         Guid reporterId,
         DateTimeOffset now)
     {
         ArgumentNullException.ThrowIfNull(project);
+        ArgumentNullException.ThrowIfNull(status);
 
         if (project.IsArchived)
         {
@@ -125,6 +142,16 @@ public sealed class Issue : AggregateRoot<Guid>, ITenantScoped
             return IssueErrors.DescriptionTooLong;
         }
 
+        if (status.ProjectId != project.Id)
+        {
+            return WorkflowErrors.UnknownStatus;
+        }
+
+        if (!Issues.Rank.IsValid(rank))
+        {
+            return IssueErrors.InvalidRank;
+        }
+
         return new Issue(
             Guid.CreateVersion7(),
             project.OrganizationId,
@@ -134,6 +161,7 @@ public sealed class Issue : AggregateRoot<Guid>, ITenantScoped
             trimmedTitle,
             normalizedDescription,
             status,
+            rank,
             priority,
             reporterId,
             now);
@@ -163,19 +191,43 @@ public sealed class Issue : AggregateRoot<Guid>, ITenantScoped
         return Touch(now);
     }
 
-    /// <summary>Moves the issue to a status; closing it records when, reopening clears that.</summary>
-    public Result MoveTo(IssueStatus status, DateTimeOffset now)
+    /// <summary>
+    /// Moves the issue to a status of its project's workflow; closing it records when, reopening
+    /// clears that. Callers check the workflow's transition rules first.
+    /// </summary>
+    public Result MoveTo(WorkflowStatus status, DateTimeOffset now)
     {
-        if (status.IsClosed() && !Status.IsClosed())
+        ArgumentNullException.ThrowIfNull(status);
+
+        if (status.ProjectId != ProjectId)
+        {
+            return WorkflowErrors.UnknownStatus;
+        }
+
+        var category = status.Category;
+        if (category.IsClosed() && !Status.IsClosed())
         {
             CompletedAt = now;
         }
-        else if (!status.IsClosed())
+        else if (!category.IsClosed())
         {
             CompletedAt = null;
         }
 
-        Status = status;
+        StatusId = status.Id;
+        Status = category;
+        return Touch(now);
+    }
+
+    /// <summary>Places the issue elsewhere in its project's order.</summary>
+    public Result Rerank(string rank, DateTimeOffset now)
+    {
+        if (!Issues.Rank.IsValid(rank))
+        {
+            return IssueErrors.InvalidRank;
+        }
+
+        Rank = rank;
         return Touch(now);
     }
 

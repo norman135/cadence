@@ -184,6 +184,13 @@ namespace Cadence.Infrastructure.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("project_id");
 
+                    b.Property<string>("Rank")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("rank")
+                        .UseCollation("C");
+
                     b.Property<Guid>("ReporterId")
                         .HasColumnType("uuid")
                         .HasColumnName("reporter_id");
@@ -191,6 +198,10 @@ namespace Cadence.Infrastructure.Persistence.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("integer")
                         .HasColumnName("status");
+
+                    b.Property<Guid>("StatusId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("status_id");
 
                     b.Property<int>("SubIssueClosedCount")
                         .HasColumnType("integer")
@@ -214,12 +225,22 @@ namespace Cadence.Infrastructure.Persistence.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
 
+                    b.Property<uint>("Version")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
                     b.HasKey("Id")
                         .HasName("pk_issues");
 
                     b.HasIndex("ParentId")
                         .HasDatabaseName("ix_issues_parent")
                         .HasFilter("parent_id IS NOT NULL");
+
+                    b.HasIndex("ProjectId")
+                        .HasDatabaseName("ix_issues_long_ranks")
+                        .HasFilter("length(rank) > 12");
 
                     b.HasIndex("ReporterId")
                         .HasDatabaseName("ix_issues_reporter_id");
@@ -233,6 +254,9 @@ namespace Cadence.Infrastructure.Persistence.Migrations
                         .IsUnique()
                         .HasDatabaseName("ix_issues_project_id_number");
 
+                    b.HasIndex("ProjectId", "Rank")
+                        .HasDatabaseName("ix_issues_project_id_rank");
+
                     b.HasIndex("OrganizationId", "UpdatedAt", "Id")
                         .IsDescending(false, true, true)
                         .HasDatabaseName("ix_issues_organization_id_updated_at_id");
@@ -240,6 +264,9 @@ namespace Cadence.Infrastructure.Persistence.Migrations
                     b.HasIndex("ProjectId", "UpdatedAt", "Id")
                         .IsDescending(false, true, true)
                         .HasDatabaseName("ix_issues_project_id_updated_at_id");
+
+                    b.HasIndex("StatusId", "Rank", "Id")
+                        .HasDatabaseName("ix_issues_status_id_rank_id");
 
                     b.ToTable("issues", (string)null);
                 });
@@ -586,6 +613,137 @@ namespace Cadence.Infrastructure.Persistence.Migrations
                     b.ToTable("project_members", (string)null);
                 });
 
+            modelBuilder.Entity("Cadence.Domain.Workflows.Workflow", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("organization_id");
+
+                    b.Property<Guid>("ProjectId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("project_id");
+
+                    b.Property<bool>("RestrictTransitions")
+                        .HasColumnType("boolean")
+                        .HasColumnName("restrict_transitions");
+
+                    b.HasKey("Id")
+                        .HasName("pk_workflows");
+
+                    b.HasIndex("OrganizationId")
+                        .HasDatabaseName("ix_workflows_organization_id");
+
+                    b.HasIndex("ProjectId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_workflows_project_id");
+
+                    b.ToTable("workflows", (string)null);
+                });
+
+            modelBuilder.Entity("Cadence.Domain.Workflows.WorkflowStatus", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<int>("Category")
+                        .HasColumnType("integer")
+                        .HasColumnName("category");
+
+                    b.Property<bool>("IsDefault")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_default");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("name");
+
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("organization_id");
+
+                    b.Property<int>("Position")
+                        .HasColumnType("integer")
+                        .HasColumnName("position");
+
+                    b.Property<Guid>("ProjectId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("project_id");
+
+                    b.Property<int?>("WipLimit")
+                        .HasColumnType("integer")
+                        .HasColumnName("wip_limit");
+
+                    b.Property<Guid>("WorkflowId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("workflow_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_workflow_statuses");
+
+                    b.HasIndex("ProjectId")
+                        .HasDatabaseName("ix_workflow_statuses_project_id");
+
+                    b.HasIndex("WorkflowId")
+                        .HasDatabaseName("ix_workflow_statuses_workflow_id");
+
+                    b.ToTable("workflow_statuses", (string)null);
+                });
+
+            modelBuilder.Entity("Cadence.Domain.Workflows.WorkflowTransition", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("AllowedBy")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("allowed_by");
+
+                    b.Property<Guid>("FromStatusId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("from_status_id");
+
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("organization_id");
+
+                    b.Property<bool>("RequireAssignee")
+                        .HasColumnType("boolean")
+                        .HasColumnName("require_assignee");
+
+                    b.Property<Guid>("ToStatusId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("to_status_id");
+
+                    b.Property<Guid>("WorkflowId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("workflow_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_workflow_transitions");
+
+                    b.HasIndex("FromStatusId")
+                        .HasDatabaseName("ix_workflow_transitions_from_status_id");
+
+                    b.HasIndex("ToStatusId")
+                        .HasDatabaseName("ix_workflow_transitions_to_status_id");
+
+                    b.HasIndex("WorkflowId", "FromStatusId", "ToStatusId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_workflow_transitions_workflow_id_from_status_id_to_status_id");
+
+                    b.ToTable("workflow_transitions", (string)null);
+                });
+
             modelBuilder.Entity("Cadence.Infrastructure.Identity.ApplicationUser", b =>
                 {
                     b.Property<Guid>("Id")
@@ -883,6 +1041,13 @@ namespace Cadence.Infrastructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_issues_users_reporter_id");
+
+                    b.HasOne("Cadence.Domain.Workflows.WorkflowStatus", null)
+                        .WithMany()
+                        .HasForeignKey("StatusId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("fk_issues_workflow_statuses_status_id");
                 });
 
             modelBuilder.Entity("Cadence.Domain.Issues.IssueLabel", b =>
@@ -1004,6 +1169,57 @@ namespace Cadence.Infrastructure.Persistence.Migrations
                         .HasConstraintName("fk_project_members_users_user_id");
                 });
 
+            modelBuilder.Entity("Cadence.Domain.Workflows.Workflow", b =>
+                {
+                    b.HasOne("Cadence.Domain.Organizations.Organization", null)
+                        .WithMany()
+                        .HasForeignKey("OrganizationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_workflows_organizations_organization_id");
+
+                    b.HasOne("Cadence.Domain.Projects.Project", null)
+                        .WithMany()
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_workflows_projects_project_id");
+                });
+
+            modelBuilder.Entity("Cadence.Domain.Workflows.WorkflowStatus", b =>
+                {
+                    b.HasOne("Cadence.Domain.Workflows.Workflow", null)
+                        .WithMany("_statuses")
+                        .HasForeignKey("WorkflowId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_workflow_statuses_workflows_workflow_id");
+                });
+
+            modelBuilder.Entity("Cadence.Domain.Workflows.WorkflowTransition", b =>
+                {
+                    b.HasOne("Cadence.Domain.Workflows.WorkflowStatus", null)
+                        .WithMany()
+                        .HasForeignKey("FromStatusId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_workflow_transitions_workflow_statuses_from_status_id");
+
+                    b.HasOne("Cadence.Domain.Workflows.WorkflowStatus", null)
+                        .WithMany()
+                        .HasForeignKey("ToStatusId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_workflow_transitions_workflow_statuses_to_status_id");
+
+                    b.HasOne("Cadence.Domain.Workflows.Workflow", null)
+                        .WithMany("_transitions")
+                        .HasForeignKey("WorkflowId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_workflow_transitions_workflows_workflow_id");
+                });
+
             modelBuilder.Entity("Cadence.Infrastructure.Identity.RefreshToken", b =>
                 {
                     b.HasOne("Cadence.Infrastructure.Identity.ApplicationUser", null)
@@ -1042,6 +1258,13 @@ namespace Cadence.Infrastructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_user_tokens_users_user_id");
+                });
+
+            modelBuilder.Entity("Cadence.Domain.Workflows.Workflow", b =>
+                {
+                    b.Navigation("_statuses");
+
+                    b.Navigation("_transitions");
                 });
 #pragma warning restore 612, 618
         }

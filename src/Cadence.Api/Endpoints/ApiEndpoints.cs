@@ -20,6 +20,7 @@ internal static class ApiEndpoints
         v1.MapInvitationEndpoints();
         v1.MapProjectEndpoints();
         v1.MapIssueEndpoints();
+        v1.MapBoardEndpoints();
 
         // Unknown API routes get a JSON 404 instead of falling through to the SPA's index.html.
         app.MapFallback("/api/{**path}", static () => TypedResults.Problem(

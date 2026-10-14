@@ -2,6 +2,39 @@
 
 All notable changes to Cadence are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses [Semantic Versioning](https://semver.org/). Each release corresponds to a milestone in the [roadmap](docs/ROADMAP.md).
 
+## [0.5.0] - M4: Workflows & Kanban board
+
+Each project gets its own workflow, and its issues move across a drag-and-drop board.
+
+### Added
+
+- **Workflows** ([ADR-0017](docs/adr/0017-projects-issues-and-access.md)):
+  - statuses per project in board order, each counting as one of six categories, with optional WIP limits and a default status
+  - optional transition rules: which moves are allowed, whether they need an assignee, and who may make them
+  - a workflow editor in project settings; removed statuses send their issues where you choose
+- **Kanban board** (`/projects/:key/board`):
+  - drag and drop with the mouse or the keyboard, with optimistic moves that roll back if refused
+  - swimlanes by assignee, priority or epic, and the list's quick filters
+  - WIP limits in column headers, a "+" per column, and a warning when a drop goes over a limit
+  - List and Board views on every project, also in the sidebar
+- **Ordering**: fractional-index ranks, so a move rewrites one row, and a background job that keeps the keys short ([ADR-0010](docs/adr/0010-fractional-indexing-for-ordering.md))
+- **Concurrency**: issues carry a row version; a move or edit that lost a race answers 409, and the board reloads with a note
+- **Performance tooling**: a k6 board scenario, and a script that measures drag smoothness on a 500-card board
+
+### Changed
+
+- Status pickers list the project's own statuses, and disable moves a restricted workflow doesn't allow.
+- The API accepts status ids; status categories still work and pick the first status in that category.
+
+### Fixed
+
+- Labels of switches and checkboxes show the pointer cursor.
+- A token expiring more than 24 days out no longer causes a refresh loop.
+
+### Performance
+
+Over 10,000 issues, a card move persists with p95 16 ms at 10 users (target 50 ms), the board loads with p95 84 ms, and a 500-card board drags at 59 fps. See [docs/performance.md](docs/performance.md#v050-m4-workflows--kanban-board).
+
 ## [0.4.0] - M3: Projects & issues
 
 Teams can now track work: projects hold issues with readable keys, and issues can be filtered, discussed, nested and linked.

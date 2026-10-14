@@ -1487,6 +1487,18 @@
             }
           },
           {
+            "name": "statusId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          },
+          {
             "name": "priority",
             "in": "query",
             "description": "",
@@ -2167,6 +2179,283 @@
           }
         ]
       }
+    },
+    "/api/v1/organizations/{organizationId}/projects/{projectId}/workflow": {
+      "get": {
+        "tags": [
+          "Workflows"
+        ],
+        "summary": "Get a project's workflow",
+        "operationId": "GetWorkflow",
+        "parameters": [
+          {
+            "name": "organizationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "projectId",
+            "in": "path",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkflowResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "Workflows"
+        ],
+        "summary": "Replace a project's statuses and transitions",
+        "operationId": "UpdateWorkflow",
+        "parameters": [
+          {
+            "name": "organizationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "projectId",
+            "in": "path",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateWorkflowRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkflowResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/v1/organizations/{organizationId}/projects/{projectId}/board": {
+      "get": {
+        "tags": [
+          "Board"
+        ],
+        "summary": "Get a project's board: columns and their first cards",
+        "operationId": "GetBoard",
+        "parameters": [
+          {
+            "name": "organizationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "projectId",
+            "in": "path",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "assigneeId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          },
+          {
+            "name": "unassigned",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/IssueType"
+              }
+            }
+          },
+          {
+            "name": "priority",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/IssuePriority"
+              }
+            }
+          },
+          {
+            "name": "labelId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          },
+          {
+            "name": "epicId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BoardResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/v1/organizations/{organizationId}/projects/{projectId}/board/moves": {
+      "post": {
+        "tags": [
+          "Board"
+        ],
+        "summary": "Move a card to a status and position",
+        "operationId": "MoveCard",
+        "parameters": [
+          {
+            "name": "organizationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "projectId",
+            "in": "path",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MoveCardRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MovedCardResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
     }
   },
   "components": {
@@ -2227,6 +2516,187 @@
           },
           "role": {
             "$ref": "#/components/schemas/ProjectRole"
+          }
+        }
+      },
+      "BoardCard": {
+        "required": [
+          "id",
+          "key",
+          "type",
+          "title",
+          "statusId",
+          "priority",
+          "rank",
+          "version",
+          "assignee",
+          "labels",
+          "estimate",
+          "dueDate",
+          "subIssueCount",
+          "subIssueClosedCount",
+          "commentCount",
+          "epic"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "key": {
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/IssueType"
+          },
+          "title": {
+            "type": "string"
+          },
+          "statusId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "priority": {
+            "$ref": "#/components/schemas/IssuePriority"
+          },
+          "rank": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "uint32"
+          },
+          "assignee": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/PersonSummary"
+              }
+            ]
+          },
+          "labels": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LabelResponse"
+            }
+          },
+          "estimate": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int32"
+          },
+          "dueDate": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date"
+          },
+          "subIssueCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "subIssueClosedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "commentCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "epic": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/EpicSummary"
+              }
+            ]
+          }
+        }
+      },
+      "BoardColumn": {
+        "required": [
+          "statusId",
+          "name",
+          "category",
+          "wipLimit",
+          "total",
+          "hasMore",
+          "nextRank",
+          "cards"
+        ],
+        "type": "object",
+        "properties": {
+          "statusId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "category": {
+            "$ref": "#/components/schemas/IssueStatus"
+          },
+          "wipLimit": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "hasMore": {
+            "type": "boolean"
+          },
+          "nextRank": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "cards": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BoardCard"
+            }
+          }
+        }
+      },
+      "BoardResponse": {
+        "required": [
+          "projectId",
+          "projectKey",
+          "closedWindowDays",
+          "columns"
+        ],
+        "type": "object",
+        "properties": {
+          "projectId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "projectKey": {
+            "type": "string"
+          },
+          "closedWindowDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "columns": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BoardColumn"
+            }
           }
         }
       },
@@ -2404,6 +2874,13 @@
               }
             ]
           },
+          "statusId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
           "status": {
             "oneOf": [
               {
@@ -2573,6 +3050,26 @@
           }
         }
       },
+      "EpicSummary": {
+        "required": [
+          "id",
+          "key",
+          "title"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "key": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          }
+        }
+      },
       "ForgotPasswordCommand": {
         "required": [
           "email"
@@ -2669,6 +3166,7 @@
           "title",
           "description",
           "status",
+          "statusId",
           "priority",
           "assignee",
           "reporter",
@@ -2681,7 +3179,8 @@
           "commentCount",
           "createdAt",
           "updatedAt",
-          "completedAt"
+          "completedAt",
+          "version"
         ],
         "type": "object",
         "properties": {
@@ -2716,6 +3215,10 @@
           },
           "status": {
             "$ref": "#/components/schemas/IssueStatus"
+          },
+          "statusId": {
+            "type": "string",
+            "format": "uuid"
           },
           "priority": {
             "$ref": "#/components/schemas/IssuePriority"
@@ -2793,6 +3296,10 @@
               "string"
             ],
             "format": "date-time"
+          },
+          "version": {
+            "type": "integer",
+            "format": "uint32"
           }
         }
       },
@@ -2840,6 +3347,7 @@
           "type",
           "title",
           "status",
+          "statusId",
           "priority",
           "assignee",
           "estimate",
@@ -2872,6 +3380,10 @@
           },
           "status": {
             "$ref": "#/components/schemas/IssueStatus"
+          },
+          "statusId": {
+            "type": "string",
+            "format": "uuid"
           },
           "priority": {
             "$ref": "#/components/schemas/IssuePriority"
@@ -3132,6 +3644,76 @@
           }
         }
       },
+      "MoveCardRequest": {
+        "required": [
+          "issueId",
+          "fromStatusId",
+          "toStatusId",
+          "rank",
+          "version",
+          "assigneeId"
+        ],
+        "type": "object",
+        "properties": {
+          "issueId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "fromStatusId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "toStatusId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "rank": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "uint32"
+          },
+          "assigneeId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          }
+        },
+        "description": "Body of a board move: the card, where it was as the client saw it, and where it goes."
+      },
+      "MovedCardResponse": {
+        "required": [
+          "issueId",
+          "statusId",
+          "category",
+          "rank",
+          "version"
+        ],
+        "type": "object",
+        "properties": {
+          "issueId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "statusId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "category": {
+            "$ref": "#/components/schemas/IssueStatus"
+          },
+          "rank": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "uint32"
+          }
+        }
+      },
       "MyOrganizationResponse": {
         "required": [
           "id",
@@ -3383,6 +3965,13 @@
           }
         }
       },
+      "TransitionActor": {
+        "enum": [
+          "Anyone",
+          "AssigneeOrAdmins",
+          "Admins"
+        ]
+      },
       "UpdateIssueRequest": {
         "type": "object",
         "properties": {
@@ -3407,6 +3996,13 @@
                 "$ref": "#/components/schemas/IssueType"
               }
             ]
+          },
+          "statusId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
           },
           "status": {
             "oneOf": [
@@ -3525,6 +4121,223 @@
           }
         },
         "description": "Body of the update-project request. Fields left out are unchanged."
+      },
+      "UpdateWorkflowRequest": {
+        "required": [
+          "statuses",
+          "restrictTransitions",
+          "transitions"
+        ],
+        "type": "object",
+        "properties": {
+          "statuses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WorkflowStatusInput"
+            }
+          },
+          "restrictTransitions": {
+            "type": "boolean"
+          },
+          "transitions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WorkflowTransitionInput"
+            }
+          },
+          "replacements": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/WorkflowReplacementInput"
+            }
+          }
+        },
+        "description": "Body of the update-workflow request: the whole workflow as the editor shows it."
+      },
+      "WorkflowReplacementInput": {
+        "required": [
+          "removedStatusId",
+          "replacementIndex"
+        ],
+        "type": "object",
+        "properties": {
+          "removedStatusId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "replacementIndex": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "WorkflowResponse": {
+        "required": [
+          "id",
+          "projectId",
+          "restrictTransitions",
+          "statuses",
+          "transitions"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "projectId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "restrictTransitions": {
+            "type": "boolean"
+          },
+          "statuses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WorkflowStatusResponse"
+            }
+          },
+          "transitions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WorkflowTransitionResponse"
+            }
+          },
+          "defaultStatus": {
+            "$ref": "#/components/schemas/WorkflowStatusResponse"
+          }
+        }
+      },
+      "WorkflowStatusInput": {
+        "required": [
+          "id",
+          "name",
+          "category",
+          "wipLimit",
+          "isDefault"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "category": {
+            "$ref": "#/components/schemas/IssueStatus"
+          },
+          "wipLimit": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int32"
+          },
+          "isDefault": {
+            "type": "boolean"
+          }
+        }
+      },
+      "WorkflowStatusResponse": {
+        "required": [
+          "id",
+          "name",
+          "category",
+          "position",
+          "wipLimit",
+          "isDefault"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "category": {
+            "$ref": "#/components/schemas/IssueStatus"
+          },
+          "position": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "wipLimit": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int32"
+          },
+          "isDefault": {
+            "type": "boolean"
+          }
+        }
+      },
+      "WorkflowTransitionInput": {
+        "required": [
+          "from",
+          "to",
+          "requireAssignee",
+          "allowedBy"
+        ],
+        "type": "object",
+        "properties": {
+          "from": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "to": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "requireAssignee": {
+            "type": "boolean"
+          },
+          "allowedBy": {
+            "$ref": "#/components/schemas/TransitionActor"
+          }
+        }
+      },
+      "WorkflowTransitionResponse": {
+        "required": [
+          "id",
+          "fromStatusId",
+          "toStatusId",
+          "requireAssignee",
+          "allowedBy"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "fromStatusId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "toStatusId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "requireAssignee": {
+            "type": "boolean"
+          },
+          "allowedBy": {
+            "$ref": "#/components/schemas/TransitionActor"
+          }
+        }
       }
     },
     "securitySchemes": {
@@ -3566,6 +4379,12 @@
     },
     {
       "name": "Comments"
+    },
+    {
+      "name": "Workflows"
+    },
+    {
+      "name": "Board"
     }
   ]
 }

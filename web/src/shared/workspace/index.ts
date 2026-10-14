@@ -11,4 +11,6 @@ export {
   useProjectPeople,
   useProjects,
   useRefreshIssues,
+  useWorkflow,
+  isBoardQuery,
 } from './projects';

@@ -1,8 +1,10 @@
 using System.Net;
 using Cadence.Application.Common.Paging;
+using Cadence.Application.Features.Board;
 using Cadence.Application.Features.Issues;
 using Cadence.Application.Features.Labels;
 using Cadence.Application.Features.Projects;
+using Cadence.Application.Features.Workflows;
 using Cadence.Domain.Projects;
 
 namespace Cadence.Api.IntegrationTests.Infrastructure;
@@ -81,4 +83,34 @@ public static class TestProjects
         var me = await response.Content.ReadJsonAsync<Application.Features.Me.CurrentUserResponse>();
         return me!.Id;
     }
+
+    public static string ProjectUrl(Guid organizationId, Guid projectId) => $"{OrganizationUrl(organizationId)}/projects/{projectId}";
+
+    public static async Task<WorkflowResponse> GetWorkflowAsync(this HttpClient client, TestSession user, Guid organizationId, Guid projectId)
+    {
+        var response = await client.SendAsync(user.Authorized(HttpMethod.Get, $"{ProjectUrl(organizationId, projectId)}/workflow"));
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        return (await response.Content.ReadJsonAsync<WorkflowResponse>())!;
+    }
+
+    public static Task<HttpResponseMessage> PutWorkflowAsync(this HttpClient client, TestSession user, Guid organizationId, Guid projectId, object body) =>
+        client.SendAsync(user.Authorized(HttpMethod.Put, $"{ProjectUrl(organizationId, projectId)}/workflow", body));
+
+    /// <summary>The workflow's statuses as the editor would resubmit them unchanged.</summary>
+    public static List<WorkflowStatusInput> AsInputs(this WorkflowResponse workflow) =>
+        [.. workflow.Statuses.Select(status => new WorkflowStatusInput(status.Id, status.Name, status.Category, status.WipLimit, status.IsDefault))];
+
+    public static async Task<BoardResponse> GetBoardAsync(this HttpClient client, TestSession user, Guid organizationId, Guid projectId, string query = "")
+    {
+        var response = await client.SendAsync(user.Authorized(HttpMethod.Get, $"{ProjectUrl(organizationId, projectId)}/board{query}"));
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        return (await response.Content.ReadJsonAsync<BoardResponse>())!;
+    }
+
+    public static Task<HttpResponseMessage> MoveCardAsync(
+        this HttpClient client, TestSession user, Guid organizationId, Guid projectId, BoardCard card, Guid toStatusId, string rank) =>
+        client.SendAsync(user.Authorized(
+            HttpMethod.Post,
+            $"{ProjectUrl(organizationId, projectId)}/board/moves",
+            new { issueId = card.Id, fromStatusId = card.StatusId, toStatusId, rank, version = card.Version, assigneeId = card.Assignee?.Id }));
 }
