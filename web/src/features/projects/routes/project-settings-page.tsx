@@ -22,6 +22,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/sha
 import { Select } from '@/shared/ui/select';
 import { TextField } from '@/shared/ui/text-field';
 import { useCurrentOrganization, useCurrentProject, useProjectPeople } from '@/shared/workspace';
+import { WorkflowEditor } from '../components/workflow-editor';
 
 const ROLES: readonly ProjectRole[] = ['Admin', 'Member', 'Viewer'];
 
@@ -45,6 +46,7 @@ export function ProjectSettingsPage() {
       <h1 className="text-2xl font-semibold tracking-[-0.02em]">{project.name} settings</h1>
       <DetailsCard key={project.id} project={project} />
       <MembersCard project={project} />
+      <WorkflowEditor project={project} />
       <ArchiveCard project={project} />
     </div>
   );

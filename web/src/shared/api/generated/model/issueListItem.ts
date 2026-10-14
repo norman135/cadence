@@ -18,6 +18,7 @@ export interface IssueListItem {
   type: IssueType;
   title: string;
   status: IssueStatus;
+  statusId: string;
   priority: IssuePriority;
   assignee: null | PersonSummary;
   /** @nullable */

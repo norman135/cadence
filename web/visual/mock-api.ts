@@ -1,6 +1,7 @@
 import type { Page, Route } from '@playwright/test';
 import type {
   AccessTokenResponse,
+  BoardResponse,
   CommentResponse,
   CurrentUserResponse,
   InvitationResponse,
@@ -13,6 +14,7 @@ import type {
   PersonSummary,
   ProjectMemberResponse,
   ProjectResponse,
+  WorkflowResponse,
 } from '../src/shared/api/generated/model';
 
 /*
@@ -149,6 +151,7 @@ const issue = (
   type: 'Task',
   title,
   status,
+  statusId: `status-${status}`,
   priority,
   assignee: ada,
   estimate: null,
@@ -252,6 +255,7 @@ const detail: IssueDetail = {
     },
   ],
   completedAt: null,
+  version: 1,
 };
 
 const comments: CommentResponse[] = [
@@ -272,6 +276,74 @@ const comments: CommentResponse[] = [
     revisionCount: 1,
   },
 ];
+
+const categories: { status: IssueStatus; name: string; wipLimit: number | null }[] = [
+  { status: 'Backlog', name: 'Backlog', wipLimit: null },
+  { status: 'Todo', name: 'Todo', wipLimit: null },
+  { status: 'InProgress', name: 'In progress', wipLimit: 2 },
+  { status: 'InReview', name: 'In review', wipLimit: 3 },
+  { status: 'Done', name: 'Done', wipLimit: null },
+  { status: 'Canceled', name: 'Canceled', wipLimit: null },
+];
+
+const workflow: WorkflowResponse = {
+  id: '0199a1b2-0000-7000-8000-0000000000c1',
+  projectId: atlas.id,
+  restrictTransitions: false,
+  statuses: categories.map((category, position) => ({
+    id: `status-${category.status}`,
+    name: category.name,
+    category: category.status,
+    position,
+    wipLimit: category.wipLimit,
+    isDefault: category.status === 'Todo',
+  })),
+  transitions: [],
+};
+
+// Cards in rank order: the issues above, ranked by their place in the list.
+const rankDigits = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+const board: BoardResponse = {
+  projectId: atlas.id,
+  projectKey: atlas.key,
+  closedWindowDays: 14,
+  columns: categories.map((category) => {
+    const cards = issues
+      .map((item, index) => ({ item, rank: `a${rankDigits.charAt(index + 1)}` }))
+      .filter(({ item }) => item.status === category.status)
+      .map(({ item, rank }) => ({
+        id: item.id,
+        key: item.key,
+        type: item.type,
+        title: item.title,
+        statusId: item.statusId,
+        priority: item.priority,
+        rank,
+        version: 1,
+        assignee: item.assignee,
+        labels: item.labels,
+        estimate: item.estimate,
+        dueDate: item.dueDate,
+        subIssueCount: item.subIssueCount,
+        subIssueClosedCount: item.subIssueClosedCount,
+        commentCount: item.commentCount,
+        epic:
+          item.id === syncEngine.id || item.type === 'Epic'
+            ? null
+            : { id: syncEngine.id, key: syncEngine.key, title: syncEngine.title },
+      }));
+    return {
+      statusId: `status-${category.status}`,
+      name: category.name,
+      category: category.status,
+      wipLimit: category.wipLimit,
+      total: cards.length,
+      hasMore: false,
+      nextRank: null,
+      cards,
+    };
+  }),
+};
 
 const projectPeople: ProjectMemberResponse[] = [
   {
@@ -320,6 +392,8 @@ export async function mockApi(page: Page, { signedIn }: { signedIn: boolean }) {
     if (pathname === `${orgBase}/projects`) return json(route, projects);
     if (pathname === `${orgBase}/projects/${atlas.id}/members`) return json(route, projectPeople);
     if (pathname === `${orgBase}/labels`) return json(route, labels);
+    if (pathname === `${orgBase}/projects/${atlas.id}/workflow`) return json(route, workflow);
+    if (pathname === `${orgBase}/projects/${atlas.id}/board`) return json(route, board);
     if (pathname === `${orgBase}/issues`) {
       // My work asks for the user's open issues; project lists get everything.
       const mine = new URL(route.request().url()).searchParams.has('assigneeId');

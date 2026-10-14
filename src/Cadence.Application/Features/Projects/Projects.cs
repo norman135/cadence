@@ -3,6 +3,7 @@ using Cadence.Application.Common.Abstractions;
 using Cadence.Application.Common.Access;
 using Cadence.Domain.Common;
 using Cadence.Domain.Projects;
+using Cadence.Domain.Workflows;
 using FluentValidation;
 using Mediator;
 using Microsoft.EntityFrameworkCore;
@@ -132,6 +133,7 @@ public sealed class CreateProjectCommandHandler(
         var project = created.Value;
         db.Projects.Add(project);
         db.ProjectMembers.Add(ProjectMember.Add(project, userId, ProjectRole.Admin, now));
+        db.Workflows.Add(Workflow.CreateDefault(project));
         await db.SaveChangesAsync(cancellationToken);
 
         await access.InvalidateAsync(tenant.OrganizationId, project.Id, userId, cancellationToken);

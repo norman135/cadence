@@ -96,6 +96,7 @@ public sealed class GetIssueQueryHandler(ICadenceDbContext db, ProjectGate gate)
             issueRow.Title,
             issueRow.Description,
             issueRow.Status,
+            issueRow.StatusId,
             issueRow.Priority,
             issueRow.AssigneeId is { } assigneeId ? new PersonSummary(assigneeId, core.AssigneeName ?? string.Empty) : null,
             new PersonSummary(issueRow.ReporterId, core.ReporterName),
@@ -108,7 +109,8 @@ public sealed class GetIssueQueryHandler(ICadenceDbContext db, ProjectGate gate)
             issueRow.CommentCount,
             issueRow.CreatedAt,
             issueRow.UpdatedAt,
-            issueRow.CompletedAt);
+            issueRow.CompletedAt,
+            issueRow.Version);
     }
 
     /// <summary>The link as read from this issue's side.</summary>

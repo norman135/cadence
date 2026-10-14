@@ -31,7 +31,8 @@ public enum IssueSort
 /// the same kind are alternatives (status Todo or In progress); different kinds all apply.
 /// </summary>
 /// <param name="ProjectId">Only these projects.</param>
-/// <param name="Status">Only these statuses.</param>
+/// <param name="Status">Only these status categories.</param>
+/// <param name="StatusId">Only these workflow statuses.</param>
 /// <param name="Priority">Only these priorities.</param>
 /// <param name="Type">Only these types.</param>
 /// <param name="AssigneeId">Only issues assigned to these people.</param>
@@ -45,6 +46,7 @@ public enum IssueSort
 public sealed record ListIssuesQuery(
     Guid[]? ProjectId = null,
     IssueStatus[]? Status = null,
+    Guid[]? StatusId = null,
     IssuePriority[]? Priority = null,
     IssueType[]? Type = null,
     Guid[]? AssigneeId = null,
@@ -108,6 +110,7 @@ public sealed class ListIssuesQueryHandler(ICadenceDbContext db, ProjectGate gat
                 issue.Type,
                 issue.Title,
                 issue.Status,
+                issue.StatusId,
                 issue.Priority,
                 issue.AssigneeId == null
                     ? null
@@ -142,6 +145,11 @@ public sealed class ListIssuesQueryHandler(ICadenceDbContext db, ProjectGate gat
         if (query.ProjectId is { Length: > 0 } projects)
         {
             issues = issues.Where(issue => projects.Contains(issue.ProjectId));
+        }
+
+        if (query.StatusId is { Length: > 0 } statusIds)
+        {
+            issues = issues.Where(issue => statusIds.Contains(issue.StatusId));
         }
 
         if (query.Status is { Length: > 0 } statuses)

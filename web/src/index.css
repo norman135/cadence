@@ -268,6 +268,9 @@
   input:is([type='checkbox'], [type='radio'], [type='color'], [type='file']):not(:disabled),
   input::-webkit-calendar-picker-indicator,
   label:has(input:is([type='checkbox'], [type='radio']):not(:disabled)),
+  /* Radix switches and checkboxes are buttons, labelled by the label that follows or wraps them. */
+  :is([role='switch'], [role='checkbox']):not(:disabled) + label,
+  label:has(:is([role='switch'], [role='checkbox']):not(:disabled)),
   :is(
     [role='button'],
     [role='checkbox'],

@@ -57,6 +57,11 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
+  // Dependencies that only lazily loaded code imports (the board, the Markdown renderer) are
+  // pre-bundled at startup; otherwise the dev server finds them on first use and reloads the page.
+  optimizeDeps: {
+    include: ['@dnd-kit/core', '@dnd-kit/sortable', '@dnd-kit/utilities', 'marked', 'dompurify'],
+  },
   server: {
     port: Number(process.env.PORT ?? 5173),
     // Same-origin requests in development, exactly like production where the API serves the SPA.

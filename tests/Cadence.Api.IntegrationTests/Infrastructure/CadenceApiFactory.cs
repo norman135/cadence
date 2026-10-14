@@ -1,3 +1,5 @@
+using Cadence.Application.Common.Abstractions;
+using Cadence.Domain.Issues;
 using Cadence.Infrastructure.Email;
 using Cadence.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Hosting;
@@ -33,6 +35,18 @@ public sealed class CadenceApiFactory : WebApplicationFactory<Program>, IAsyncLi
         await using var scope = Services.CreateAsyncScope();
         var db = scope.ServiceProvider.GetRequiredService<CadenceDbContext>();
         await db.Database.MigrateAsync(TestContext.Current.CancellationToken);
+    }
+
+    /// <summary>The first status of a category in the project's workflow, read straight from the database.</summary>
+    public async Task<Guid> StatusIdAsync(Guid projectId, IssueStatus category)
+    {
+        await using var scope = Services.CreateAsyncScope();
+        var db = scope.ServiceProvider.GetRequiredService<CadenceDbContext>();
+        return await db.WorkflowStatuses.IgnoreQueryFilters([QueryFilters.Tenant])
+            .Where(status => status.ProjectId == projectId && status.Category == category)
+            .OrderBy(status => status.Position)
+            .Select(status => status.Id)
+            .FirstAsync(TestContext.Current.CancellationToken);
     }
 
     /// <summary>A variant of this API with different settings, sharing the same database.</summary>

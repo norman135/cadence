@@ -3,6 +3,7 @@ using System.Text.Json.Serialization;
 using Cadence.Api.Endpoints;
 using Cadence.Application.Common.Paging;
 using Cadence.Application.Features.Auth;
+using Cadence.Application.Features.Board;
 using Cadence.Application.Features.Comments;
 using Cadence.Application.Features.Invitations;
 using Cadence.Application.Features.Issues;
@@ -12,6 +13,7 @@ using Cadence.Application.Features.Members;
 using Cadence.Application.Features.Organizations;
 using Cadence.Application.Features.Projects;
 using Cadence.Application.Features.System;
+using Cadence.Application.Features.Workflows;
 
 namespace Cadence.Api.Serialization;
 
@@ -66,4 +68,9 @@ namespace Cadence.Api.Serialization;
 [JsonSerializable(typeof(KeysetPage<CommentResponse>))]
 [JsonSerializable(typeof(CommentResponse))]
 [JsonSerializable(typeof(IReadOnlyList<CommentRevisionResponse>))]
+[JsonSerializable(typeof(WorkflowResponse))]
+[JsonSerializable(typeof(UpdateWorkflowRequest))]
+[JsonSerializable(typeof(BoardResponse))]
+[JsonSerializable(typeof(MoveCardRequest))]
+[JsonSerializable(typeof(MovedCardResponse))]
 internal sealed partial class ApiJsonSerializerContext : JsonSerializerContext;
