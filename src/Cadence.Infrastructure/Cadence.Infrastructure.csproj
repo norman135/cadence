@@ -25,6 +25,7 @@
   <ItemGroup>
     <InternalsVisibleTo Include="Cadence.Migrator" />
     <InternalsVisibleTo Include="Cadence.Api.IntegrationTests" />
+    <InternalsVisibleTo Include="Cadence.Api.IntegrationTests" />
   </ItemGroup>
 
 </Project>

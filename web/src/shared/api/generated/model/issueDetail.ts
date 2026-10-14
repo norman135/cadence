@@ -25,6 +25,7 @@ export interface IssueDetail {
   /** @nullable */
   description: string | null;
   status: IssueStatus;
+  statusId: string;
   priority: IssuePriority;
   assignee: null | PersonSummary;
   reporter: PersonSummary;
@@ -41,4 +42,5 @@ export interface IssueDetail {
   updatedAt: string;
   /** @nullable */
   completedAt: string | null;
+  version: number;
 }

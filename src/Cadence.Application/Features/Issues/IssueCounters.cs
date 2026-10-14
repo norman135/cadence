@@ -29,6 +29,16 @@ public static class IssueCounters
                 cancellationToken);
     }
 
+    /// <summary>Sub-issue counts of every parent in the project, after many statuses changed at once.</summary>
+    public static Task RefreshAllSubIssuesAsync(this ICadenceDbContext db, Guid projectId, CancellationToken cancellationToken) =>
+        db.Issues
+            .Where(parent => parent.ProjectId == projectId && parent.SubIssueCount > 0)
+            .ExecuteUpdateAsync(
+                setters => setters.SetProperty(
+                    parent => parent.SubIssueClosedCount,
+                    parent => db.Issues.Count(child => child.ParentId == parent.Id && child.Status >= IssueStatus.Done)),
+                cancellationToken);
+
     public static Task RefreshOpenIssuesAsync(this ICadenceDbContext db, Guid projectId, CancellationToken cancellationToken) =>
         db.Projects
             .Where(project => project.Id == projectId)

@@ -49,8 +49,9 @@ internal sealed class IssueConfiguration : IEntityTypeConfiguration<Issue>
             .HasDatabaseName("ix_issues_assignee_open")
             .HasFilter(OpenFilter);
 
-        // A project's order: board columns read it by rank, filtered to the column's statuses.
+        // A project's order, and each board column's: a column reads its first cards by rank.
         builder.HasIndex(issue => new { issue.ProjectId, issue.Rank });
+        builder.HasIndex(issue => new { issue.StatusId, issue.Rank, issue.Id });
 
         // Projects whose keys have grown long, for the rebalancing job. Almost always empty.
         builder.HasIndex(issue => issue.ProjectId)
